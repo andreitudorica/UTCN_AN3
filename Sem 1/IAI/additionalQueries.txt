@@ -1,0 +1,23 @@
+(firerule 
+               (and (?x person)
+	            (neg 
+                       (project-to 
+                         (?x) 
+                         (?x civilian)
+                       )
+                    )
+                    (neg 
+                       (project-to 
+                         (?x) 
+                         (?x soldier)
+                       )
+                    )
+               )
+               ((instance ?x cadet))
+)
+
+(retrieve (?x) (?x cadet))
+(retrieve (?x) (?x student))
+(retrieve (?x ?y) (?x ?y is-in-command-of))
+(retrieve (?x ?y) (?x ?y is-superior-of))
+

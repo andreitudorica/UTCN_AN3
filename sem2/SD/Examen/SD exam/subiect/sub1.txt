@@ -1,0 +1,62 @@
+Subiecte MOO vara :
+
+1. Modelarea comportamentului dinamic in vederea logica
+
+2. Un Design Pattern la alegere
+
+3. Tratati pe scurt
+a) relatii de asociere
+b) Toolkits
+c) Un Analysis Pattern la alegere
+
+4.a) Identificati actorii si realizati diagramele usecase pentru un sistem ecommerce 
+prin intermediul caruia se ofera si se pot achizitiona produse de diverse tipuri.
+
+b)Presupunand ca numele BD este Ecommerce si ca BD contine, intre alte tabele, si tabelele 
+Buyers(ID, Name, Address, Organization) si 
+Transactions(ID, ProductID, Quantity, Account, BuyerID, SupplierID) scrieti codul Java 
+care permite:
+-conectarea la BD
+-fiind dat un ID corespunzator campului ID din tabela Buyers sa se obtina detaliile unui 
+cumparator
+-inserarea unei colectii mari de obiecte Transaction in tabela Transactions
+
+c)Scrieti codul Java care implementeaza Design Patternul de la punctul 2
+****************************************************************************************************
+
+Subiecte MOO toamna:
+
+Sub.1
+ 1.Framework
+
+2.Clase/Obiecte/Relatiile dintre clase
+
+3.Composite Design Pattern
+
+4.Use case
+
+5.Access control & interfaces
+
+6.Immutable & read-only
+
+7.Probl.: Swing - butoane ale caror culori se schimba cu timer aleator
+ 
+
+
+Sub.2
+ 1.Modeling use-cases
+
+2.Factory 
+
+3.Discuss shortly:
+a. multiple & dynamic classification
+
+b. template classes
+
+c. immutability & read-only
+
+d. toolkits
+
+4.Problema
+
+*****************************************************************************************************

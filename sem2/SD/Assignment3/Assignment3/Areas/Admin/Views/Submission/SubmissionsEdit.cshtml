@@ -1,0 +1,73 @@
+﻿@model Assignment3.Models.SubmissionModel
+@{
+    ViewBag.Title = "SubmissionsEdit";
+}
+<h2>Grade submission</h2>
+
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    <div class="form-horizontal">
+        <h4>Submission</h4>
+        <hr />
+
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+        @Html.HiddenFor(model => model.ID)
+        <dl class="dl-horizontal">
+            <dt>
+                @Html.DisplayNameFor(model => model.AssignmentID)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.AssignmentID)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.StudentID)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.StudentID)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.GitLink)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.GitLink)
+            </dd>
+
+            <dt>
+                @Html.DisplayNameFor(model => model.Note)
+            </dt>
+
+            <dd>
+                @Html.DisplayFor(model => model.Note)
+            </dd>
+        </dl>
+        <div class="form-group">
+            @Html.LabelFor(model => model.Grade, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Grade, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.Grade, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Grade" class="btn btn-default" />
+            </div>
+        </div>
+    </div>
+}
+
+<div>
+    @Html.ActionLink("Back to List", "SubmissionsIndex")
+</div>
+
+@section Scripts {
+    @Scripts.Render("~/bundles/jqueryval")
+}
+

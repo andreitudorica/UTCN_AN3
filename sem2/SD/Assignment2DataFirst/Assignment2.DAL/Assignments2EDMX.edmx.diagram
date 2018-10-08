@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="3.0" xmlns:edmx="http://schemas.microsoft.com/ado/2009/11/edmx">
+ <!-- EF Designer content (DO NOT EDIT MANUALLY BELOW HERE) -->
+  <edmx:Designer xmlns="http://schemas.microsoft.com/ado/2009/11/edmx">
+    <!-- Diagram content (shape and connector positions) -->
+    <edmx:Diagrams>
+      <Diagram DiagramId="73fc7eeb5d5b4d63ab94e6b36a4c08c1" Name="Diagram1">
+        <EntityTypeShape EntityType="Assignment2Model.Assignment" Width="1.5" PointX="0.75" PointY="8.25" IsExpanded="true" />
+        <EntityTypeShape EntityType="Assignment2Model.Attendance" Width="1.5" PointX="3" PointY="4" IsExpanded="true" />
+        <EntityTypeShape EntityType="Assignment2Model.Laboratory" Width="1.5" PointX="1.5" PointY="12.125" IsExpanded="true" />
+        <EntityTypeShape EntityType="Assignment2Model.Submission" Width="1.5" PointX="3" PointY="0.75" IsExpanded="true" />
+        <EntityTypeShape EntityType="Assignment2Model.User" Width="1.5" PointX="0.75" PointY="3.5" IsExpanded="true" />
+        <AssociationConnector Association="Assignment2Model.FK_Assignments_Laboratories" ManuallyRouted="false" />
+        <AssociationConnector Association="Assignment2Model.FK_Submissions_Assignments" ManuallyRouted="false" />
+        <AssociationConnector Association="Assignment2Model.FK_Attendances_Laboratories" ManuallyRouted="false" />
+        <AssociationConnector Association="Assignment2Model.FK_Attendances_Users" ManuallyRouted="false" />
+        <AssociationConnector Association="Assignment2Model.FK_Submissions_Users" ManuallyRouted="false" />
+      </Diagram>
+    </edmx:Diagrams>
+  </edmx:Designer>
+</edmx:Edmx>

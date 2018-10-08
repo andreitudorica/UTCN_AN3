@@ -1,0 +1,7 @@
+1. Sistem e-bay -> descriere un performance, availability, usability si pt 2 din ele sa se faca scenarii
+2. Class diagram -> modelare constrangeri(pre, post conditii, invarianti) 
+3. Pornind de la o calitate -> sa se faca arhitectura sist
+4. Sistem cu carduri pt studenti pt intrare cu zone securizate (ore, plata taxe...): use cases + business layer
+5. Ce e web client server: 3 pattern-uri si architectural styles (proxy, broker)
+
+3 din 5 probleme trebuie rezolvate

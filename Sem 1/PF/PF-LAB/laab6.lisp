@@ -1,0 +1,5 @@
+(DEFVAR *dict* NIL)
+(DEFUN add_word(WORD EXPL))
+(COND ((EQ (ASSOC WORD *dict*) NIL) (SETF *dict* (ACONS WORD EXPL *dict*) ))
+(T NIL)
+))

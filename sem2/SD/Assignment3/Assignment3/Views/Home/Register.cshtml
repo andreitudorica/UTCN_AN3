@@ -1,0 +1,68 @@
+﻿@model Assignment3.Models.UserModel
+
+@{
+    ViewBag.Title = "Register";
+}
+
+<h2>Register</h2>
+
+@using (Html.BeginForm("Register", "Home", FormMethod.Post))
+{
+<fieldset>
+    <legend>Register</legend>
+
+    @Html.AntiForgeryToken()
+    @Html.ValidationSummary(true)
+    @if (@ViewBag.Message != null)
+    {
+        <div style="border: 1px solid red">
+            @ViewBag.Message
+        </div>
+    }
+    <table>
+        <tr>
+            <td>@Html.LabelFor(a => a.Token)</td>
+            <td>@Html.TextBoxFor(a => a.Token)</td>
+            <td>@Html.ValidationMessageFor(a => a.Token)</td>
+        </tr>
+        <tr>
+            <td>@Html.LabelFor(a => a.Email)</td>
+            <td>@Html.TextBoxFor(a => a.Email)</td>
+            <td>@Html.ValidationMessageFor(a => a.Email)</td>
+        </tr>
+        <tr>
+            <td>
+                @Html.LabelFor(a => a.Password)
+            </td>
+            <td>
+                @Html.PasswordFor(a => a.Password)
+            </td>
+            <td>
+                @Html.ValidationMessageFor(a => a.Password)
+            </td>
+        </tr>
+        <tr>
+            <td>@Html.LabelFor(a => a.FullName)</td>
+            <td>@Html.TextBoxFor(a => a.FullName)</td>
+            <td>@Html.ValidationMessageFor(a => a.FullName)</td>
+        </tr>
+        <tr>
+            <td>@Html.LabelFor(a => a.GroupCode)</td>
+            <td>@Html.TextBoxFor(a => a.GroupCode)</td>
+            <td>@Html.ValidationMessageFor(a => a.GroupCode)</td>
+        </tr>
+        <tr>
+            <td>@Html.LabelFor(a => a.Hobby)</td>
+            <td>@Html.TextBoxFor(a => a.Hobby)</td>
+            <td>@Html.ValidationMessageFor(a => a.Hobby)</td>
+        </tr>
+        <tr>
+            <td></td>
+            <td>
+                <input type="submit" value="Register" />
+            </td>
+            <td></td>
+        </tr>
+    </table>
+</fieldset>
+}  

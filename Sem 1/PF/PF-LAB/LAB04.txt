@@ -1,0 +1,595 @@
+LUCRAREA 4
+Domeniul variabilelor.
+Forme iterative. Salturi nelocale
+
+1.	SCOPUL LUCRÃRII
+	În aceastã lucrare se prezintã modul în care se face asocierea dintre un nume de simbol 
+ºi o valoare în timpul evaluãrii formelor Lisp. Lucrarea mai are ca scop familiarizarea cu formele 
+recursive care se pot utliza în funcþiile Lisp, precum ºi cu unele noþiuni privitoare la salturile 
+nelocale, salturi între blocuri diferite.
+2.	CONSIDERAÞII TEORETICE
+2.1. Domeniul variabilelor
+     O serie de funcþii (LET, DO, PROG, LAMBDA, etc.) permit introducerea de nume a cãror 
+valoare este diferitã de cea globalã pe parcursul construcþiilor pe care le introduc. O variabilã care 
+apare în lista de parametri a unei astfel de construcþii sau care este menþionatã în lista de parametri 
+formali a unei funcþii se numeºte "legatã" în corpul acelei forme, respectiv în corpul funcþiei 
+definite de utilizator. O variabilã care este utilizatã în corpul unei funcþii definite de utilizator, dar 
+care nu este menþionatã în lista de parametri a acelei funcþii se numeºte "liberã". Exemplu:
+(DEFUN foo (x)	; var. x este legata in corpul functiei foo
+	(SETF q x))	; variabila q este libera
+	Întrebarea la care vrem sã rãspundem este cum se face asocierea la un moment dat 
+dintre un nume ºi o valoare în Lisp. În cazul variabilelor legate rãspunsul este acelaºi, indiferent de 
+dialectul Lisp. Anume la intrarea într-un bloc care introduce un nume local se salveazã legarea 
+curentã a acelei variabile. Pe parcursul blocului respectiv variabila legatã poate lua orice valori ºi 
+poate fi modificatã de oricâte ori. La ieºirea din bloc se restaureazã valoarea anterioarã intrãrii în 
+el. Exemplu:
+	*(SETF x 'orice)	| * x
+	orice			| orice
+	*(LET ( x )
+		(SETF x 'ceva) (PRINT x)  )
+	ceva
+	ceva
+	Pentru a stabili valoarea ataºatã unei variabile libere într-un bloc, se cunosc douã 
+convenþii: legarea lexicalã ºi legarea dinamicã. Legarea dinamicã a fost mult utilizatã în primele 
+implementãri de Lisp datoritã faptului cã este uºor de implementat. Aceastã modalitate de legare 
+produce unele neplãceri. Codul compilat obþinut prin convenþia de legare lexicalã este mai 
+eficient. În Common Lisp se utilizeazã în mod implicit legarea lexicalã. Totuºi, atunci când se 
+doreºte, se poate utiliza ºi convenþia legãrii dinamice. În acest scop numele respective trebuie 
+declarate "speciale".
+Observaþie: Golden Common Lisp v1.00 utilizeazã convenþia legãrii dinamice!
+	Legarea lexicalã ataºeazã unui nume liber într-un bloc valoarea din blocul cel mai 
+apropiat  în care blocul curent este inclus ºi în care respectivul nume este legat. Dacã nu existã un 
+astfel de bloc exterior, atunci numele respectiv referã valoarea globalã ataºatã lui. Pentru a 
+determina care este valoarea ataºatã unui nume în cazul convenþiei lexicale este suficientã 
+examinarea textului Lisp, ataºarea fiind independentã de ordinea de apelare a diverselor funcþii. 
+Exemplu:
+*(DEFUN silly-function (x)		| *(SETQ x 'GLOBAL-VALUE)
+	(test) (PRINT x))		| GLOBAL-VALUE
+SILLY-FUNCTION				| *(silly-function 7)
+*(DEFUN test ()				| GLOBAL-VALUE
+	(PRINT x))			| 7
+TEST					| 7
+
+*(DEFUN even-silly-funct (x)		| *(DEFUN foo (x z)
+(LET ((y 5))				| (PRINT (LIST x y z)))
+	(PRINT (CONS x y))		| FOO
+	(foo y x)			| *(SETF x 'UN y 'DOI z 'TRE)
+))					| TRE
+EVEN-SILLY-FUNCT
+
+*(foo 3 4)				|  *(even-silly-funct 7)
+(3 DOI 4)				|  (7 . 5)
+(3 DOI 4)				|  (5 DOI 7)
+					|  (5 DOI 7)
+	Legarea dinamicã ataºeazã unui nume valoarea cea mai recent ataºatã acelui nume din 
+punct de vedere istoric, adicã þinând cont de ordinea de evaluare a funcþiilor. Presupunând 
+valabile definiþiile funcþiilor din exemplul de mai sus, în cazul folosirii legãrii dinamice s-ar obþine 
+urmãtoarele rezultate:
+*(SETQ x 'UNU  y 'DOI  z 'TREI)		| *(foo 3 4)
+TREI					| (3 DOI 4)
+*(test)					| (3 DOI 4)
+UNU					| *(even-silly-funct 7)
+UNU					| (7 . 5)
+*(silly-function 7)			| (5 5 7)
+7					| (5 5 7)
+7
+7
+	În cazul legãrii lexicale nu este posibil ca o variabilã localã unui bloc sã fie modificatã în 
+corpul unei funcþii apelate în acel bloc, lucru posibil în cazul legãrii dinamice. Exemplu:
+*(SETQ x 1)				| *(DEFUN f2 ()
+1					| (SETQ x (+ x 1)) )
+*(DEFUN f1 ( x )			| f2
+	(f2) x)
+f1
+	Legare Lexicala			Legare Dinamica
+*(f1 3)					| *(f1 3)
+3					| 4
+* x					| * x
+2					| 1
+	În Lisp orice simbol este caracterizat de o serie de atribute, cum ar fi numele, valoarea 
+globalã, lista de proprietãþi, funcþia ataºatã etc. Aceste informaþii se pãstreazã pentru toþi atomii 
+simbolici cunoscuþi de sistem la un moment dat într-o tabelã de simboluri cu numele generic de 
+OBLIST. În OBLIST se pãstreazã numai valoarea globalã a unui simbol, valoarea dinamicã 
+stabilindu-se, în funcþie de convenþia de legare, prin alte mecanisme. În cazul legãrii dinamice 
+acest lucru se poate implementa foarte uºor cu ajutorul unei liste de asociaþii numite ALIST. 
+Putem privi ALIST-ul ca o stivã de perechi punct de forma (simbol . valoare-curenta). Iniþial stiva 
+ALIST e vida, dar la intrarea în fiecare domeniu în care existã variabile legate (locale acelui 
+domeniu) ea se extinde cu noi perechi punct ce pãstreazã valorile locale ale acelor parametri. La 
+ieºirea din acel domeniu stiva ALIST se descarcã.
+     Valoarea unui simbol, în cazul legãrii dinamice, se stabileºte cercetând stiva ALIST dinspre 
+vârf spre bazã. Dacã nu e gãsitã în ALIST nici o pereche menþionând simbolul cãutat, atunci se 
+cautã în OBLIST valoarea globalã. Altfel valoarea ataºatã numelui este cea menþionatã în 
+perechea punct respectivã. Ca exemplu vom trasa evoluþia stivei ALIST pe parcursul execuþiei 
+formei	(even-silly-funct 7)
+	Moment					ALIST
+ - înainte de apel				()
+ - imediat dupã intrarea în corpul funcþiei	((x . 7))
+ - imediat dupã intrarea în forma LET		((y . 5) (x . 7))
+ - dupã intrarea în funcþia foo			((x . 5) (z . 7) (y . 5) (x . 7))
+ - la ieºirea din corpul funcþiei foo		((y . 5) (x . 7))
+ - la ieºirea din LET				((x . 7))
+ - la terminarea apelului even-silly-funct	()
+	Pentru ca în Common Lisp sã utilizãm legarea dinamicã pentru anumite simboluri 
+trebuie adãugatã declaraþia (DECLARE (SPECIAL <var1> ... )) imediat dupã lista de parametri 
+a unei funcþii. Spre exemplu, pentru ca funcþia "test" definitã mai sus sã producã comportamentul 
+descris la legarea dinamicã, în Common Lisp definiþia ei ar trebui sã fie:
+	*(DEFUN test ()
+		(DECLARE (SPECIAL x))
+		(PRINT x))
+	Un stil bun de scriere a funcþiilor Lisp evitã folosirea variabilelor libere în descrierea 
+funcþiilor.
+2.2.	Forme iterative
+	Metoda naturalã de programare în Lisp este recursivitatea, exprimãrile recursive sunt în 
+general mai elegante ºi mai concise. Din pãcate ele nu sunt la fel de eficiente în timpul execuþiei ca 
+ºi versiunile ce folosesc exprimãri iterative. În scopul creºterii eficienþei execuþiei au fost introduse 
+în Lisp ºi construcþii ce permit iteraþia. Câteva dintre acestea sunt prezentate în continuare.
+1. Forma LET. Sintaxa:
+	(LET (	<var1> | (<var1>  <fv1>)
+		<var2> | (<var2>  <fv2>) ... )
+	<f1> <f2> ... <fn>	)
+	Are ca efect legarea temporarã a simbolurilor <var1>, <var2>, ... la valorile ce rezultã în 
+urma evaluãrii formelor <fv1>, <fv2>, ... . Dacã vreo formã fvi lipseºte, simbolul corespondent se 
+iniþializeazã cu NIL. Iniþializarea variabilelor se face în paralel, adicã întâi se evalueazã toate 
+formele de iniþializare ºi abia apoi se face legarea valorilor la variabile. În continuare are loc 
+evaluarea secvenþialã a formelor <f1>, <f2>, ..., <fn>, rezultatul ultimei forme evaluate fiind cel 
+întors de forma LET.
+	La ieºirea din forma LET variabilele îºi recapãtã vechile valori. Exemplu:
+	*(SETF a 1 b 1)
+	1
+	*(LET ( (a '(a)) (b a) (c (+ 2 3)) d (e) )
+		(LIST a b c d e) )
+	((a) 1 5 NIL NIL)
+
+2. Forma LET*. Este identicã cu LET doar ca iniþializãrile se fac secvenþial, nu în paralel! 
+Exemplu:
+	*(SETF a 1 b 1)
+	1
+	*(LET* ( (a '(a)) (b a) (c (+ 2 3)) d (e) )
+		(LIST a b c d e) )
+	((a) (a) 5 NIL NIL)
+
+3. Forma LOOP. Sintaxa:
+	(LOOP <f1> <f2> ... <fn>)
+	Are ca efect repetarea de un numãr nedefinit de ori a secvenþei de forme <f1>, <f2>, ..., 
+<fn>. Evaluarea unei forme (RETURN <formã-return>)  provoacã ieºirea din ciclu ºi întoarce 
+rezultatul evaluãrii formei <formã-return>.
+
+4. Forma DO. Sintaxa:
+	(DO (	( <var1> [ <finit1> [ <fpas1>] ])
+		( <var2> [ <finit2> [ <fpas2>] ])
+		...
+		( <varn> [ <finitn> [ <fpasn>] ]) )
+	    (<trigger> <fend1> <fend2> ... <fendm> )
+	   <f1> <f2> ... <fp>)
+	Are ca efect utilizarea variabilelor <var1>, <var2>, ..., <varn> ca variabile locale formei 
+DO. La intrare vor fi legate la valorile ce rezultã în urma evaluãrii formelor de iniþializare <finit1>, 
+<finit2>, ..., <finitn>. Legarea se face în paralel, ca la LET. Dacã lipseºte forma de iniþializare, 
+variabila corespondentã se iniþializeazã cu NIL. Execuþia formei DO constã în paºii:
+(a) Se creeazã variabilele locale cu valorile iniþiale conform blocului de iniþializare.
+(b) Se evalueazã forma <trigger> care controleazã terminarea buclãrii. Dacã rezultatul este NIL 
+se continuã cu pasul (c), altfel se întrerupe buclarea, continuându-se cu evaluarea formelor 
+<fend1>, <fend2>, ..., <fendm>, rezultatul ultimei forme evaluate fiind cel întors de DO. 
+(Dacã aceste forme lipsesc, atunci forma DO întoarce NIL.)
+(c) Dacã rezultatul testului a fost NIL se continuã cu evaluarea secvenþei de forme <f1>, <f2>, 
+..., <fp>.
+(d) Dupã terminarea evaluãrii secvenþei fiecare variabilã <vari> pentru care a existat specificatã 
+forma <fpasi> se leagã la valoarea întoarsã de forma respectivã. Variabilele de ciclu care nu 
+au asociate asemenea forme nu se reseteazã. Se reia ciclul cu pasul (b).
+Forma DO poate fi pãrãsitã în orice punct dacã se executã o forma RETURN. Exemplu:
+	*(DO (	(l '(THIS IS A LIST) (REST l))	;specificare
+		(result NIL) )			;parametri locali
+	     ((NULL L) result)		;clauza test
+	   (SETF result (CONS (FIRST l) result))	;corpul
+	)
+	(LIST A IS THIS)
+Iatã valorile variabilelor la fiecare iteratie:
+	Iteratie	l			result
+	1		(THIS IS A LIST)	()
+	2		(IS A LIST)		(THIS)
+	3		(A LIST)		(IS THIS)
+	4		(LIST)			(A IS THIS)
+	5		()			(LIST A IS THIS)
+5. Forma DO*. Este identicã cu DO doar cã variabilele se leagã secvenþial ca la LET*. 
+Exemplu:
+*(SETF a 1)				| *(SETF a 1)
+1					| 1
+*(DO ( (a (+ a 1) (+ a 1))		| *(DO* ( (a (+ a 1) (+ a 1))
+       (b (+ a 1) (+ a 1)) )		|	  (b (+ a 1) (+ a 1)) )
+((> a 3) 'gata)				|       ((> a 3) 'gata)
+(PRINT `(,a ,b)) )			|    (PRINT `(,a ,b)) )
+(2 2)					| (2 3)
+(3 3)					| (3 4)
+gata					| gata
+
+6. Forma PROG. Sintaxa:
+	(PROG (	<var1> | ( <var1> [ <finit1> ] )
+		<var2> | ( <var2> [ <finit2> ] )
+		...
+		<varn> | ( <varn> [ <finitn> ] ) )
+	[ <et1> ] <f1>
+	[ <et2> ] <f2>
+	...
+	[ <etm> ] <fm> )
+	Are ca efect utilizarea variabilelor <var1>, <var2>, ..., <varn> ca variabile locale formei 
+PROG, care se leagã iniþial la valoarea formei de iniþializare corespunzãtoare sau la NIL, (legãrile 
+facându-se în paralel, ca la LET). Cu rol de etichete se utilizeazã formele <eti> care trebuie sã fie 
+atomice ºi nu se evalueazã. Evaluarea corpului formei PROG se face secvenþial <f1>, <f2>, ..., 
+<fm> dacã nu se întâlnesc pe parcurs forme GO sau RETURN. Dacã se ajunge la sfârºitul 
+corpului PROG se întoarce NIL (nu valoarea ultimei forme evaluate!). Evaluarea unei forme 
+(GO <eti>) în interiorul corpului PROG are ca efect transferul controlului la forma ce urmeazã 
+etichetei <eti>. Evaluarea unei forme (RETURN <formã-return>) provoacã pãrãsirea formei 
+PROG ºi întoarcerea valorii ce rezultã în urma evaluãrii formei <formã-return>. Exemplu:
+	*(PROG ()
+	       (GO salt)
+	       (RETURN 1)
+	  salt (RETURN 2) )
+	2
+
+7. Forma PROG*. Este analoagã cu PROG, doar cã iniþializãrile se fac ca la LET*.
+
+8. Forma PROG1. Sintaxa: (PROG1 <f1> <f2> ... <fn>). Evaluarea formei PROG1 are ca 
+efect evaluarea pe rând a formelor <f1>, <f2>, ..., <fn> ºi întoarcerea ca valoare a apelului 
+PROG1 a rezultatului evaluãrii primei forme din secvenþã: <f1>.
+
+9. Forma PROG2. Este asemãnãtoare cu PROG1, doar ca se întoarce valoarea celei de-a 
+doua forme din secvenþã: <f2>.
+2.3.	Salturi nelocale
+	Formele GO ºi RETURN permit salturi la nivelul superficial al formei PROG care 
+contine atât saltul cât ºi eticheta la care se face saltul. În Lisp sunt prevãzute facilitãþi pentru 
+salturi nelocale prin mecanismul CATCH-THROW. Acest mecanism este activat prin iniþierea 
+unui lanþ de evaluãri de forme declanºate de forma CATCH care va forþa la un moment ulterior 
+de timp evaluarea unei forme THROW. Revenirea din THROW are loc direct în CATCH 
+întorcând forma evaluatã de cãtre THROW.
+	Forma CATCH serveºte ca un indicator þintã pentru transferul controlului execuþiei de 
+la un salt nelocal THROW.
+? CATCH aºteptã doi parametri, un indicator ºi o listã de forme. Forma pentru indicator este 
+evaluatã pentru a produce un obiect necesar în identificarea formei CATCH destinaþie a 
+saltului dintr-un THROW (în cazul mai multor apeluri CATCH avem mai multe destinaþii 
+posibile). Formele din listã sunt evaluate succesiv, iar valoarea ultimei forme este întoarsa ca 
+rezultat, cu excepþia cazului în care se întâlneºte pe parcursul evaluãrii o formã THROW, caz 
+în care se întoarce ca rezultat valoarea formei THROW, iar evaluarea restului de forme din 
+CATCH este opritã.
+? THROW aºteaptã doi parametri, un indicator ºi o formã. Forma pentru indicator este 
+evaluatã pentru a produce un obiect necesar în identificarea formei CATCH destinaþie a 
+saltului. Testul de identificare se face prin intermediul predicatului EQ, iar dacã nu existã 
+forma CATCH corespunzãtoare este semnalatã o eroare. Forma este evaluatã iar valoarea 
+este întoarsa ca rezultat al formei CATCH corespunzãtoare.
+	Uneori este necesarã evaluarea unei forme chiar dacã au apãrut efecte laterale în 
+succesiunea procesului de evaluare. Astfel, spre exemplu, într-o formã
+(PROG		(deschide_fiºier)
+		(prelucrare_fiºier)
+		(închid_fiºier) )
+funcþia de închidere a fiºierului trebuie evaluatã chiar ºi în cazul unor posibile erori intervenite în 
+prelucrarea fiºierului, urmate de iniþierea unui salt nelocal printr-o formã THROW la o formã 
+anterioarã CATCH unde sunt capturate. Pentru înlãturarea acestui neajuns este folositã forma 
+prezentatã în continuare:
+? UNWIND-PROTECT - aºteaptã ca parametri douã forme care reprezintã forma protejatã 
+ºi respectiv forma curatã, care este evaluatã chiar ºi în cazul unei ieºiri anormale. Forma 
+întoarce ca rezultat valoarea formei protejate ºi neglijeazã toate rezultatele evaluãrii formelor 
+curate.
+	Ca regulã generalã, UNWIND-PROTECT garanteazã execuþia formelor curate dupã 
+orice ieºire din forma protejatã, indiferent de faptul cã ieºirea a fost normalã sau iniþiatã de un salt 
+nelocal THROW la o formã corespunzãtoare CATCH. Este de remarcat faptul cã 
+UNWIND-PROTECT garanteazã execuþia formelor curate, atât contra tuturor salturilor nelocale 
+CATCH-THROW, cât ºi contra ieºirilor lexicale de tip GO sau RETURN.
+Observaþie:	Utilizarea formelor iterative ºi a salturilor nelocale nu este indicatã într-o 
+programare funcþionalã, eleganta în limbajul Lisp!
+3.	DESFÃªURAREA LUCRÃRII
+	1. Sã se evalueze secvenþa ºi sã se determine ieºirile interpretorului în cazul în care avem 
+(i) legare lexicalã ºi (ii) legare dinamicã. În cazul legãrii dinamice sã se traseze evoluþia stivei 
+ALIST.
+a)	*(SETF var 'libera)			| *var
+	*(SETF alta-var 'libera)		| *alta-var
+	*(DEFUN f1 (alta-var)			| *(f1 'legata)
+		(SETF var alta-var)		| *var
+		(SETF alta-var 'orice))		| *alta-var
+
+b)
+	*(DEFUN f2 (x) (SETF x 1) y)		| *(SETF l '1)
+	*(SETF y 0)				| *(ev-prim '(y p q))
+	*(f2 y)					| *(ev-prim '(l p q))
+	*(DEFUN ev-prim (l)
+		(EVAL (CAR l)) )
+
+	2. Se vor testa funcþiile care utilizeazã forme iterative prezentate în continuare.
+
+	3. Sã se compare consumul de resurse ºi durata de execuþie între variantele recursivã, 
+recursivã cu parametru de acumulare ºi iterativã ale unei funcþii.
+
+	4. Încercaþi sã scrieþi o variantã total iterativã echivalentã cu funcþia EQUAL. Comparaþi 
+efortul de programare cu cel necesar scrierii versiunii recursive.
+
+	5. Studiaþi prin trasare salturile nelocale prin CATCH-THROW din exemplul de test 
+prezentat în cadrul surselor precum ºi în micro-editorul care are unele comenzi de parcurgere 
+liste.
+
+	6. Studiaþi în exemplele de test prezentate în surse protecþia la salturi locale ºi nelocale a 
+execuþiei unei forme prin UNWIND-PROTECT.
+4. ÎNTREBARI ªI PROBLEME
+	1. Sã se descrie variante iterative pentru funcþiile: diferenþã, test-inclusã, extind1, 
+fuzion, reun-clase.
+
+	2. Sã se descrie în variantele (i) recursivã, (ii) recursivã cu parametru de acumulare, (iii) 
+iterativã, funcþiile care:
+a) calculeazã lungimea unei liste
+b) testeazã dacã o listã este ordonatã crescãtor
+c) eliminã dintr-o listã elementele nenumerice
+d) eliminã dintr-o listã toþi atomii nenumerici, indiferent de nivelul de imbricare pe care se aflã
+e) însumeazã atomii numerici de pe nivelul superficial al unei liste
+f) însumeazã atomii numerici de pe toate nivelurile unei liste
+g) calculeazã al n-lea element din ºirul lui Fibonacci
+
+	3. Sã se scrie o variantã a funcþiei reun-clase în care clasa ºi elem sã fie externe funcþiei 
+- caz în care trebuie declarate "speciale" pentru a se folosi legarea dinamicã.
+
+	4. Sã se descrie funcþiile care implementeazã operaþiile elementare (construcþie, 
+reuniune, intersecþie, diferenþã) asupra multiseturilor. Un multiset este o generalizare a noþiunii de 
+set, în care un element are ataºat numãrul de apariþii. Exemplu:
+lista (a b c a a b) are asociat multisetul ((a . 3) (b . 2) (c . 1))
+5.	SURSE
+;;; Calculul valorii functiei exponentiale
+;;; cu baza intreaga si exponent natural
+;; iteratie cu "DO" - varianta 1 ("rez" e externa lui "do")
+(DEFUN exp3 (m n)
+(LET ((rez 1))
+	(DO (	(exp n (- exp 1)) )
+		((ZEROP exp) )
+		(SETF rez (* rez m)) )
+rez	))
+;; iteratie cu "DO" - varianta 2
+(DEFUN exp4 (m n)
+(DO (	(rez 1)
+	(exp n (- exp 1)) )
+	((ZEROP exp) rez)
+	(SETF rez (* m rez))
+))
+;; iteratie cu "DO" - varianta 3
+(DEFUN exp5 (m n)
+(DO (	(rez 1 (* rez m))
+	(exp n (- exp 1)) )
+	((= exp 0)  rez)
+))
+
+
+;; iteratie cu "LOOP"
+(DEFUN exp6 (m n)
+(LET ((rez 1))
+	(LOOP
+		(IF (ZEROP n) (RETURN rez))
+      		(SETF n (- n 1) rez (* rez m)) )
+))
+;; iteratie cu "PROG"
+(DEFUN exp7 (m n)
+(PROG	((rez 1))
+   	cic	(IF (ZEROP n) (RETURN rez))
+		(SETF n (- n 1) rez (* rez m))
+		(GO cic)
+))
+
+;;; Calculul factorialului unui numar
+;; iteratie cu "DO" - varianta 1
+(DEFUN fact2 (n)
+(DO (	(nn n (- nn 1))
+	(rez 1 (* rez nn)) )
+	((ZEROP nn) rez)
+))
+;;iteratie cu "DO" - varianta 2
+(DEFUN fact3 (n)
+(DO ( (rez 1) (nn n (- nn 1)) )
+	((ZEROP nn) rez)
+    	(SETF rez  (* rez nn) )))
+;; iteratie cu "DO*"
+(DEFUN fact4 (n)
+(DO* (	(rez 1 (* rez nn))
+	(nn n  (- nn 1)) )
+	((ZEROP nn) rez )))
+;; iteratie cu "DO*" - varianta gresita !
+(DEFUN factrau (n)
+(DO* (	(nn n (- nn 1))
+	(rez 1 (* rez nn)) )
+	((ZEROP nn) rez )))
+;; iteratie cu "LOOP"
+(DEFUN fact5 (n)
+(LET ((rez 1))
+	(LOOP	(WHEN (ZEROP n) (RETURN rez))
+		(SETF rez (* rez n))
+		(SETF n (- n 1))
+	)
+))
+
+;; iteratie cu "PROG"
+(DEFUN fact6 (n)
+(PROG	((rez))
+		(SETF rez 1)
+	cic	(IF (ZEROP n) (RETURN rez) )
+		(SETF rez (* rez n))
+		(SETF n (- n 1))
+		(GO cic)
+))
+
+;;; Operatii simple pe liste
+;;; ultima celula CONS a unei liste.
+;; iteratie cu "DO"
+(DEFUN last1 (lis)
+(DO ( (var lis (CDR var)) )
+	((OR (ATOM var) (ENDP (REST var))) var)
+))
+;; iteratie cu "LOOP"
+(DEFUN last2 (lis)
+(LOOP	(IF (OR (ATOM lis) (ENDP (CDR lis)))
+		(RETURN lis) )
+	(SETF lis (CDR lis))
+))
+;;; Lista primelor "n" elemente dintr-o lista data
+;; iteratie cu "DO*"
+(DEFUN fata2 (ls n)
+(DO* (	(rez NIL (CONS (CAR lis) rez))
+	(lis ls (REST lis))
+	(nn n (- nn 1)) )
+	((OR (= nn 0) (ENDP lis)) (REVERSE rez))
+))
+
+;;; inversarea elementelor unei liste
+;; iteratie cu "prog"
+(DEFUN rev2 (ls)
+(PROG	( (rez NIL) )
+	cic	(WHEN (ENDP ls) (RETURN rez) )
+		(SETF rez (CONS (CAR ls) rez) )
+		(SETF ls (CDR ls))
+		(GO cic)
+))
+
+
+
+
+;;; eliminarea parantezelor interioare dintr-o listã
+;; parcurgere iterativã în lãþime, recursivã în adâncime
+(DEFUN striv2 (lis)
+(DO ( (par lis (REST par))
+      (rez) )
+	((NULL par)rez)
+(SETF rez (APPEND rez
+		(IF (ATOM (FIRST par))
+			(LIST (FIRST par))
+			(striv2 (FIRST par))))
+)))
+
+;;; Operatii cu clase de echivalenta
+;;; fuzioneaza perechile echivalente dintr-o lista
+;;; returnind clasele de echivalenta
+(DEFUN fuzionare (perechi)
+	(fuzion perechi NIL) )
+;; se acumuleaza in parametrul "clase" clasele de echivalenta
+;; care corespund multimii de relatii binare din "perechi"
+(DEFUN fuzion (perechi clase)
+	(IF (NULL perechi)
+		clase
+		(fuzion	(REST perechi)
+			(absorb (FIRST perechi) clase) )  ))
+;; Reuneºte clasele de echivalenþã ale celor douã elemente
+;; din "pereche". Dacã nu gaseºte clasele corespunzãtoare, creeazã
+;; o nouã clasã.
+(DEFUN absorb (pereche clase)
+(LET (	(is-first (MEMBER (FIRST pereche) (FIRST clase)))
+	(is-second (MEMBER (SECOND pereche) (FIRST clase))) )
+	(COND	((ENDP clase) (LIST pereche))
+		((AND is-first is-second) clase)
+		((NOT (OR is-first is-second ))
+			(CONS (FIRST clase)
+			      (absorb pereche (REST clase))))
+		((reun-clase
+				(FIRST clase)
+				(OR 	(AND  is-first  (SECOND pereche))
+					(AND  is-second (FIRST  pereche)))
+				(REST clase))) )
+))
+
+
+
+;; reuneste clasa "clasa" cu cea coresp. lui "elem" din "clase"
+(DEFUN reun-clase (clasa elem clase)
+(COND	((ENDP clase) (LIST (CONS elem clasa)) )
+	((MEMBER elem (FIRST clase))
+		(CONS (APPEND clasa (FIRST clase))
+		      (REST clase)))
+	((CONS	(FIRST clase)
+		(reun-clase clasa elem (REST clase))))
+))
+
+;;; Salturi nelocale utilizind THROW si CATCH
+(DEFUN test-catch (m)
+	(CATCH 'exit (test-c 1)) )
+(DEFUN test-c	(n)
+	(PRINT `(in ,@(if (= n 1) '(primul) `(al ,n - lea)) test-c))
+	(IF (< n m) (CATCH n (test-c (+ n 1)) ) )
+	(PRINT `(ies din al ,n - lea test-c))
+	(COND ((= n (- m 2)) (THROW (- n 2)))
+	      ((= n 4) (THROW 'exit `(vin din throw-ul cu n = ,n)))
+))
+;;; implementarea unui editor simplu pentru forme Lisp; comenzi:
+;;	"jos"	- avans editare pe car-ul formei
+;;	"dr"	- avans editare pe cdr-ul formei
+;;	"st"	- revenire spre stinga
+;;	"sus"	- revenirea la forma ce continea forma curenta
+;;	"exit"	- terminare editare
+;;	altceva - se evalueaza, se reia editarea din pozitia curenta
+;; Revenirea spre stinga se face prin iesirea din LOOP cu RETURN
+;; iar revenirea in sus prin (THROW '$edit)
+(DEFUN edit (form)
+(LET ( comanda )
+	(CATCH '$exit (edit1 form nil nil))
+))
+(DEFUN edit1 (form are-sus are-stg)
+(LOOP	(PRINC "Forma curenta ")
+	(PRINT form)
+	(PRINC "Comanda: ")
+	(SETQ comanda (read))
+(COND	((EQ comanda 'jos)
+		(IF (NOT (ATOM form))
+		    (CATCH '$edit (edit1 (CAR form) T nil))) )
+	((EQ comanda 'dr)
+		(AND (CDR form) (edit1 (CDR form) are-sus T)))
+	((EQ comanda 'sus)
+		(AND are-sus (THROW '$edit)))
+	((EQ comanda 'st)
+		(AND are-stg (RETURN NIL)))
+	((EQ comanda 'exit)
+		(THROW '$exit 'EXIT))
+	(T (PRINT (EVAL comanda)) )
+)))
+
+;;; Exemplu de protejare a formelor cu UNWIND-PROTECT
+;;forme neprotejate , salt local
+(DEFUN neprotej (n)
+(BLOCK bloc
+(PROGN
+	(PRINT `(deschid fisier))
+	(PRINT `(incep prelucrare fisier))
+	(COND	((= 0 (- n (* 3 (TRUNCATE (/ n 3)))))
+			(RETURN-FROM bloc)))
+	(PRINT `(termin prelucrare fisier))
+	(PRINT `(inchid fisier))
+)))
+
+;; forme neprotejate, salt nelocal
+(LET ((foo '(1)))
+(CATCH 'tag
+	(PROGN
+		(SETF foo
+			(CONS 2 foo))
+		(THROW 'tag NIL))
+	(SETF foo (CONS 3 foo)))
+foo)
+
+;; forme protejate corespunzatoare, salt local
+(DEFUN protejat (n)
+(BLOCK bloc
+(UNWIND-PROTECT
+(PROGN
+	(PRINT `(deschid fisier))
+	(PRINT `(incep prelucrare fisier))
+	(COND	((= 0 (- n (* 3 (TRUNCATE (/ n 3)))))
+			(RETURN-FROM bloc)))
+	(PRINT `(termin prelucrare fisier)))
+	(PRINT `(inchid fisiser))
+)))
+
+
+
+;; forme protejate corespunzatoare, salt nelocal
+(LET ((foo '(1)))
+(CATCH 'tag (UNWIND-PROTECT
+	(PROGN
+		(SETF foo
+			(CONS 2 foo))
+		(THROW 'tag NIL))
+	(SETF foo (CONS 3 foo))))
+foo)
+
+
+
+
+
+
+
+26

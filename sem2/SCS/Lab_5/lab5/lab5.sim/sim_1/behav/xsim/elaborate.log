@@ -1,0 +1,7 @@
+Vivado Simulator 2017.4
+Copyright 1986-1999, 2001-2016 Xilinx, Inc. All Rights Reserved.
+Running: C:/Xilinx/Vivado/2017.4/bin/unwrapped/win64.o/xelab.exe -wto 613f1a2aada145bdb3e6b1d5a21a5d55 --incr --debug typical --relax --mt 2 -L xil_defaultlib -L secureip --snapshot fifo_behav xil_defaultlib.fifo -log elaborate.log 
+Using 2 slave threads.
+Starting static elaboration
+ERROR: [VRFC 10-2335] case statement does not cover all choices. 'others' clause is needed [D:/Andrei/Scoala/SCS/Lab_5/lab5/lab5.srcs/sources_1/new/fifo.vhd:104]
+ERROR: [XSIM 43-3321] Static elaboration of top level VHDL design unit fifo in library work failed.

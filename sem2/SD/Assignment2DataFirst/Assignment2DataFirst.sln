@@ -1,0 +1,38 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.27428.2037
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assignment2.DAL", "Assignment2.DAL\Assignment2.DAL.csproj", "{810385D1-7F4C-4D55-9A96-E6C513921129}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Assignment2.BLL", "Assignment2.BLL\Assignment2.BLL.csproj", "{CE81BDE3-2F1D-416E-89E9-C218FFB2A17C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Assignment2.API", "Assignmen2.API\Assignment2.API.csproj", "{7115DBE6-8E67-4EDE-BC36-4EDBF7C73592}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{810385D1-7F4C-4D55-9A96-E6C513921129}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{810385D1-7F4C-4D55-9A96-E6C513921129}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{810385D1-7F4C-4D55-9A96-E6C513921129}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{810385D1-7F4C-4D55-9A96-E6C513921129}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CE81BDE3-2F1D-416E-89E9-C218FFB2A17C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CE81BDE3-2F1D-416E-89E9-C218FFB2A17C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CE81BDE3-2F1D-416E-89E9-C218FFB2A17C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CE81BDE3-2F1D-416E-89E9-C218FFB2A17C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7115DBE6-8E67-4EDE-BC36-4EDBF7C73592}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7115DBE6-8E67-4EDE-BC36-4EDBF7C73592}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7115DBE6-8E67-4EDE-BC36-4EDBF7C73592}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7115DBE6-8E67-4EDE-BC36-4EDBF7C73592}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F54615B4-5B3F-440A-A647-05EB49B5E4BF}
+		EnterpriseLibraryConfigurationToolBinariesPath = packages\Unity.2.1.505.0\lib\NET35
+	EndGlobalSection
+EndGlobal

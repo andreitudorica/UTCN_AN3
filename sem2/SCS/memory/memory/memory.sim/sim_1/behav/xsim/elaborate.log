@@ -1,0 +1,7 @@
+Vivado Simulator 2017.4
+Copyright 1986-1999, 2001-2016 Xilinx, Inc. All Rights Reserved.
+Running: C:/Xilinx/Vivado/2017.4/bin/unwrapped/win64.o/xelab.exe -wto a8208ba944384a54a7f19ad4147aa127 --incr --debug typical --relax --mt 2 -L xil_defaultlib -L secureip --snapshot SRAM_behav xil_defaultlib.SRAM -log elaborate.log 
+Using 2 slave threads.
+Starting static elaboration
+ERROR: [VRFC 10-2335] case statement does not cover all choices. 'others' clause is needed [D:/Andrei/Scoala/SCS/memory/memory/memory.srcs/sources_1/new/SRAM.vhd:61]
+ERROR: [XSIM 43-3321] Static elaboration of top level VHDL design unit sram in library work failed.

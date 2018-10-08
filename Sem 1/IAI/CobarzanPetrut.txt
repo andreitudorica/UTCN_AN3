@@ -1,0 +1,1069 @@
+RacerPro - Renamed ABox and Concept Expression Reasoner Professional
+
+by Cobarzan petrut, 30433
+
+1. Short description of RACER
+
+The origins of RacerPro are within the area of description logics. Since description logics provide the foundation of international approaches to standardize ontology languages in the context of the so-called semantic web, RacerPro can also be used as a system for managing semantic web ontologies based on OWL. RacerPro is also a semantic web information repository with optimized retrieval engine because it can handle large sets of data descriptions.
+
+RacerPro handles  knowledge bases. A knowledge base is a special kind of database for knowledge management, providing the means for the computerized collection, organization, and retrieval of knowledge. It contains TBoxes and ABoxes. The terms ABox and TBox are used to describe two different types of statements in ontologies. TBoxes refer to concepts, roles, attributes, objects as concepts. ABoxes refer to the instances of the concepts from the associated TBoxes.
+
+The retrievel part of the job is accomplished using AllegroGraph. AllegroGraph RDFStore is a modern, high-performance, persistent RDF (Resource Description Framework) graph database. A triple is a 3-tuple; a n-tuple captures the intuitive notion of an ordered list of n-elements. So a triple stored in an AllegroGraph keeps data about a subject, a predicate and an object. This represents a relation between the subject and the object, just like in the relational model, although RacerPro and AllegroGraph are not based on an relational model.
+
+The standard RacerPro has almost no user interface, it just prints some welcome messages and basic status reports into the console or terminal window. Generally speaking, RacerPro acts like a face-less back-end server – and is therefore sometimes referred to as the "kernel application". To close the gap Racer Systems has created "RacerPorter", the graphical user interface for RacerPro. RacerPorter uses the TCP/IP network interface to connect to one or more RacerPro-servers and helps you manage them: You can load knowledge bases, switch between different taxonomies, inspect your instances, visualize T-Boxes and A-Boxes, manipulate the server and much more.
+
+Source of information: en.wikipedia.org, www.racersystems.com (documentation). 
+
+2. Installation and examples
+
+The following instructions are correct when using Fedora or Windows XP (I did not manage to run RacerPorter GUI on Ubuntu).
+	
+	PART I - Installation
+
+	STEP 1. Download the latest vesrion from http://www.racer-systems.com/products/download/index.phtml .
+		This will provide you a limited version of RacerPro. 
+		For a unlimited version you must register at http://www.racer-systems.com/products/download/education.phtml .
+		Use an utcluj.ro e-mail address because the RacerPro team will check if you require the licence for academic use.
+		After two business days you will receive an e-mail containing a personal download link.
+		Download RacerPro, RacerPorter, the documentation, the examples and the license.
+	Step 2.	The RacerPro archive must be extracted to a directory, lets say "C:/RacerPro" or "/home/iai/RacerPro".
+		This will be done by right-clicking on the archive file and selecting extract.
+		Also extract the examples archive.
+	Step 3. The license file (having the .racerlicense extension) will be placed in the RacerPro directory.
+	Step 4. Double-click on the RacerPorter application file. This will automatically start the RacerPro server and the RacerPorter GUI.
+		By default, RacerPro uses the port 8088 for the HTTP and TCP services.
+	
+	PART II - Running examples
+	
+	Step 1. The RacerPro server will run in a console. The GUI is available in RacerPorter application.
+		RacerPorter has a few tabs: 
+			- Profiles
+			- Shell
+			- TBoxes
+			- ABoxes
+			- Concepts
+			- Roles
+			- Individuals
+			- Assertions
+			- Taxonomy
+			- Role hierarchy
+			- ABox Graph
+		and others.
+		In the Profiles tab in the bottom of the viewport there are some buttons. 
+		Press Connect (if the status of the default profile is disconnected). This will ensure that the RacerPro server is connected.
+	Step 2. The next step is to load an .racer file which will contain a knowledge base (TBoxes and the associated ABoxes).
+		Press Load. A window will pop-up. Search for the examples directory and select the .racer file you want to be loaded.
+	Stept3. Go to the TBoxes tab. The TBoxes will be available here. There always is a default TBox, called default.
+	Step 4. Go to the ABoxes tab. The ABoxes will be available here. There always is a default ABox, called default.
+	Step 5. Also visit :
+			- Concepts (the available concepts)
+			- Roles (the atomic and complex roles)
+			- Individuals (from the ABox)
+			- Assertions (all the attribute values)
+		tabs.
+	Step 6. In the Taxonomy tab you will find a graph containing all the available concepts. 
+	Step 7. The role hierarchy is available in the Role hierarchy tab.
+	Step 8. Also visit the ABox Graph tab which will display the individuals and their roles.
+
+	Step 9. To run a query you should use the Shell tab. Write the query in the console and press ENTER.
+	Step 10. If you want to quit press the ShutDown RacerPro & Quit button from the Profiles tab.
+
+3. Running an example
+
+Run RacerPro server and RacerPorter GUI.
+Press Connect to connect ensure the RacerPro server is online.
+Press Load and go the the examples directory in the pop-up that will be displayed.
+Select the "family.racer" Racer file. Now the family TBox and the smith-family ABox are loaded into the knowledge base.
+Take a look to all the tabs to visualize all data loaded from the Racer file.
+
+The "family.racer" file contains the following description:
+
+
+1.  (in-knowledge-base family smith-family)				;sets the default TBox (family) and the default ABox (smith-family)
+2.
+3.  (signature :atomic-concepts (human person female male woman man	;the signature of the TBox and ABox conatining a list of:
+4.                                     parent mother father		;atomic-concepts (usually they are nouns)
+5.                                     grandmother aunt uncle
+6.                                     sister brother)				   
+7.           :roles ((has-descendant :transitive t)			;atomic-roles (usually they are verbs of verbal structures)
+8.                    (has-child :parent has-descendant			;some of the roles are transitive (R is transitive, aRb and bRc, then aRc)
+9. 		              	 :inverse has-parent 			;some of them are parent roles for other roles (R parent to P, aPb, then aRb)
+10.                              :domain parent				;each role has an invers (even if it is not explicitly declared)
+11.                              :range person)				;some restrictions can be specified (like which concepts can be subjects)
+12.                   has-sibling
+13.                   (has-sister :parent has-sibling)
+14.                   (has-brother :parent has-sibling))
+15.          :features ((has-gender :feature t))			;features can be specified
+16.          :individuals (alice betty charles doris eve)		;the list of individuals, instances of the atomic concepts
+17.	     :attributes ((cardinal age)))				;attributes can be specified
+18.									;complex concepts are now defined
+19. (implies *top* (all has-child person))				;the top concept is the suprem concept
+20. (implies (some has-child *top*) parent)				;if someone has a child then he is parent
+21.
+22. (implies (some has-sibling *top*) (or sister brother))		;if someone has a sibling then he is a sister or a brother
+23. (implies *top* (all has-sibling (or sister brother)))		;all who have a sibling have a sister or a brother
+24. (implies *top* (all has-sister (some has-gender female)))		;if someone has a sister, then there is a female
+25. (implies *top* (all has-brother (some has-gender male)))		;if someone has a brother, then there is a male
+26.
+27. (implies person (and human (some has-gender (or female male))))	;if someone is a person, then he is human and he has a gender (male or female) 
+28. (disjoint female male)						;the female and male concepts are dijoint
+29. (implies woman (and person (some has-gender female)))		;if you are a woman then you are a person and you are a female
+30. (implies man (and person (some has-gender male)))			;if you are a man then you are a person and you are a male
+31.
+32. (equivalent parent (and person (some has-child person)))		;you are a parent if and only if you are a person and you have a son
+33. (equivalent mother (and woman parent)) 				;you are a mother if and only if you are a woman and parent
+34. (equivalent father (and man parent))				;you are a father if and only if you are a man and parent
+35.
+36. (equivalent grandmother 						;you are a grandmother if and only if you are mother to someone who has a child
+37. 	    (and mother 
+38. 		 (some has-child 
+39. 		       (some has-child person))))			
+40. (equivalent aunt (and woman (some has-sibling parent)))		;you are an aunt if and only if you are woman and you have a sibling which is parent
+41. (equivalent uncle (and man (some has-sibling parent)))		;you are an uncle if and only if you are man and you have a sibling which is parent
+42.
+43. (equivalent brother (and man (some has-sibling person)))		;you are an brother if and only if you are a man and you have a sibling
+44. (equivalent sister (and woman (some has-sibling person)))		;you are an sister if and only if you are a woman and you have a sibling
+45.
+46. (instance alice mother)						;alice is a mother (ABox data from now on)
+47.
+48. (related alice betty has-child)					;alice is betty's mother
+49. (related alice charles has-child)					;alice is charles's mother
+50.
+51. (instance betty mother)						;betty is a mother
+52.
+53. (related betty doris has-child)					;betty is doris's mother
+54. (related betty eve has-child)					;betty is eve's mother
+55.
+56. (instance charles brother)						;charles is a brother
+57. (related charles betty has-sibling)					;charles and betty are siblings
+58.
+59. (related doris eve has-sister)					;eve is doris's sister
+60.
+61. (related eve doris has-sister)					;doris is eve's sister
+62. 
+63. (instance alice (= age 80))						;alice is 80 years old and the other ages are assigned below
+64.
+65. (instance betty (= age 50))
+66.
+67. (instance charles (= age 55))
+68.
+69. (instance eve (= age 18))
+70.
+71. (instance doris (= age 24))
+
+Some important notes:
+(some A B)  means "there exist an B who is a subject of A"  (A is a role and B is a concept)
+(all A B) means "all the B are subjects of A" (A is a role and B is a concept)
+(implies C1 C2) "if you are C1, then you are C2" (C1, C2 are concepts)
+(equivantent C1 C2) "you are C1 if and only if you are C2" (C1,C2 are concepts)
+
+Some queries:
+? (retrieve (?x) (?x woman))						;retrieves is in ?x variable all the individuals that are women
+> (((?x alice)) ((?x betty)) ((?x doris)) ((?x eve)))			;(?x) is the head of the query (what will be returned)
+									;(?x woman) is the matching condition
+
+? (retrieve (?x) (?x (and woman (some has-child top)))			;retrives all the women who have a child ore more
+> (((?x betty)) ((?x alice)))
+
+? (retrieve nil (?x woman))						;is there any woman?
+> T
+
+? (retrieve (?x ?y) (?x ?y has-child))					;retrieves all the individuals related by the role "has-child"
+> (((?x betty) (?y doris))
+((?x betty) (?y eve))
+((?x alice) (?y betty))
+((?x alice) (?y charles)))
+
+? (retrieve (?x) (?x (not woman)))					;all the individuals that are not women
+> (((?x charles)))
+
+? (retrieve (?x) (?x (>= age 18)))					;all the individuals that are 18 or above
+> (((?x alice)) ((?x doris)) ((?x eve)) ((?x betty)) ((?x charles)))
+
+? (retrieve (?x) (neg (project-to (?x) (?x ?y (constraint age age <)))))	;the oldest person
+> (((?x alice)))
+
+
+I have also run and followed the "game.racer" example, it is a lot bigger then "family.racer" and I will skip it.
+
+4. My final project - S.F.D.B.M.P.
+
+
+
+
+A. Specification.
+
+
+My project name will be S.F.D.B.M.P. which stands Super Fast DataBase for Military Purposes.
+I will implement a "database" using RacerPro for the management of a military academy.
+In a military academy the actors are:
+	- the professors (which are ranked soldiers)
+
+	- the army employees (like gards, tailors, smiths, managers of the resources like guns, food, money and people etc)
+	- the students (simple soldiers or ranked soldiers, they study, they get marks, they are promoted to a hiher rank). 
+Military rank is a system of hierarchical relationships in army forces. 
+A military academy has some substructures (the faculties) e.g. Computer Science, Aeronautics etc.
+Each substructure has its one classes and training sessions, so different professors, and different managers.
+If a war is coming the soldiers (proffessors and students) get prepared for the war by doing their specific job.
+My database will keep track of the people and their activity in a military academy.
+I will implement specific queries for multiple purposes.
+A set of possible concepts will be: professor,student, managers, amiral, major, sergent (all the possible ranks) etc.
+A set of possible roles will be: is-professor, is-the-dirrect-boss, is-the-manager.
+A set of possible attributes will be: mark, payment, mission.
+
+
+
+
+B.Implementation
+
+
+The code specifing the TBox and the ABox can be found in the file "SFDBMP.rarcer". After a full-reset of the RacerPro server and RacerPorter GUI, load this file.
+
+The code specifing the prerequired queries can be found in the file "predefinedQueries.racer". Those queries must be executed before any real query will be asked. Generally those queries will fill the ABox with temporary, volatile assertions. Like in a realtional database, in a RACER knowledge base, we can not impose rules like "all the entries of a table are in some relation with all the entries of another table". We can impose a rule like a many-to-many relationskip or primary or foreign key relationship between two concepts, but not "all-to-all". So the prerequired queries will fill the ABox with all the assertions necessary for an "all to all relationship". As an example: in my default ABox there are 20-25 individuals. If I want to specify all the is-superior-of role assertions I should probably write into my ABox 20*20=400 new assertions just for this role. To skip that we run a "firerule" query. The syntax is the following one:
+
+(firerule <a_query_retrieving_a_list_of_results> <the_assertion_which_should_apply_for_all_the_results_in_the_list>).
+
+The query (firerule (?x ?y (constraint (rank) (rank) (> rank-1 rank-2))) ((related ?x ?y is-superior-of))) will generate all the role assertions needed in for the is-superior-of role.
+
+Please execute all the prerequired queries, before asking any other real queries. It should take some minutes maybe, some grab a coffee. This should have been necessary if there was a real licence of RacerPro server. Even I requested one from the Racer team, they send me a limited licence. Using these limited licence there are some features of the RacerPro server that don't work correctly or at all. One of those features is the keyword "feature", which should be a functional type of role. These keyword is very important for relationships like one-to-many. But there is a much slower way to implement a one-to-many relationship (using the domain restriction "at-most n Role", where n in these case should be one in order to specify that there is a single individual filler for the given Role). The lack of a real licence does not allow me to auto-execute queries, because the only available running mode using a temporary license is the lazy mode.
+
+
+Lets talk a little bit about the code.
+The atomic concepts are:
+
+	:atomic-concepts
+	(
+		;;; PERSON
+		person
+		civilian
+		soldier
+
+		;;; ACADEMIC RANKS
+		academic
+		professor
+		distinguished-professor
+		associate-professor
+		assistant-professor
+		lecturer
+		
+		;;; STUDENTS
+		student
+		
+		;;; MANAGERS
+		manager
+		food-manager
+		guns-manager
+		finance-manager
+		human-resource-manager
+		tailors
+		smith
+		
+		;;; MILITARY RANKS
+		ranked-soldier
+		general-of-the-army
+		general
+		lieutenant-general
+		major-general
+		brigadier-general
+		colonel
+		lieutenant-colonel
+		major
+		captain
+		first-lieutenant
+		second-lieutenant
+		cadet
+		
+		;;; STRUCTURE
+		department
+		academic-department
+		military-department
+		unitate
+		subunitate
+		grupa
+		pluton
+		companie
+		batalion
+		regiment
+		divizie
+		corp
+		armata
+
+		;;; MILITARY FUNCTIONS
+		comandant
+		comandant-de-grupa
+		comandant-de-pluton
+		comandant-de-companie
+		comandant-de-batalion
+		comandant-de-regiment
+		comandant-de-divizie
+		comandant-de-corp
+		comandant-de-armata
+	).
+
+Of course, I have mostly been concerned about the military hierarchy and extremy less concerned about the academic subject or the managment policy.
+I assume the fact that the usage of english and romanian is not a plus, but I also assume everything is easy to be understood.
+
+The main roles are:
+
+	:roles
+	(
+		(is-professor-of 
+			:inverse is-student-of
+			:domain academic
+			:range (or cadet student)
+		)
+		(is-superior-of 
+			:inverse is-inferior-of 
+			:transitive t
+			:domain ranked-soldier
+			:range ranked-soldier
+		)
+		(is-professor-at 
+			:domain academic
+			:range academic-department
+		)
+		(is-student-at 
+			:domain (or cadet student)
+			:range academic-department
+		)
+		(is-subunit-of
+			:transitive t
+			:domain military-department
+			:range military-department
+		)
+		(is-in-troop
+			:domain soldier
+			:range military-department
+		)
+		(is-in-command-of
+			:parent is-in-troop
+			:domain comandant
+			:range military-department
+		)
+		(is-under-command-of
+			:inverse is-in-command-of
+			:domain military-department
+			:range comandant
+		)
+		(a-primit-ordin-de-la
+			:inverse a-dat-ordin-lui
+			:domain ranked-soldier
+			:range comandant
+		)
+		(a-fost-pus-de-paza-de
+			:parent a-primit-ordin-de-la
+			:inverse a-pus-de-paza-pe
+			:domain ranked-soldier
+			:range comandant
+		)
+	).
+
+From this list is-in-command-of, is-under-command-of, is-student-at and is-in-troop roles should be feature roles, but as explained above the current licence does not support feature roles.
+
+There are 3 kinds of individuals: persons, academic departments and troops.
+
+	:individuals 
+	(
+		;;; persons
+		Apan
+		Chindris
+		Chirap
+		Cobarzan
+		Colceriu
+		Cornean
+		Ghiran
+		Gliga
+		Giorfi
+		Halmaghi
+		Hojbota
+		Mera
+		Miclaus
+		Miron
+		MoldovanA
+		MoldovanT
+		Monda
+		Radu
+		Shara
+		Seceleanu
+		Sigartau
+		Simion
+
+		;;; academic departments
+		Electronics
+		ComputerScience
+		Telecommunications
+		Aeronautics
+		Explosives
+		Geodesy
+
+		;;; troops
+		group1 group2 group3 group4 group5 group6 group7 group8
+		group9 group10 group11 group12 group13 group14 group15 group16
+		pluton1 pluton2 pluton3 pluton4 pluton5 pluton6  pluton7 pluton8
+		compania1 compania2 compania3 compania4 compania5 compania6 compania7 compania8
+		batalionul1 batalionul2 batalionul3 batalionul4
+		regimentul1 regimentul2
+		divizia1
+	).
+
+The attributes of each person are:
+
+	:attributes 
+	(
+		(real age)
+		(cardinal rank)
+		(cardinal retras)
+		(cardinal pus-de-paza)
+		(cardinal sub-ordin)
+	).
+
+As we will see the age of a person should be between 0 and 100 years.
+The rank attribute only facilitates the ease of working with the military hierarchy (like when asking "who salutes who" query).
+The retras attribute should be 0 for any active soldier, and 1 for any retired one.
+If a soldier already received an order than sub-ordin attribute should be 1 (pus-de-paza has the same rule).
+
+
+The structure of the military academy is defined by the following equivalences:
+
+(equivalent
+	department
+	(or
+		academic-department
+		military-department
+	)
+)
+
+(disjoint academic-department military-department)
+
+
+;;; military department
+(equivalent
+	military-department
+	(or
+		unitate
+		subunitate
+	)
+)
+
+(disjoint unitate subunitate)
+
+(equivalent
+	subunitate
+	(or
+		grupa
+		pluton
+		companie
+	)
+)
+
+(equivalent
+	unitate
+	(or
+		batalion
+		regiment
+		divizie
+		corp
+		armata
+	)
+)
+
+(disjoint department person)
+
+A department can be either a military or an academic department. The two kinds of department are also disjoint (there is no military department which is also an academic one).
+
+
+
+The concept of person is disscuses in the lines:
+
+;;; persons
+
+(equivalent 
+	person
+	(and
+		(or
+			civilian
+			soldier
+		)
+		(>= age 0)
+		(<= age 100)
+	)
+)
+
+(implies civilian person)
+(implies soldier person)
+(disjoint civilian soldier)
+
+
+
+;;; civilians
+
+(implies manager civilian)
+(implies student civilian)
+
+
+(equivalent
+	manager
+	(or
+		food-manager
+		guns-manager
+		finance-manager
+		human-resource-manager
+		tailors
+		smith
+	)
+)
+
+
+(disjoint student manager)
+
+
+
+;;; soldiers
+
+(equivalent 
+	ranked-soldier 
+	(or 
+		general-of-the-army  
+		general 
+		lieutenant-general 
+		major-general
+		brigadier-general
+		colonel
+		lieutenant-colonel
+		major
+		captain
+		first-lieutenant
+		second-lieutenant
+		cadet
+	)
+)
+
+
+(equivalent
+	academic
+	(or
+		professor
+		distinguished-professor
+		associate-professor
+		assistant-professor
+		lecturer
+	)
+)
+
+(equivalent
+	comandant
+	(or
+		comandant-de-grupa
+		comandant-de-pluton
+		comandant-de-companie
+		comandant-de-batalion
+		comandant-de-regiment
+		comandant-de-divizie
+		comandant-de-corp
+		comandant-de-armata
+	)
+)
+
+(implies academic soldier)
+(implies ranked-soldier soldier)
+(implies comandant ranked-soldier)
+(implies (some is-in-command-of divizie) (or general lieutenant-general major-general brigadier-general))
+(equivalent (some is-in-command-of divizie) comandant-de-divizie)
+(implies (some is-in-command-of regiment) (or colonel lieutenant-colonel))
+(equivalent (some is-in-command-of regiment) comandant-de-regiment)
+(implies (some is-in-command-of batalion) (or lieutenant-colonel major captain))
+(equivalent (some is-in-command-of batalion) comandant-de-batalion)
+(implies (some is-in-command-of companie) (or captain first-lieutenant))
+(equivalent (some is-in-command-of companie) comandant-de-companie)
+(implies (some is-in-command-of pluton) (or first-lieutenant second-lieutenant))
+(equivalent (some is-in-command-of pluton) comandant-de-pluton)
+(implies (some is-in-command-of grupa) second-lieutenant)
+(equivalent (some is-in-command-of grupa) comandant-de-grupa)
+(implies (some is-in-command-of military-department) (= retras 0))
+
+(implies (some a-dat-ordin-lui (some is-in-troop divizie)) comandant-de-divizie)
+(implies (some a-dat-ordin-lui (some is-in-troop regiment)) (or comandant-de-divizie comandant-de-regiment))
+(implies (some a-dat-ordin-lui (some is-in-troop batalion)) (or comandant-de-divizie comandant-de-regiment comandant-de-batalion))
+(implies (some a-dat-ordin-lui (some is-in-troop companie)) (or comandant-de-divizie comandant-de-regiment comandant-de-batalion comandant-de-companie))
+(implies (some a-dat-ordin-lui (some is-in-troop pluton)) (or comandant-de-divizie comandant-de-regiment comandant-de-batalion comandant-de-companie comandant-de-pluton))
+(implies (some a-dat-ordin-lui (some is-in-troop grupa)) (or comandant-de-divizie comandant-de-regiment comandant-de-batalion comandant-de-companie comandant-de-pluton comandant-de-grupa))
+
+(implies (some a-fost-pus-de-paza-de comandant) (= pus-de-paza 1))
+(implies (some a-primit-ordin-de-la comandant) (= sub-ordin 1))
+(implies ranked-soldier (at-most 1 a-primit-ordin-de-la))
+
+The first lines about the civilians and soldiers classes are easy to be understood without any additional comments.
+Lets disscuss about the lines 
+
+	(implies (some is-in-command-of divizie) (or general lieutenant-general major-general brigadier-general))
+	(equivalent (some is-in-command-of divizie) comandant-de-divizie)
+
+These lines restrict the domain of the commander of a division to the domain of generals or lieutenant-generals or major-generals or brigadier-generals.
+The same explaination for the other lines defining the domain of commander of a unit or subunit.
+
+Due to the fact that we only administrate a military academy, in the ABox the bigest unit I have deined is a division (divizia1). Otherwise we need to much individuals (persons) to fill each group, each subunit.
+
+Lets see the following lines of code:
+
+(equivalent 
+	cadet 
+	(and 
+		ranked-soldier 
+		(= rank 1)
+		(all 
+			is-inferior-of 
+			(or 
+				general-of-the-army 
+				general
+				lieutenant-general
+				major-general
+				brigadier-general
+				colonel
+				lieutenant-colonel
+				captain
+				major
+				first-lieutenant
+				second-lieutenant 
+			)
+		)		
+	)
+)
+
+These lines define the concept of cadet. An individual who is a cadet, must be a ranked-soldier (just to make the difference between a civilian student and a cadet), must have the rank attribute equal to 1, and is inferior of individuals that are either general-of-the-army, either general and so one.
+These kind of definition is defined for any other type of ranked soldier.
+
+The lines below explicitly show the disjunction between the general-of-the-army individuals and any other kind of ranked soldier:
+
+(disjoint general-of-the-army general)
+(disjoint general-of-the-army lieutenant-general)
+(disjoint general-of-the-army major-general)
+(disjoint general-of-the-army brigadier-general)
+(disjoint general-of-the-army colonel)
+(disjoint general-of-the-army lieutenant-colonel)
+(disjoint general-of-the-army major)
+(disjoint general-of-the-army captain)
+(disjoint general-of-the-army first-lieutenant)
+(disjoint general-of-the-army second-lieutenant)
+(disjoint general-of-the-army cadet)
+
+These kind of definition is defined for any other type of ranked soldier.
+
+Until now we mainly disscussed about the concept and role definitions, all of them being part of the TBox.
+
+
+Lets disscuss about the ABox content (the default one, because the queries should allow as to increase the content). Here is the default content:
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(instance Apan person)
+(instance Chindris person)
+(instance Chirap person)
+(instance Cobarzan person)
+(instance Colceriu person)
+(instance Cornean person)
+(instance Ghiran person)
+(instance Gliga person)
+(instance Giorfi person)
+(instance Halmaghi person)
+(instance Hojbota person)
+(instance Mera person)
+(instance Miclaus person)
+(instance Miron person)
+(instance MoldovanA person)
+(instance MoldovanT person)
+(instance Monda person)
+(instance Radu person)
+(instance Shara person)
+(instance Seceleanu person)
+(instance Sigartau person)
+(instance Simion person)
+
+(instance Electronics academic-department)
+(instance ComputerScience academic-department)
+(instance Telecommunications academic-department)
+(instance Aeronautics academic-department)
+(instance Explosives academic-department)
+(instance Geodesy academic-department)
+
+(instance Mera general-of-the-army)
+(instance Mera distinguished-professor)
+(instance Mera (= age 50))
+(related Mera ComputerScience is-professor-at)
+
+(instance Cobarzan general)
+(instance Cobarzan professor)
+(instance Cobarzan (= age 40))
+(instance Cobarzan (= retras 0))
+
+(instance Miclaus general)
+(instance Miclaus professor)
+(instance Miclaus (= age 40))
+(instance Miclaus (= retras 0))
+
+(instance Colceriu lieutenant-general)
+(instance Colceriu professor)
+(instance Colceriu (= age 45))
+(instance Colceriu (= retras 0))
+
+(instance Halmaghi colonel)
+(instance Halmaghi associate-professor)
+(instance Halmaghi (= age 43))
+(instance Halmaghi (= retras 0))
+
+(instance Shara brigadier-general)
+(instance Shara associate-professor)
+(instance Shara (= age 48))
+(instance Shara (= retras 1))
+
+(instance Sigartau cadet)
+(instance Sigartau (= age 22))
+(instance Sigartau (= retras 0))
+
+(instance Simion student)
+(instance Simion (= age 23))
+(instance Simion (= retras 0))
+
+(related Mera Sigartau is-professor-of)
+(related Mera Simion is-professor-of)
+
+
+(instance group1 grupa)
+(related group1 pluton1 is-subunit-of)
+(instance group2 grupa)
+(related group2 pluton1 is-subunit-of)
+(instance group3 grupa)
+(related group3 pluton2 is-subunit-of)
+(instance group4 grupa)
+(related group4 pluton2 is-subunit-of)
+(instance group5 grupa)
+(related group5 pluton3 is-subunit-of)
+(instance group6 grupa)
+(related group6 pluton3 is-subunit-of)
+(instance group7 grupa)
+(related group7 pluton4 is-subunit-of)
+(instance group8 grupa)
+(related group8 pluton4 is-subunit-of)
+(instance group9 grupa)
+(related group9 pluton5 is-subunit-of)
+(instance group10 grupa)
+(related group10 pluton5 is-subunit-of)
+(instance group11 grupa)
+(related group11 pluton6 is-subunit-of)
+(instance group12 grupa)
+(related group12 pluton6 is-subunit-of)
+(instance group13 grupa)
+(related group13 pluton7 is-subunit-of)
+(instance group14 grupa)
+(related group14 pluton7 is-subunit-of)
+(instance group15 grupa)
+(related group15 pluton8 is-subunit-of)
+(instance group16 grupa)
+(related group16 pluton8 is-subunit-of)
+
+(instance pluton1 pluton)
+(related pluton1 compania1 is-subunit-of)
+(instance pluton2 pluton)
+(related pluton2 compania2 is-subunit-of)
+(instance pluton3 pluton)
+(related pluton3 compania3 is-subunit-of)
+(instance pluton4 pluton)
+(related pluton4 compania4 is-subunit-of)
+(instance pluton5 pluton)
+(related pluton5 compania5 is-subunit-of)
+(instance pluton6 pluton)
+(related pluton6 compania6 is-subunit-of)
+(instance pluton7 pluton)
+(related pluton7 compania7 is-subunit-of)
+(instance pluton8 pluton)
+(related pluton8 compania8 is-subunit-of)
+
+(instance compania1 companie)
+(related compania1 batalionul1 is-subunit-of)
+(instance compania2 companie)
+(related compania2 batalionul1 is-subunit-of)
+(instance compania3 companie)
+(related compania3 batalionul2 is-subunit-of)
+(instance compania4 companie)
+(related compania4 batalionul2 is-subunit-of)
+(instance compania5 companie)
+(related compania5 batalionul3 is-subunit-of)
+(instance compania6 companie)
+(related compania6 batalionul3 is-subunit-of)
+(instance compania7 companie)
+(related compania7 batalionul4 is-subunit-of)
+(instance compania8 companie)
+(related compania8 batalionul4 is-subunit-of)
+
+
+(instance batalionul1 batalion)
+(related batalionul1 regimentul1 is-subunit-of)
+(instance batalionul2 batalion)
+(related batalionul2 regimentul1 is-subunit-of)
+(instance batalionul3 batalion)
+(related batalionul3 regimentul2 is-subunit-of)
+(instance batalionul4 batalion)
+(related batalionul4 regimentul2 is-subunit-of)
+
+(instance regimentul1 regiment)
+(related regimentul1 divizia1 is-subunit-of)
+(instance regimentul2 regiment)
+(related regimentul2 divizia1 is-subunit-of)
+
+(instance divizia1 divizie)
+
+
+(instance Apan cadet)
+(instance Apan (= age 22))
+(instance Apan (= retras 0))
+(related Apan group1 is-in-troop)
+
+(instance Chindris cadet)
+(instance Chindris (= age 21))
+(instance Chindris (= retras 0))
+(related Chindris group2 is-in-troop)
+
+(instance Chirap second-lieutenant)
+(instance Chirap (= age 22))
+(instance Chirap (= retras 0))
+(related Chirap group3 is-in-troop)
+
+(instance Gliga second-lieutenant)
+(instance Gliga (= age 22))
+(instance Gliga (= retras 0))
+(related Gliga group4 is-in-troop)
+
+(instance Cornean first-lieutenant)
+(instance Cornean (= age 20))
+(instance Cornean (= retras 0))
+(related Cornean pluton1 is-in-command-of)
+
+(instance Ghiran first-lieutenant)
+(instance Ghiran (= age 21))
+(instance Ghiran (= retras 0))
+(related Ghiran pluton2 is-in-command-of)
+
+(instance Giorfi captain)
+(instance Giorfi (= age 25))
+(instance Giorfi (= retras 0))
+(related Giorfi compania1 is-in-command-of)
+
+(instance Hojbota major)
+(instance Hojbota (= age 25))
+(instance Hojbota (= retras 0))
+(related Hojbota batalionul1 is-in-command-of)
+
+(instance Miron second-lieutenant)
+(instance Miron (= age 32))
+(instance Miron (= retras 0))
+(related Miron group7 is-in-troop)
+
+(instance MoldovanA captain)
+(instance MoldovanA (= age 29))
+(instance MoldovanA (= retras 0))
+(related MoldovanA compania2 is-in-command-of)
+
+(instance MoldovanT lieutenant-colonel)
+(instance MoldovanT (= age 29))
+(instance MoldovanA (= retras 0))
+(related MoldovanT regimentul1 is-in-command-of)
+
+(related Cobarzan divizia1 is-in-command-of)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+The ABox can be seen as an example of what the knowlegde base can do.
+In general when we define a new individual, we should provide details about rank, the age and about it's military department. Additionally we can provide data about the academic department.
+
+As seen in the code line above, the units hierarchy is predefined in the ABox. Of course other units and subunits can be added.
+
+Generally the ABox content is very easy to be understood, so I will skip the unnecessary explanations about it.
+
+
+
+
+
+
+
+
+C.Queries
+
+When executing queries they should be written in the shell of the RacerPorter GUI executable.
+There are a few kinds of errors that can be encounted when executing queries (excluding the syntax error):
+	
+	a. The error "individual not in ABox"  will appear when an individual (person, military-department or academic department) is uses even it was not yet defined. This type of error ussually occurs when executing the full reset of a system and a reload of the code file (the ABox will return to the default content).
+	To define a new indiviadual use (define-individual <individual_name>) and then use (instance <individual_name> <concept>) to say that the new individual is of type <concept>.
+	
+	b. The error "a-bos is inconsistent" will appear most probably when the content of the ABox is inconsistent with the rules in the TBOx. This means that some of the new provided data (from the last full reste of the system) is inconsistend, violating some TBOx rules. After each "insertion" please check the consistency of the ABOx. The reasoning knowledge base is not able to tell you that a certain "insertion" query will not produce a consistent result. It first must execute the query and then if we are curious we can check the consistency. If there is something inconsistent, and there will be ussualy :)), the last insertion should be retracted using the (forget) macro.
+	Lets see how we use the (forget) macro. The syntax is:
+	
+	(forget (:abox <ABox_name>) <statement_to_be_retracted>)
+
+	An example:
+	when we promote an colonel named Halmaghi we should first retract the concept assertion asserting that Halmaghi is a colonel and than add a new concept assertion asserting that Halmaghi is a general.
+	
+	(forget (:abox military-technical-academy) (instance Halmaghi colonel))
+	(instance Halmaghi general)
+
+	Of course the new assertion could introduce some inconsistency. Halmaghi used to be an colonel. If Halmaghi was the commander of a regiment, and now he is a general, he can not longer be the commander of that regiment. A user which promotes Halmaghi should also solve this problem. As I have said before, the RacerPro system, can only execute queries and than report an inconsistency. It is user's job to manage the inconsistencies.
+
+There are also other kinds of errors but these two types are the most encounted ones.
+
+
+
+List of queries:
+
+a. cine-pe-cine-saluta
+
+(retrieve
+	(?y ?x)
+	(union
+		(?x ?y (constraint (rank) (rank) (> rank-1 rank-2)))
+		(and 
+			(?x ?y (constraint (rank) (rank) (= rank-1 rank-2)))
+			(?x ?y (constraint (age) (age) (> age-1 age-2)))
+		)
+	)
+)
+
+These query will return all the pairs (?saluter ?saluted).
+To see who salutes Halmaghi execute the query:
+
+(retrieve
+	(?y)
+	(union
+		(Halmaghi ?y (constraint (rank) (rank) (> rank-1 rank-2)))
+		(and 
+			(Halmaghi ?y (constraint (rank) (rank) (= rank-1 rank-2)))
+			(Halmaghi ?y (constraint (age) (age) (> age-1 age-2)))
+		)
+	)
+)
+
+
+b. oamenii-de-sub-comanda-cuiva
+
+(retrieve 
+	(?soldier)
+	(and
+		(Cobarzan ?bigUnit is-in-command-of)
+		(?smallerUnit ?bigUnit is-subunit-of)
+		(?soldier ?smallerUnit is-in-troop)
+	)
+)
+These query will return all the men under the command of Cobarzan, which is a general and the commander of the divizia1 division.
+
+c. recita-toti-superiorii (all the commanders which give orders to a given soldier)
+
+(retrieve
+	(?comandant ?bigerTroop)
+	(and
+		(Apan ?troop is-in-troop)
+		(?troop ?bigerTroop is-subunit-of)
+		(?comandant ?bigerTroop is-in-command-of)
+	)
+)
+
+This will return all commanders of the troops in which Apan is a member and the corresponding troops (in pairs).
+
+d. sorteaza-dupa-functie
+
+(retrieve
+	(?x)
+	(union
+		(?x comandant-de-armata)
+		(?x comandant-de-corp)
+		(?x comandant-de-divizie)
+		(?x comandant-de-regiment)
+		(?x comandant-de-batalion)
+		(?x comandant-de-companie)
+		(?x comandant-de-pluton)
+		(?x comandant-de-grupa)
+	)
+)
+
+This query sorts the commanders because of the FIFO manner of executing the union operation which is garanteed by the server, even that the mathematical union set operation does not garantee any order relationship.
+e. da-un-odin
+
+(related <subordonat> <comandant> a-primit-un-odin-de-la)
+
+When the attribute sub-ordin of <subordonat> is 0, it will be changed to 1. If the attribute is already 1, then the ABox will become inconsistent.
+In this case the last assertion should be retracted using the (forget) macro.
+
+(related Ghiran Cobarzan a-primit-un-ordin-de-la)
+(related Ghiran Hojbota a-primit-un-ordin-de-la)
+
+The addition of the first assertion will be allright.
+The addition of the second assertion will cause some inconsistency.
+Also if <comandant> is not a superior of <subordonat> then data will be inconsistent.
+
+f. pun-de-paza
+
+(related <subordonat> <comandant> a-fost-pus-de-paza-de)
+
+When the attribute sub-ordin of <subordonat> is 0, it will be changed to 1. If the attribute is already 1, then the ABox will become inconsistent.
+The same things are also true for the  pus-de-paza attribute of <subordonat>.
+In this case the last assertion should be retracted using the (forget) macro.
+
+(related Ghiran Cobarzan a-primit-un-ordin-de-la)
+(related Ghiran Hojbota a-fost-pus-de-paza-de)
+
+The addition of the first assertion will be allright.
+The addition of the second assertion will cause some inconsistency.
+Also if <comandant> is not a superior of <subordonat> then data will be inconsistent.
+
+g. seteaza-comandantul-unui-departament
+
+(forget (:abox military-technical-academy) (related Cobarzan divizia1 is-in-command-of))
+(related Miclaus divizia1 is-in-command-of)
+
+This is an example of how to set a new commandor of a department.
+An inconsistency will appear if the commandor does not have the necessary rank to be in command of the named troop.
+The bigest problm when retracting a statement is that it most probably cases inconsistency.
+So when working with (forget) an exterior reasoning engine is needed to keep the data consistent. This is why I thing that the usage of JRacer library is indicated. 
+For the time being I did not have time to implement a GUI in Java for this project, but I thing that the project would look cleaner if so.
+The conclusion is that RacerPro is just a knowledge base server and just like in a relational database server additional computing power is needed 
+to coordinate data and to keep it consistent.
+
+h. retrage-un-soldat-gradat
+
+(forget (:abox military-technical-academy) (instance Cobarzan (= retras 0)))
+(instance Cobarzan (= retras 1))
+
+It will also be necessary to execute (forget-role-assertion military-technical-academy Cobarzan divizia1 is-in-command-of).
+But this is just an example where we know that Cobarzan is in command of divizia1 division.
+
+We should use (firerule) macro.
+
+(firerule <query_returning_a_list> <set_of_assertions_which should_hold_for_the_elements_from_the_returned_list>)
+
+The exact code should be:
+(firerule (?x Cobarzan is-in-command-of) ((forget (:abox military-technical-academy) (related Cobarzan ?x is-in-command-of) ))  )
+
+i. avanseaza-degradeaza
+
+(forget (:abox military-technical-academy) (instance Cobarzan general))
+(instance Cobarzan general-of-the-army)
+
+The same type of inconsistency as at point h. should be handled.
+
+j. adauga-un-soldat
+
+(define-individual <name>)
+(instance <name> <ranked-soldier>)
+(related <name> <military-department> is-in-command-of)
+(related <name> academic)
+(related <name> <academic-department> is-professor-at)
+(instance <name> (= retras 0))
+(instance <name> (= age <age_value>))
+
+After each such an addition we will need to rerun the predefined queries in order to assert all the needed assertions.
+
+
+D.Conclusion
+
+The first and the most important conclusion is that description logic can consume time, very large amount of time and even space in the development part of a project.
+After that the execution should be fast if an optimal solution has been chosen.
+The RacerPro reasoner (in the limited license version) is not the best reasoner. There were some important restrictions, which made my job more difficult.
+My project could use an GUI in Java using JRacer library for the additional exterior reasoning tasks (to keep the data consistency).
+After all, the database (knowledge base) model is not very different of the relational database model.

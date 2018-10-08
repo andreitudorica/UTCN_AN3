@@ -1,0 +1,55 @@
+﻿
+@{
+    ViewBag.Title = "SubmissionsIndex";
+}
+
+@model PagedList.IPagedList<Assignment3.Models.SubmissionModel>
+@using PagedList.Mvc;
+
+<link href="~/Content/PagedList.css" rel="stylesheet" type="text/css" />
+
+@{
+    ViewBag.Title = "Laboratories";
+}
+
+<h2>Submissions</h2>
+
+<table class="table">
+    <tr>
+        <th>
+            Assignment ID
+        </th>
+        <th>
+            Student ID
+        </th>
+        <th>
+            Grade
+        </th>
+        <th></th>
+    </tr>
+
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.AssignmentID)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.StudentID)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Grade)
+            </td>
+            <td>
+                @Html.ActionLink("Grade submission", "SubmissionsEdit", new { id = item.ID }) 
+            </td>
+        </tr>
+    }
+
+</table>
+<br />
+Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+
+@Html.PagedListPager(Model, page => Url.Action("Index",
+    new { page, sortOrder = ViewBag.CurrentSort, currentFilter = ViewBag.CurrentFilter }))

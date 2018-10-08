@@ -1,0 +1,513 @@
+LUCRAREA 9
+
+					Grafuri _i revenire
+
+1.	Scopul lucr_rii
+
+	Lucrarea are drept scop familiarizarea din punct de vedere al implement_rii în LISP 
+cu unele tehnici de programare din teoria algoritmilor: algoritmi cu revenire _i algoritmi de 
+c_utare în grafuri.
+
+2.	Considera_ii teoretice
+
+	2.1.	Algoritmi cu revenire implementa_i în LISP
+
+	În general, algoritmii cu revenire (backtracking) apeleaz_ la una dintre urm_toarele 
+tehnici de programare: recursivitatea, itera_ia prin folosirea explicit_ a stivei sau a unei 
+tabele. Exemplele de mai jos sunt implementate mai ales cu ajutorul regulii recursivit__ii. 
+Aceasta permite ob_inerea unor versiuni condensate, func_ionale pentru implementarea 
+algoritmilor cu revenire.
+	Problema plas_rii a "n" dame pe o tabl_ de _ah de "n" linii _i "n" coloane, astfel încât 
+nici o dam_ s_ nu atace pe nici una dintre celelalte, este rezolvat_ prin func_ia "dame". Se 
+observ_ aici c_ "conf", parametrul func_iei auxiliare "do_dame", este o solu_ie par_ial_ a 
+problemei.
+	Problema "turul calului": se pune pe o tabl_ de _ah goal_ doar o singur_ pies_ cal, 
+într-o anumit_ pozi_ie, de exemplu un col_ al tablei, _i se cere aflarea traseului pe care 
+trebuie s_-l urmeze calul, pentru ca acesta sa parcurg_ toate p_tratele tablei de _ah într-o 
+succesiune continu_ de mut_ri. Problema este rezolvat_ prin backtracking de c_tre func_ia 
+"cal". Urmarind codul putem observa când se face revenirea: daca se ajunge ca (ENDP mv) 
+s_ fie T, adic_ se epuizeaza mut_rile posibile din pozi_ia curent_ încercat_, adic_ pozi_ia 
+curent_ nu mai are perspective de continuare a turului calului, atunci se face revenirea la 
+pozi_ia anterioar_ a calului, prin terminarea evalu_rii apelului recursiv curent al func_iei 
+"do_cal" _i deci revenirea în nivelul anterior unde se încearc_ o noua pozi_ie urm_toare a 
+calului, printr-o noua itera_ie cu "DO*", ce induce o nou_ evaluare recursiv_.
+	Cele doua exemple de mai sus sunt implementate prin func_ii care returneaz_ toate 
+solu_iile posibile ale problemelor printr-o inspectare ordonat_.
+	O alt_ problem_ rezolvat_ prin backtracking este: având la dispozitie bancnote _i 
+monede de valori v1, v2, ..., vn, s_ se g_seasc_ toate modurile în care se poate pl_ti o sum_ 
+"S" folosind aceste valori. Problema este rezolvat_ de func_ia "plata", o func_ie care 
+returneaz_ NIL dac_ nu exist_ solu_ii sau lista cu toate solu_iile, în caz contrar.
+	Este prezentat_ _i problema "cangurului" care face salturi de lungimi l1, l2, ..., ln _i 
+trebuie s_ acopere distan_a "L". Se cere secven_a de salturi astfel încât cangurul s_ fac_ 
+un num_r minim de salturi _i s_ ajung_ exact în punctul final. Rezolvarea este dat_ prin 
+apelul macrodefini_iei "cangur".
+	Se poate observa o asem_nare logic_ între ultimele doua probleme, deosebirea fiind 
+c_ la problema bancnotelor _i monedelor se cer toate variantele posibile de acoperire a 
+sumei, iar la problema cangurului se cere doar o variant_ optimal_ de acoperire a 
+distan_ei.
+
+	2.2.	Grafuri
+
+	2.2.1.	Tratarea grafurilor cu ajutorul listelor de asocia_ie.
+	Putem reprezenta un graf direc_ionat printr-o list_ de asocia_ie între noduri _i 
+succesorii lor. Lista va fi compus_ din perechi de forma (nod . list__succesori_nod), astfel 
+încât pentru orice "nod'" din lista succesorilor exist_ un arc orientat de la "nod" spre "nod'". 
+Se consider_ c_ nodurile sunt atomi simbolici. De exemplu, graful:
+	a ¦¦¦¦¦¦¦ b ¦¦¦¦¦¦¦ c
+	          -         -
+	          -         -
+	          -         -
+	      -¦¦ d ¦¦¦¦¦¦¦¦-
+	      -   -
+	      L¦¦¦-
+poate fi reprezentat prin una din urmatoarele forme echivalente:
+	((a . (b)) (b . (c d)) (c . NIL) (d . (c d))	sau
+	((a b) (b c d) (c) (d c d))			sau
+	((a (b)) (b (c d)) (c NIL) (d (c d)))		;
+în ultima variant_ asocierea facându-se între un nod _i o list_ cu un singur element care 
+este lista succesorilor nodului respectiv în graf.
+	În cadrul aplica_iei din surse sunt implementate doua grafuri prin liste de asocia_ie.
+
+	Clasificarea algoritmilor de c_utare în grafuri
+
+	Metodele de cautare a unor drumuri în grafuri se înscriu în problematica c_ut_rii, 
+tipica Inteligen_ei artificiale. O metod_ este aceea de a folosi algoritmi cu revenire 
+(backtracking). To_i algoritmii descri_i în paragraful anterior pot fi v_zu_i ca ni_te tehnici de 
+c_utare în adâncime în graful reprezentat de spa_iul st_rilor posibile ale problemei, tehnici 
+concretizate pe specificul fiec_rei probleme în parte.
+	Prima variant_ de func_ie de c_utare în grafuri este implementata prin backtracking. 
+În aceast_ variant_ se memoreaza explicit în "cale" întotdeauna un singur traseu, acesta 
+fiind mereu modificat pân_ la g_sirea, daca este posibil_, a drumului dorit. Este mult mai 
+convenabil_ folosirea unor metode care sa memoreze toate variantele de c_utare pe care le 
+putem urma plecând dintr-un anume nod. Aceste variante sunt ob_inute cu ajutorul func_iei 
+"extind" în a doua variant_ de rezolvare a problemei. La apelul func_iei "extind" din corpul 
+functiei "cale22" lista "drumuri" con_ine drumurile par_iale (în ordinea invers_ a nodurilor) 
+care încep de la "start" _i care au r_mas de investigat. Drumul din vârful listei "drumuri" este 
+substituit prin toate drumurile posibile rezultate din avans unitar pornind de la ultimul nod din 
+acel drum. Altfel spus, drumurile expandate din drumul aflat în vârful listei "drumuri" sunt 
+inserate tot în vârful listei, deci lista este tratata ca o stiv_ (LIFO) si avem de-a face cu o 
+c_utare întâi în adâncime ("depth-first"). Cautarile prin backtracking folosind recursivitatea 
+sint cautari "depth-first", deoarece stiva drumurilor este gestionata implicit prin recursivitate. 
+Daca drumurile expandate sint inserate la sfirsitul listei, atunci lista de drumuri este o coada 
+(FIFO), cautarea fiind intii in latime ("breadth-first"). Daca inserarea se face intr-o lista 
+ordonata dupa lungimea drumului partial, atunci cautarea este intii cel mai bun 
+("best-first"). Ordonarea se poate face _i conform unor informa_ii euristice (c_utare 
+euristic_), vezi func_ia "cel-mai-scurt" din sursele lucr_rii.
+	Toate functiile si categoriile de algoritmi descrise pina acum in acest paragraf 
+returneaza doar o singura cale (prima gasita) de la nodul de start la nodul tinta. Se pot insa 
+defini si functii care returneaza toate caile de la start la stop.
+
+	2.2.2.	Tratarea grafurilor cu ajutorul propriet__ilor
+	Proprietatile pot constitui o baza pentru reprezentarea si prelucrarea unor constructii 
+complexe cum ar fi grafurile directionate.
+	Vom asocia fiecarui nod "X" (reprezentat ca un atom simbolic) proprietatea "leg_out". 
+Valoarea corespunzatoare acestei proprietati va fi lista nodurilor spre care ies prin arce din 
+nodul "X". Cu alte cuvinte, reprezentam arcul Xi->Xj prin prezenta lui Xj in lista care 
+constituie valoarea proprietatii "leg_out" a lui Xi. Acest lucru se poate realiza în Lisp prin:
+	(SETF (GET 'a 'leg_out) '(b))
+	(SETF (GET 'b 'leg_out) '(c d))
+	(SETF (GET 'c 'leg_out) '(c d))
+	(SETF (GET 'd 'leg_out) '())
+	Cautarea unui drum de la un nod de start la un nod tinta intr-un graf astfel 
+reprezentat se poate realiza, avind in vedere clasificarea din paragraful anterior a 
+algoritmilor de cautare, in mai multe modalitati. Cautarea unui singur drum de la "nod1" la 
+"nod2" cu backtracking este realizata de functiile "drum-prop" si "caut_dr_prop" care 
+returneaza primul drum gasit. Func_iile "caut_min" _i "caut_dr_min" din sursele lucr_rii 
+returneaz_ drumul de lungime minim_ dintre "in" _i "out", iar func_iile "drum-all" _i 
+"caut_dr_all" intr_ în categoria de algoritmi care g_sesc toate drumurile dintre nodul de start 
+_i nodul _int_. De altfel si cautarea caii de cost minim se face explorind toate caile si 
+memorind-o mereu pe cea mai scurta. Un caz similar de c_utare a solu_iei de lungime 
+minim_ este a treia variant_, unde se exploreaz_ doar c_ile par_iale mai scurte decât un 
+minim curent deja gasit.
+	Sint prezenate si alte functii de cautare in grafuri reprezentate prin intermediul 
+proprietatilor, fiind descris explicit modul de tratare a listei drumurilor partiale pentru fiecare 
+categorie de cautare.
+
+3.	Desf__urarea lucr_rii
+
+	1) Se vor parcurge si discuta sursele corespunzatoare algoritmilor de revenire.
+
+	2) Se vor trasa (eventual cu facilitatea Inspector) toti algoritmii cu revenire dezvoltati.
+
+	3) Se vor discuta principalele modalit__i de reprezentare a grafurilor directionate în 
+Lisp.
+
+	4) Se vor studia in detaliu sursele corespunzatoare algoritmilor de cautare in grafuri. 
+Observati modul de reprezentare a unui graf cu ajutorul listelor de asociatie si cu ajutorul 
+proprietatilor.
+
+	5) Se vor trasa (eventual cu facilitatea Inspector) toti algoritmii de cautare a unui 
+drum intr-un graf prezentati in lucrare.
+
+	6) Se va discuta modalitatea de evitare a ciclurilor in drumurile explorate de functiile 
+din lucrare.
+
+4.	Întreb_ri _i probleme
+
+	1) Încerca_i solu_ii iterative pentru problemele damelor _i a turului calului. 
+Compara_i variantele rezultate cu cele descrise în lucrare.
+
+	2) Implementati o functie pentru rezolvarea problemei mariajului stabil: Pentru "n" 
+barbati si "n" femei, se dau prioritatile cu care fiecare barbat prefera fiecare femeie si 
+reciproc. Se cere o solutie stabila, adica o lista de cupluri in care sa nu existe parteneri care 
+sa prefere renuntarea la mariajul stabilit si formarea unui nou mariaj impreuna.
+
+	3) Implementati o functie pentru rezolvarea problemei selectiei optimale: Se da un 
+set de obiecte de greutati si valori cunoscute si se cere sa se selecteze o submultime care 
+sa nu depaseasca ca greutate o valoare limita "grlim" si care sa aiba suma valorilor 
+maximala.
+
+	4) Pentru functia de plata a unei sume avind la dispozitie doar anumite monede 
+incercati si alte variante de solutionare: cautare in adincime, cautare in latime si o solutie 
+specifica problemei.
+
+	5) Sa se defineasca o functie care, primind un graf reprezentat cu ajutorul proprietatii 
+"leg_out" a nodurilor lui, determina pentru fiecare nod proprietatea "leg_in" (care are ca 
+valoare lista predecesorilor nodului).
+
+	6) Implementati printr-o varianta iterativa de backtracking functia care cauta intr-un 
+graf reprezentat prin proprietati toate drumurile care pleaca dintr-un nod initial dat si ajung 
+intr-unul final dat.
+
+	7) Fiind dat un graf sa se gaseasca ciclul hamiltonian si un circuit care trece prin 
+toate arcele o singura data (traverseaza graful).
+
+5.	Surse
+
+;;; Problema pozitionari a "N" dame pe tabla de sah
+;;; de dimensiuni "N x N" in asa fel incat sa nu se atace reciproc
+(DEFUN dame (n)
+	(do_dame NIL))
+
+(DEFUN do_dame (conf)	
+(DECLARE (SPECIAL n))
+(IF 	(= (LENGTH conf) n)
+	(AND (PRINT (REVERSE conf)) (RETURN))
+	(DO* 	((i (IF conf (+ (CAAR conf) 1) 1))
+		 (j 1 (+ j 1)))
+		((> j n))
+		(IF (liber i j conf)
+		    (do_dame (CONS (CONS i j) conf)))
+	)
+))
+(DEFUN liber (i j conf)
+(DO* ((lpoz conf (REST lpoz)))
+	((NULL lpoz) T)
+	(IF (OR	(= i (CAAR lpoz))
+		(= j (CDAR lpoz))
+		(= (+ i j)(+ (CAAR lpoz)(CDAR lpoz)))
+		(= (- i j)(- (CAAR lpoz)(CDAR lpoz))))
+	  (RETURN NIL))
+))
+
+;;; Problema efectuarii unui tur cu piesa de la sah numita cal
+;;; in asa fel incat sa se treaca prin toate pozitiile de pe tabla
+(DEFUN cal (n)
+(LET ((mut	'((-1 . 2) (1 . 2)(2 . -1)(1 . -2)
+		  (-1 . -2)(-2 . -1)(-2 . 1)(2 . 1))))
+(do_cal '((1 . 1))
+)))
+(DEFUN do_cal (drum_part)
+(DECLARE (SPECIAL n))
+(IF	(= (LENGTH drum_part) (* n n))
+	(AND (PRINT drum_part) (RETURN))
+	(DO*(	(move mut (REST move))
+		(iv)(jv) )
+		((ENDP move))
+		(SETF	iv (+ (CAAR move)(CAAR drum_part))
+			jv (+ (CDAR move)(CDAR drum_part)))
+		(IF (ok_poz iv jv drum_part)
+			(do_cal (CONS (CONS iv jv) drum_part)))
+)))
+(DEFUN ok_poz (i j drum)
+(AND (NOT (MEMBER (CONS i j) drum :test #'EQUAL))
+     (NOT (> i n))
+     (NOT (> j n))
+     (NOT (< i 1))
+     (NOT (< j 1))
+))
+
+;;; Plata unei sume "suma" folosind valori (monede) date in lista 
+;;; "lv" in toate modurile posibile
+;;; Intoarce NIL daca nu sint solutii sau lista cu toate 
+solutiile.
+(DEFUN plata (lis_valori suma)
+(COND	((NULL lis_valori) NIL)
+	((= suma 0) (LIST (LIST (LIST (CAR lis_valori) 0))) )
+	((< suma (APPLY #'MIN lis_valori)) NIL)
+	((< suma (CAR lis_valori)) (plata  (REST lis_valori)
+					   suma))
+	(T (APPEND (plata (REST lis_valori) suma)
+		   (LET ((temp (plata lis_valori
+				      (- suma (CAR lis_valori)))))
+				(MAPC #'(LAMBDA (sol)
+						(adaug-distr (CAR lis_valori) 		
+							     sol))
+				      temp)
+				temp)))
+))
+;; Adauga distructiv valoarea "val" la solutia "sol"
+;; Solutiile sint liste de perechi de forma
+;; ( ... (valoarei nr-aparitiii) ...)
+(DEFUN adaug-distr (val sol)
+(IF	(ASSOC val sol)
+	(INCF (SECOND (ASSOC val sol)))
+	(NCONC sol (LIST (LIST val 1)))
+))
+
+;;; Problema salturilor cangurului
+(DEFMACRO cangur ( list-salturi lung-drum )
+	`(cangur1 (sort ',list-salturi #'>) ,lung-drum NIL))
+(DEFUN cangur1 ( list-salturi drum-ramas sol-partiala &aux tmp)
+(COND	((= 0 drum-ramas) sol-partiala)
+	((NULL list-salturi) NIL)
+	((DO ((nr-prim-salt (DIV drum-ramas (FIRST list-salturi))
+			    (- nr-prim-salt 1)) )
+		((= 0 nr-prim-salt))
+		(IF (SETF tmp
+			  (cangur1 (CDR list-salturi)
+				   (- drum-ramas
+				      (* nr-prim-salt
+				      	 (FIRST list-salturi)))
+				   (CONS	(LIST	(FIRST list-salturi)
+							       nr-prim-salt)
+							sol-partiala)))
+		    (RETURN tmp))))
+	((cangur1 (REST list-salturi) drum-ramas sol-partiala))
+))
+
+;; functia de sortare
+(DEFUN sort (lst pred)
+(COND	((= (LENGTH lst) 1) lst)
+	((CONS (SETQ	minim
+			(DO ((min (FIRST lst) min)
+			     (list (REST lst) (REST list)))
+			   ((NULL list) min)
+			   (UNLESS (FUNCALL pred min (FIRST list))
+					 (SETQ min (FIRST list)))))
+	       (sort (REMOVE-IF
+				#'(LAMBDA (x) (EQUAL x minim)) 
+				lst)
+		     pred)))
+))
+
+;;; GRAFUL ESTE REPREZENTAT PRIN LISTE DE ASOCIATIE
+
+(DEFVAR graf1
+'((a (b c e)) (b (a d)) (c (b f)) (d (c e)) (e NIL) (f (e))))
+(DEFVAR graf2
+'((a (e c b)) (b (d a)) (c (f b)) (d (e c)) (e NIL) (f (e))))
+
+;; Varianta 1 - backtracking
+(DEFUN cale1(start stop graf)
+	(cale11 (LIST ,start)))
+(DEFUN cale11 (cale)
+(DECLARE (SPECIAL stop graf))
+(COND	((EQL (FIRST cale) stop) (REVERSE cale))
+	((avans1 (CADR (ASSOC (FIRST cale) graf))))
+))
+(DEFUN avans1(succesori)
+(DECLARE (SPECIAL cale))
+(COND	((NULL succesori) NIL)
+	((MEMBER (FIRST succesori) cale)
+		(avans1 (REST succesori)))
+	((cale11 (CONS (FIRST succesori) cale)))
+	((avans1 (REST succesori)))
+))
+;; Varianta 2 - se gaseste o cale oarecare intr-un graf
+;; algoritmul "depth - first"
+(DEFUN cale2(start stop graf)
+	(cale22 (LIST(LIST start))))
+(DEFUN cale22 (drumuri)
+(DECLARE (SPECIAL stop graf))
+(COND	((NULL drumuri) NIL)
+	((EQL stop (CAAR drumuri)) (REVERSE (FIRST drumuri)))
+	((cale22 (extind (FIRST drumuri)
+			 (CADR (ASSOC (CAAR drumuri) graf))
+			 (REST drumuri))))
+))
+
+(DEFUN extind(drum succesori drumuri)
+(COND	((NULL succesori) drumuri)
+	((MEMBER (FIRST succesori) drum)
+		(extind drum (REST succesori) drumuri))
+	((CONS (CONS (FIRST succesori) drum)
+	       (extind drum (REST succesori) drumuri)))))
+
+;; Varianta 3 - se gaseste solutia de lungime minima
+;; algoritmul backtracking imbunatatit
+(DEFUN cale3(start stop graf)
+	(calemin (LENGTH graf) NIL))
+(DEFUN calemin(lgmin calemin)
+	(DECLARE (SPECIAL start stop graf))
+	(cale33 (LIST start))
+	(REVERSE calemin))
+(DEFUN cale33(cale)
+(DECLARE (SPECIAL stop graf))
+(COND	((EQL (FIRST cale) stop)
+		(SETQ lgmin (LENGTH cale)
+		      calemin cale)
+		NIL)
+	((< (+ 1 (LENGTH cale)) lgmin)
+		(avans3 (CADR (ASSOC (FIRST cale) graf))))
+))
+(DEFUN avans3(succesori)
+(DECLARE (SPECIAL cale))
+(COND	((NULL succesori) NIL)
+	((MEMBER (FIRST succesori) cale)
+		(avans3 (REST succesori)))
+	((cale33 (CONS (FIRST succesori) cale)))
+	((avans3 (REST succesori)))))
+
+;;; GRAFUL ESTE REPREZENTAT PRIN PROPRIETATI
+(SETF (GET 'a 'leg_out) '(b c d a))
+(SETF (GET 'b 'leg_out) '(c))
+(SETF (GET 'c 'leg_out) '(a))
+(SETF (GET 'd 'leg_out) '(e))
+(SETF (GET 'e 'leg_out) NIL)
+(DEFUN drum-prop (nod1 nod2)
+	(caut_dr_prop (LIST nod1)))
+(DEFUN caut_dr_prop (drum_part)
+(DECLARE (SPECIAL nod2))
+(IF	(EQ (CAR drum_part) nod2)
+	(REVERSE drum_part)
+	(DO ((vecini (GET (CAR drum_part) 'leg_out) (REST vecini))
+	     (sol))
+		((ENDP vecini))
+		(IF (AND (NOT (MEMBER (CAR vecini) drum_part))
+			 (SETF sol (caut_dr_prop (CONS	(CAR vecini)
+							drum_part))))
+		    (RETURN sol)))))
+;;; Se cauta un drum minim
+(SETF (GET 'a 'leg_out) '(b c d a) (GET 'a 'marc) NIL)
+(SETF (GET 'b 'leg_out) '(c) (GET 'b 'marc) NIL)
+(SETF (GET 'c 'leg_out) '(a d) (GET 'c 'marc) NIL)
+(SETF (GET 'd 'leg_out) '(e) (GET 'd 'marc) NIL)
+(SETF (GET 'e 'leg_out) NIL (GET 'e 'marc) NIL)
+
+(DEFUN caut_min (in out)
+(LET ((drmin))
+	(caut_dr_min (LIST in))
+	drmin
+))
+(DEFUN caut_dr_min (drum_part)
+(DECLARE (SPECIAL out))
+(IF (EQ (CAR drum_part) out)
+	(COND	((NULL drmin) (SETF drmin (REVERSE drum_part)))
+		((< (LENGTH drum_part) (LENGTH drmin))
+			(SETF drmin (REVERSE drum_part))))
+	(DO	((vecini (GET (CAR drum_part) 'leg_out) (REST vecini)))
+		((ENDP vecini))
+		(WHEN (NOT (GET (CAR vecini) 'marc))
+			(SETF (GET (CAR vecini) 'marc) T)
+			(caut_dr_min (CONS (CAR vecini) drum_part))
+			(REMPROP (CAR vecini) 'marc)))))
+
+;;; Se cauta toate drumurile
+(SETF (GET 'a 'leg_out) '(b c d a) (GET 'a 'marc) NIL)
+(SETF (GET 'b 'leg_out) '(c) (GET 'b 'marc) NIL)
+(SETF (GET 'c 'leg_out) '(a d) (GET 'c 'marc) NIL)
+(SETF (GET 'd 'leg_out) '(e) (GET 'd 'marc) NIL)
+(SETF (GET 'e 'leg_out) NIL (GET 'e 'marc) NIL)
+
+(DEFUN drum-all (nod1 nod2)
+(LET	((aux))
+	(SETF (GET nod1 'marc) T)
+	(caut_dr_all (LIST nod1))
+	(REMPROP nod1 'marc)
+	aux
+))
+(DEFUN caut_dr_all (drum_part)
+(DECLARE (SPECIAL nod2))
+(IF (EQ (CAR drum_part) nod2)
+	(PROG (())
+	      (PRINT (REVERSE drum_part))
+	      (SETF aux T))
+	(DO ((vecini (GET (CAR drum_part) 'leg_out) (REST vecini)))
+		((ENDP vecini))
+		(WHEN (NOT (GET (CAR vecini) 'marc))
+			(SETF (GET (CAR vecini) 'marc) T)
+			(caut_dr_all (CONS (CAR vecini) drum_part))
+			(REMPROP (CAR vecini) 'marc)))))
+
+;;; informatii legate de vecinatate arce in graf
+(SETF (GET 'start 'vecini) '(a d))
+(SETF (GET 'a 'vecini) '(start b))
+(SETF (GET 'b 'vecini) '(a c tinta))
+(SETF (GET 'c 'vecini) '(b tinta))
+(SETF (GET 'd 'vecini) '(start e))
+(SETF (GET 'e 'vecini) '(d))
+(SETF (GET 'tinta 'vecini) '(b c))
+;;; informatii legate de pozitie noduri graf
+(SETF (GET 'start 'pozitie) '(0 2))
+(SETF (GET 'a 'pozitie) '(2 0))
+(SETF (GET 'b 'pozitie) '(5 0))
+(SETF (GET 'c 'pozitie) '(10 0))
+(SETF (GET 'd 'pozitie) '(2 4))
+(SETF (GET 'e 'pozitie) '(7 4))
+(SETF (GET 'tinta 'pozitie) '(7 2))
+
+;;; functia de expandare.
+(DEFUN expand (cale)
+(LET ((cale-inversa (REVERSE cale)))
+     (MAPCAR #'REVERSE
+	     (REMOVE-IF #'(LAMBDA (cale-noua)
+				  (MEMBER (FIRST cale-noua) (REST cale-noua)))
+			(MAPCAR #'(LAMBDA (vecin) (CONS vecin cale-inversa))
+				(GET (FIRST cale-inversa) 'vecini))))
+))
+;; functii pentru cautarea in adâncime.
+(DEFUN adancime (start tinta)
+	(adanc (LIST (LIST start) tinta))
+(DEFUN adanc (coada-asteptare tinta)
+(DECLARE (SPECIAL tinta))
+(IF	(NULL coada-asteptare)
+	NIL
+	(IF (EQUAL tinta (FIRST (LAST (FIRST coada-asteptare))))
+		(FIRST coada-asteptare)
+		(adanc (APPEND	(expand (FIRST coada-asteptare))
+				(REST coada-asteptare))
+                       tinta))))
+
+;; functii pentru cautarea in latime.
+(DEFUN latime (start tinta)
+	(lat (LIST (LIST start)) tinta))
+(DEFUN lat (coada-asteptare tinta)
+(DECLARE (SPECIAL tinta))
+(IF	(NULL coada-asteptare)
+	NIL
+	(IF (EQUAL tinta (FIRST (LAST (FIRST coada-asteptare))))
+		(FIRST coada-asteptare)
+		(lat (APPEND	(REST coada-asteptare)
+				(expand (FIRST coada-asteptare)))
+	             tinta))))
+;; functie pentru cautare cale de cost minim
+(DEFUN cel-mai-scurt (start tinta)
+	(scurt (LIST (LIST start)) tinta))
+(DEFUN scurt (coada-asteptare tinta)
+(DECLARE (SPECIAL tinta))
+(IF	(NULL coada-asteptare)
+	NIL
+	(IF (EQUAL tinta (FIRST (LAST (FIRST coada-asteptare))))
+		(FIRST coada-asteptare)
+		(scurt	(sort	(APPEND
+					(expand (FIRST coada-asteptare))
+					(REST coada-asteptare))
+				#'(LAMBDA (x y)
+					(closerp (REVERSE x) (REVERSE y) tinta)))
+			tinta)
+	)
+))
+
+(DEFUN closerp (x y obiect)
+(< (distance2 (FIRST x) obiect)(distance2 (FIRST y) obiect)))
+
+(DEFUN distance2 (a b)
+(LET* (	(pa (GET a 'pozitie))
+	(pb (GET b 'pozitie)) )
+	(+	(square (- (FIRST pa) (FIRST pb)))
+		(square (- (FIRST (REST pa)) (FIRST (REST pb)))))
+))
+
+;; Folositi aici functia de sortare de la problema
+;; salturilor cangurului!

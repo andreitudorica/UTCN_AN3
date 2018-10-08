@@ -1,0 +1,384 @@
+LUCRAREA 11
+Prelucrãri simbolice
+
+1.	SCOPUL LUCRÃRII
+	Se urmareºte exemplificarea unor prelucrãri simbolice asupra diverselor expresii 
+matematice: translatãri prefix-infix-postfix, diferenþiere simbolicã, simplificãri etc.
+2.	CONSIDERAÞII TEORETICE
+	Fiind un limbaj orientat pe prelucrãri de expresii simbolice, Lisp-ul permite descrierea 
+concisã a unor prelucrãri matematice simbolice: translatãri prefix-infix-postfix, operaþii cu 
+polinoame, derivãri ºi integrãri formale (simbolice).
+2.1.	Translatãri ale expresiilor aritmetice
+
+2.1.1.	Translatarea din forma infix în forma prefix
+
+	Algoritmul lucreazã cu o stivã a operanzilor ºi o stivã a operatorilor drept parametri de 
+acumulare, care evolueazã astfel:
+p1 - iniþial  stiva operatori = vid  ºi  stiva operanzi = vid
+p2 - se executã paºii 3-5  câtã vreme  operatori != vid || expr != vid
+p3 - if  (FIRST expr) == operand  {
+		(PUSH (FIRST expr) operanzi);
+		expr = (REST expr);
+		goto p2;
+		}
+p4 - if  (FIRST expr) == operator || expr == vid
+	if  prioritate-operator > prioritate-operator-stivã  {
+		(PUSH (FIRST expr) operatori);
+		expr = (REST expr);
+		goto p2;
+		}  else  {
+		se creeazã un nou operand din operatorul curent de pe
+		stiva operatori ºi 2 operanzi luaþi de pe stiva operanzilor.
+		Se pune acest nou operand pe stiva operanzilor.
+		goto p2;
+		}
+p5.- if  (FIRST expr) == expresie  {
+		pune pe stiva operanzilor rezultatul aplicãrii recursive a
+		algoritmului pe (FIRST expr) ºi continuã invocarea algoritmului
+		pe restul expresiei.
+		goto p2;
+		}
+
+	În cadrul surselor, macrodefiniþia prefix ºi functia trans implementeazã translatarea 
+infix-prefix pornind de la algoritmul de mai sus.
+
+2.1.2. Translatarea prefix-infix
+
+	Translatarea prefix-infix se obþine printr-o parcurgere recursivã a arborelui în ordinea 
+subarbore-stâng, rãdãcinã, subarbore-drept. Acest algoritm este implementat prin funcþia infix-1.
+	Varianta cu eliminarea parantezelor redundante, funcþia prefix-to-infix, face o analizã 
+suplimentarã pentru a decide dacã concatenarea celor doi subarbori aferenþi unui operator se face 
+încadrând operanzii între paranteze sau nu. Funcþia tr aplicã sau nu un LIST asupra argumentelor 
+lui APPEND, care vor fi cele douã subexpresii aduse deja la forma infix ºi care vor fi operanzi ai 
+expresiei de translatat. Pentru aceasta se folosesc în plus funcþiile de gestiune a prioritãþii 
+operatorilor. Iatã câteva dintre regulile folosite:
+1) Dacã subarborii au în rãdãcinile lor operatori de prioritãþi mai mari decât a operatorului tatã, 
+atunci nu se introduc paranteze.
+              +
+            /    \         Rezultatul va fi a*b+c*2
+           *       *
+         /   \    /  \
+        a    b   c    2
+2) Dacã subarborii au în rãdãcinile lor operatori de prioritãþi mai mici decât a operatorul tatã, 
+atunci se introduc paranteze.
+             *
+           /    \          Rezultatul va fi (1+a)*(c-3)
+         +       -
+       /   \    /  \
+      1     a  c    3
+
+2.1.3.	Translatare infix-prefix folosind pattern matching
+
+	Functia infpre implementeazã într-o manierã mai elegantã decât cea clasicã translatarea 
+infix-prefix a expresiilor aritmetice.
+	Noua variantã nu mai face apel la cele douã stive (pentru operanzi ºi pentru operatori). 
+Apelurile recursive se fac pe operanzii stânga, respectiv dreapta ai expresiei curente, operanzi 
+obþinuþi prin potrivirea unuia dintre mai multe ºabloane posibile pe expresia curentã. Apelurile 
+recursive continuã pânã la frunzele arborelui întregii expresii iniþiale de translatat, translatãrile 
+realizându-se efectiv pe calea de revenire.
+	Prioritatea operatorilor este specificatã prin ordinea ºabloanelor corespunzãtoare lor în 
+clauzele COND. Întotdeauna se alege primul operator de prioritate minimã dintre operatorii 
+vizibili la nivel superficial, operatorii de prioritãþi mai mari rãmânând mai spre frunzele arborelui 
+subexpresiei curente.
+	Pãtrunderea în subexpresii, indiferent dacã ele sunt neatomice (subexpresii care apar în 
+paranteze în forma infix) sau sunt atomice, este asiguratã de cãtre a doua clauzã COND.
+2.2. Derivare simbolicã
+	Derivarea simbolicã este un proces banal dacã este aplicat pe o expresie matematicã 
+prefixatã. Funcþiile elementare de derivare pentru sumã, produs etc., printr-o aplicare recursivã pe 
+componente, furnizeazã imediat rezultatul dorit. Pe calea de revenire din recursivitate se pot face 
+simplificãri ale unor subexpresii, pe baza unor operatori elementari de simplificare.
+	Pentru derivatorul simbolic deriva, calculul decizional pentru stabilirea operatorului de 
+derivare care urmeazã a fi aplicat nu se face la nivelul programului, ci la nivelul datelor printr-o 
+listã de asociaþie. Implementarea se bazeazã pe viziunea unitarã în Lisp asupra datelor ºi funcþiilor, 
+programul de derivare fiind condus prin date. Aceastã alegere conduce la o scurtare substanþialã a 
+codului.
+2.3.	Aducerea unei expresii aritmetice la forma unei sume de produse
+	Operaþia de aducere a unei expresii aritmetice la o sumã de produse înseamnã eliminarea 
+parantezelor prin aplicarea repetatã a regulii distributivitãþii înmulþirii faþã de adunare ºi scãdere:
+	a*(b+c) <=> a*b+a*c.
+	Pentru expresii scrise în forma prefixatã, funcþia transf face aceastã transformare 
+împreuna cu simplificãrile posibile de genul celor întâlnite la derivatorul simbolic prezentat 
+anterior. Operatorii de simplificare sunt aleºi din lista de asociaþie oprsimp, deci, folosim, ca în 
+cazul derivatorului simbolic, programarea condusã prin date.
+3.	DESFÃªURAREA LUCRÃRII
+	1) Se va parcurge ºi discuta codul sursã pentru aceastã lucrare.
+
+	2) Efectuaþi o trasare manualã a execuþiei funcþiilor prefix ºi trans (cu urmãrirea 
+evoluþiei stivelor operanzi ºi operatori ºi a restului expresiei de translatat) pentru translatarea în 
+prefix a expresiei a*(1+b)^c, observând modul în care funcþia transf implementeazã algoritmul 
+descris în lucrare.
+
+	3) Trasaþi ºi eventual inspectaþi execuþia funcþiilor pentru prelucrãri simbolice pe diverse 
+expresii.
+4.	ÎNTREBÃRI ªI PROBLEME
+	1) Sã se completeze lista de asociaþie pentru funcþia deriva (dicþionarul care conduce 
+derivarea) cu funcþiile elementare de derivare corespunzãtoare operatorilor ridicare la putere, 
+sinus ºi cosinus.
+
+	2) Concepeþi un derivator simbolic în care întâi sã se obþinã întreaga formulã derivatã ºi 
+nesimplificatã, iar apoi, pe aceastã expresie sã se facã toate simplificãrile (care, pentru derivatorul 
+din lucrare se fãceau imediat dupã derivarea unei subexpresii).
+
+	3) Scrieþi o funcþie pentru expandarea operatorului "+" cu n operanzi în operaþii de 
+adunare binarã.
+
+	4) Scrieþi o funcþie care transformã o expresie booleana scrisã în forma prefixatã 
+într-una echivalenta, dar formatã doar cu operatori NAND, adicã reprezentând o implementare a 
+expresiei date (un circuit combinaþional) doar cu porþi ªI-NU.
+
+	5) Modificaþi funcþia de translatare infix-prefix, astfel încât sã nu mai fie necesare 
+testãrile is-operator ºi is-operand.
+
+	6) Concepeþi ºi implementaþi un algoritm de translatare infix-postfix a expresiilor 
+aritmetice.
+
+	7) Scrieþi o funcþie de derivare simbolica folosind pattern matching.
+
+	8) Implementaþi funcþii aritmetice pe numere naturale ºi întregi privind cifrele zecimale 
+ca pe niºte simboluri; implementaþi, de asemenea, funcþii aritmetice pe numere raþionale (fracþii cu 
+numãrãtor ºi numitor întreg), privind aceste numere raþionale ca pe niºte perechi de întregi.
+
+	9) Scrieþi o funcþie care gãseºte c.m.m.d.c. al douã polinoame.
+5.	SURSE
+;; Functii gestiune prioritati operatori
+(DEFVAR prior '((+ 1) (- 1) (* 2) (\/ 2) (^ 3)))
+(DEFMACRO is-operator (s)
+	`(MEMBER ,s '(+ - * \/ ^)))
+(DEFUN is-operand (s)
+(COND	((NULL s) NIL)
+	((ATOM s) (NOT (is-operator s)))
+	(T)
+))
+(DEFMACRO prioritate (s) `(priorit ,s ,prior))
+(DEFUN priorit (s l)
+(COND	((NULL l) NIL)
+	((EQUAL s (CAAR l)) (FIRST (LAST (FIRST l))))
+	(T (priorit s (REST l))
+))
+;;; Translatare infix-prefix
+(DEFMACRO prefix (expresie)
+	`(trans NIL NIL ,expresie))
+(DEFUN trans (operanzi operatori lista)
+(COND ((NULL lista)
+	(COND	((NULL operatori)
+			(COND	((NULL operanzi) NIL)
+				((NULL (REST operanzi))
+					(FIRST operanzi))
+				(T 'eroare)
+		 	))
+		((< (LENGTH operanzi) 2) 'eroare)
+		(T (trans (CONS (LIST (FIRST operatori)
+				      (SECOND operanzi)
+				      (FIRST operanzi))
+				(REST (REST operanzi)))
+			  (REST operatori)
+			  NIL))))
+      ((ATOM lista) lista)
+      ((is-operand (FIRST lista))
+	(trans	(CONS (trans NIL NIL (FIRST lista)) operanzi)
+		operatori
+		(REST lista)))
+      ((is-operator (FIRST lista))
+	(COND	((OR	(ENDP operatori)
+			(> (prioritate (FIRST lista))
+			   (prioritate (FIRST operatori))))
+				(trans	operanzi
+					(CONS	(FIRST lista)
+						operatori)
+					(REST lista)))
+		((< (LENGTH operanzi) 2) 'eroare)
+		(T (trans	(CONS	(LIST	(FIRST operatori)
+						(SECOND operanzi)
+						(FIRST operanzi))
+					(REST (REST operanzi)))
+				(REST operatori)
+				lista))))
+      (T 'eroare)
+))
+
+;;; Translatare prefix-infix
+;; Varianta fara eliminare paranteze redundante
+(DEFUN infix-1 (expr)
+(COND	((ATOM expr) expr)
+	((LIST	(infix-1 (SECOND expr))
+		(FIRST expr)
+		(infix-1 (THIRD expr))
+	))
+))
+
+;; Varianta cu eliminarea parantezelor redundante
+(DEFUN prefix-to-infix (expr)
+(COND	((ATOM expr) expr)
+	(T (APPEND
+		(tr	(prefix-to-infix (SECOND expr))
+			(oper (SECOND expr))
+			(oper expr)
+			1)
+		(LIST (oper expr))
+		(tr	(prefix-to-infix (THIRD expr))
+			(oper (THIRD expr))
+			(oper expr)
+			2)
+	))
+))
+(DEFMACRO oper (expr-prefix)
+`(IF	(NOT (ATOM ,expr-prefix))
+	(FIRST ,expr-prefix)
+))
+(DEFUN tr (expr-infix oper-expr oper-super pozitie)
+(COND	((ATOM expr-infix) (LIST expr-infix))
+	((> (prioritate oper-expr)
+	    (prioritate oper-super))
+		expr-infix)
+	((AND	(= (prioritate oper-expr)
+		   (prioritate oper-super))
+		(OR (MEMBER oper-super '(+ *))
+		    (= pozitie 1)))
+					expr-infix)
+	(T (LIST expr-infix))
+))
+
+
+
+
+;;; Translatare infix-prefix folosind pattern matching
+
+(DEFMACRO unplus (simb) `(EQ ,simb '+))
+(DEFUN infpre (e)
+(LET (lista)
+(COND	((ATOM e) e)
+	((SETQ lista (match '((> v)) e NIL))
+		(infpre (match-value 'v lista)))
+	((SETQ lista
+		(match '((+ l) (RESTRICT ? unplus) (+ r)) e NIL))
+	`(+	,(infpre (match-value 'l lista))
+		,(infpre (match-value 'r lista))))
+	((SETQ lista (match '((+ l) - (+ r)) e NIL))
+	`(-	,(infpre (match-value 'l lista))
+		,(infpre (match-value 'r lista))))
+	((SETQ lista (match '((+ l) * (+ r)) e NIL))
+	`(*	,(infpre (match-value 'l lista))
+		,(infpre (match-value 'r lista))))
+	((SETQ lista (match '((+ l) / (+ r)) e NIL))
+	`(/	,(infpre (match-value 'l lista))
+		,(infpre (match-value 'r lista))))
+	((SETQ lista (match '((+ l) ^ (+ r)) e NIL))
+	`(EXP	,(infpre (match-value 'l lista))
+		,(infpre (match-value 'r lista))))
+	((SETQ lista (match '(- (+ r)) e NIL))
+	`(- ,(infpre (match-value 'r lista))))
+	(T e)
+)))
+
+;;; Functii pentru derivarea simbolica a unor expresii matematice
+;; Expresiile au variabila x si sunt reprezentate in prefix.
+;; oprderiv asociaza fiecarui operator matematic
+;; un operator de derivare.
+(DEFVAR oprderiv '((+ . d+) (- . d-) (* . d*) (: . d:)))
+;; Functia deriva deriveaza o expresie in x, aplicand operatorul
+;; de derivare asociat operatorului de pe prima pozitie a expresiei.
+(DEFUN deriva (expr)
+(COND	((EQ expr 'X) 1)
+	((ATOM expr) 0)
+	(T (APPLY	(CDR (ASSOC (FIRST expr) oprderiv))
+			(REST expr)))
+))
+
+
+
+;; Functiile de derivare
+(DEFMACRO d+ (o1 o2)
+`(simpl+ (deriva ,o1) (deriva ,o2)))
+(DEFMACRO d- (o1 o2)
+`(simpl- (deriva ,o1) (deriva ,o2)))
+(DEFMACRO d* (o1 o2)
+`(simpl+ (simpl* (deriva ,o1) ,o2) (simpl* ,o1 (deriva ,o2))))
+(DEFMACRO d: (o1 o2)
+`(simpl: (simpl- (simpl* (deriva ,o1) ,o2)
+		 (simpl* ,o1 (deriva ,o2)))
+	 (simpl* o2 o2)))
+;; Functii de simplificare in cazuri particulare
+(DEFUN simpl+ (o1 o2)
+(COND	((EQ o1 0) o2)
+	((EQ o2 0) o1)
+	((AND (NUMBERP o1) (NUMBERP o2)) (+ o1 o2))
+	(T (LIST '+ o1 o2))
+))
+(DEFUN simpl- (o1 o2)
+(COND	((AND (NUMBERP o2)(= o2 0)) o1)
+	((AND (NUMBERP o1) (NUMBERP o2)) (- o1 o2))
+	(T (LIST '- o1 o2))
+))
+(DEFUN simpl* (o1 o2)
+(COND	((OR	(AND (NUMBERP o1) (= o1 0))
+		(AND (NUMBERP o2) (= o2 0)))
+			0)
+	((AND (NUMBERP o1)(= o1 1)) o2)
+	((AND (NUMBERP o2)(= o2 1)) o1)
+	((AND (NUMBERP o1) (NUMBERP o2)) (* o1 o2))
+	(T (LIST '* o1 o2))
+))
+(DEFUN simpl: (o1 o2)
+(COND	((AND (NUMBERP o1)(= o1 0)) 0)
+	((AND (NUMBERP o2)(= o2 1)) o1)
+	((AND (NUMBERP o1) (NUMBERP o2)) (/ o1 o2))
+	(T (LIST ': o1 o2))
+))
+
+;; Expresii pentru testarea functiilor de derivare
+(SETQ e1 '(+ x 3) e2 '(- (* 3 x) x) e3 '(+ (* x 2 ) 3 ))
+(SETQ e4 '(* x (* x x))  e5 '(: (+ x 2) x))
+
+
+;;; Aducerea unei expresii aritmetice la forma
+;;; unei sume de produse, prin aplicarea distributivitatii inmultirii 
+;;; fata de adunare si scadere: a*(b+c) <=> a*b+a*c.
+;;; Expresiile sunt in forma prefixata.
+(DEFVAR oprsimp
+'((+ . simpl+) (- . simpl-) (* . simpl*) (: . simpl:)))
+(DEFUN transf (expr)
+(COND	((ATOM expr) expr)
+	((EQ (FIRST expr) '*)
+		(COND ((AND	(LISTP (SECOND expr))
+				(MEMBER (FIRST (SECOND expr)) '(+ -)))
+			(FUNCALL
+			   (CDR (ASSOC (FIRST (SECOND expr)) oprsimp))
+			   (transf (LIST '*	(SECOND (SECOND expr))
+						(THIRD expr)))
+			   (transf (LIST '*	(THIRD (SECOND expr))
+						(THIRD expr)))))
+		      ((AND	(LISTP (THIRD expr))
+				(MEMBER (FIRST (THIRD expr)) '(+ -)))
+			(FUNCALL
+			   (CDR (ASSOC (FIRST (THIRD expr)) oprsimp))
+			   (transf (LIST '*	(SECOND expr)
+						(SECOND (THIRD expr))))
+			   (transf (LIST '*	(SECOND expr)
+						(THIRD (THIRD expr))))))
+		      (T (LET	((e1 (transf (SECOND expr)))
+				 (e2 (transf (THIRD expr))))
+				(IF (AND	(EQUAL e1 (SECOND expr))
+						(EQUAL e2 (THIRD expr)))
+					(simpl* e1 e2)
+					(transf (simpl* e1 e2)))))))
+	(T (FUNCALL	(CDR (ASSOC (FIRST expr) oprsimp))
+			(transf (SECOND expr))
+			(transf (THIRD expr))))
+))
+
+;; Expresii pentru testarea lui transf
+(SETQ	t1 '(* (+ a 1)(- b c))
+	t2 '(+	(* (* a (- b c))
+		   (+ c (+ d e)))
+		(* (- 5 7) (+ a 4)))
+)
+ 
+
+ 
+ 
+
+
+
+101
+
+

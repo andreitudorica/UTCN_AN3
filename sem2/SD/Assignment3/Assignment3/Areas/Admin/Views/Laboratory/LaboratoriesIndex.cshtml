@@ -1,0 +1,65 @@
+﻿@{
+    ViewBag.Title = "Index";
+}
+
+@model PagedList.IPagedList<Assignment3.Models.LaboratoryModel>
+@using PagedList.Mvc;
+
+<link href="~/Content/PagedList.css" rel="stylesheet" type="text/css" />
+
+@{
+    ViewBag.Title = "Laboratories";
+}
+
+<h2>Laboratories</h2>
+
+<p>
+    @Html.ActionLink("Create New", "LaboratoriesCreate")
+</p>
+
+<table class="table">
+    <tr>
+        <th>
+            Title
+        </th>
+        <th>
+            Curricula
+        </th>
+        <th>
+            Date
+        </th>
+        <th>
+            Number
+        </th>
+        <th></th>
+    </tr>
+
+
+    @foreach (var item in Model)
+    {
+    <tr>
+        <td>
+            @Html.DisplayFor(modelItem => item.Title)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Curricula)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.LabDate)
+        </td>
+        <td>
+            @Html.DisplayFor(modelItem => item.Number)
+        </td>
+        <td>
+            @Html.ActionLink("Edit", "LaboratoriesEdit", new { id = item.ID }) |
+            @Html.ActionLink("Delete", "LaboratoriesDelete", new { id = item.ID })
+        </td>
+    </tr>
+    }
+
+</table>
+<br />
+Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+
+@Html.PagedListPager(Model, page => Url.Action("Index",
+    new { page, sortOrder = ViewBag.CurrentSort, currentFilter = ViewBag.CurrentFilter }))

@@ -1,0 +1,41 @@
+﻿@{
+    ViewBag.Title = "Index";
+}
+@*@{
+    Layout = "~/Areas/Admin/Views/Shared/AdminMaster.cshtml";
+}*@
+
+@model PagedList.IPagedList<Assignment3.Models.UserModel>
+@using PagedList.Mvc;
+<link href="~/Content/PagedList.css" rel="stylesheet" type="text/css" />
+
+@{
+    ViewBag.Title = "Admin";
+}
+
+<h2>Admin dashboard</h2>
+
+<table class="table">
+
+
+    <tr>
+        <td>
+
+            @Html.ActionLink("Students", "StudentsIndex", "User")
+        </td>
+        <td>
+            @Html.ActionLink("Laboratories", "LaboratoriesIndex", "Laboratory")
+        </td>
+        <td>
+            @Html.ActionLink("Assignments", "AssignmentsIndex", "Assignment")
+        </td>
+        <td>
+            @Html.ActionLink("Submissions", "SubmissionsIndex", "Submission")
+        </td>
+        <td>
+            @Html.ActionLink("Attendance", "AttendancesIndex", "Attendance")
+        </td>
+    </tr>
+
+</table>
+<br />

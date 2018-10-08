@@ -1,0 +1,356 @@
+LUCRAREA 1
+Obiecte Lisp. Evaluarea formelor.
+Funcþii Lisp primitive
+
+1.	SCOPUL LUCRÃRII
+	Lucrarea are ca scop prezentarea principalelor elemente ale limbajului Lisp. De 
+asemenea este prezentat modul în care este evaluatã o expresie Lisp precum ºi un numãr de 
+funcþii predefinite de bazã.
+2.	CONSIDERAÞII TEORETICE
+2.1.	Atomi ºi liste. Tipuri de obiecte.
+	Cele doua elemente de bazã ale limbajului Lisp sunt atomii ºi listele. Atomii reprezintã 
+obiecte indivizibile ºi se împart în mai multe clase disjuncte:
+? atomi simbolici	- exemple: ALFA, A, b, b19, +, p3*5
+? atomi numerici	- exemple: 7, 3.14, -98
+? atomi ºiruri de caractere	- exemple: "alfa","un atom"
+Atomii simbolici joaca rolul variabilelor din limbajele de programare clasice. Aceasta înseamnã cã 
+ei pot fi legaþi în mod dinamic la o valoare oarecare. Ei pot avea ca valoare orice alt obiect Lisp 
+(de exemplu un numãr, un alt atom simbolic, o lista, etc.). În orice sistem Lisp existã o serie de 
+atomi simbolici predefiniþi, unii dintre aceºtia desemnând funcþii primitive (exemple: SET, CONS 
+etc.) alþii desemnând variabile predefinite (exemple: *PRINT-LENGTH*, *PRINT-LEVEL* 
+etc.) puse la îndemânã de sistemul Lisp respectiv.
+	Listele sunt delimitate de paranteze ºi pot avea ca elemente orice alt tip de obiect Lisp. 
+Aceasta înseamnã cã o listã poate avea ca elemente atomi sau alte liste, încuibãrirea fiind permisã 
+pe oricâte nivele. Exemple:
+	(O "L I S T A" cu 5. atomi)
+	( UN_atom (2 1) (( alta lista )) )
+	()
+	Lista vidã se simbolizeazã prin '()' sau 'NIL'. Este singurul element al limbajului Lisp 
+care este ºi listã ºi atom în acelaºi timp! Listele nu au dimensiune fixã, ele pot creºte sau 
+descreºte în mod dinamic.
+	În Common Lisp tipurile obiectelor sunt aranjate într-o ierarhie. De exemplu tipul LIST 
+are ca subtip tipul CONS. Tipul ATOM are ca subtipuri tipurile NUMBER, SYMBOL si 
+STRING. Tipul NUMBER are ca subtipuri tipurile INTEGER ºi FLOAT. Tipul INTEGER are 
+ca subtip tipul CHARACTER. În afarã de acestea mai existã tipuri ca ARRAY, STRUCTURE, 
+HASH_TABLE, etc.
+2.2.	Evaluarea formelor
+	Interpretorul Lisp executã la infinit o buclã în care citeºte o expresie Lisp, încearcã sã o 
+evalueze ºi, în caz de succes, afiºeazã rezultatul evaluãrii, altfel un mesaj de eroare. Prin "formã" 
+vom înþelege orice expresie Lisp "bine formatã", în sensul cã ea poate fi evaluatã cu succes de 
+cãtre interpretor. Orice atom este o formã; o listã trebuie însã sã respecte anumite restricþii pentru 
+a fi "formã". Atomii se evalueazã dupã cum urmeazã:
+? atomii numerici - la numãrul pe care îl reprezintã
+? atomii ºir de caractere - la ºirul de caractere
+? atomii simbolici - la valoarea la care sunt legaþi în acel moment.
+Încercarea de evalua un atom simbolic care nu a fost legat la nici o valoare produce eroare 
+(legarea unui simbol la o anumitã valoare se face cu funcþia de sistem SETQ).
+	În exemplele de mai jos "*" reprezintã prompterul interpretorului.
+	*7	| *"ha ha ha"	| *alfa
+	7	| "ha ha ha"	| ERROR: Unbound variable: ALFA
+	*T	| *NIL		| *(SETQ alfa 10)			| *alfa
+	T	| NIL		| 10					| 10
+	Dupã cum se observã din exemplele de mai sus, atomii NIL ºi T sunt predefiniþi ºi sunt 
+legaþi la ei înºiºi. Orice încercare de schimbare a valorii lor este semnalatã ca eroare.
+	Pentru ca o listã sã fie o formã trebuie ca primul element sã desemneze o funcþie, iar 
+celelalte elemente sã fie argumentele aºteptate de funcþia respectivã. În Lisp întotdeauna numele 
+funcþiei stã în faþa argumentelor, iar între funcþie ºi argumentele sale nu se utilizeazã paranteze! 
+Expresiile de mai jos sunt corecte:
+	*(+ 2 3 4)	| *(MAX 2 1 8 53 17)	| *(LENGTH '(a b c d))
+	9		| 53			| 4
+Exemple de expresii ce nu sunt forme:	(2 + 3), (MAX (2 3 1))
+	În general procesul de evaluare a unei funcþii are loc în douã etape:
+1. întâi se evalueazã argumentele funcþiei
+2. asupra argumentelor evaluate se aplicã funcþia respectivã.
+Majoritatea funcþiilor se comportã în acest mod (exemple: SET, CONS, CAR, LIST, APPEND, 
++ etc.). Existã însã ºi excepþii, una dintre acestea fiind chiar funcþia SETQ, care nu-ºi evalueazã 
+decât al doilea argument. Caracterul apostrof "'" aflat în faþa unei expresii opreºte evaluarea acelei 
+expresii. Exemple:
+	*(SETQ alfa 345)	| *alfa	| *'(2 + 3)
+	345			| 345		| (2 + 3)
+	*'alfa			| *(+ alfa 5)	| *(2 + 3)
+	alfa			| 350		| ERROR: Bad function: 2
+Întrucât înainte de aplicarea funcþiei se evalueazã argumentele, care pot fi alte forme ce implicã 
+alte aplicãri de funcþii, procesul de evaluare este recursiv, oferind posibilitatea compunerii 
+funcþiilor. Exemplu:
+*(+ 2 (- 5 1) 3)	| *(SETQ a (+ 1 (SETQ b 2)))	| *(+ a b)
+9			| 3				| 5
+2.3.	Funcþii Lisp primitive
+	În afarã de valoare ºi independent de aceasta, oricãrui simbol poate sã i se asocieze o 
+funcþie definitã de utilizator. Standardul Common Lisp pune însã la dispoziþie un numãr 
+impresionant de mare de funcþii predefinite ce pot fi utilizate direct sau în definirea de noi funcþii. 
+În Lisp toate funcþiile întorc o valoare. Pentru a fi apelate, simbolul ce desemneazã funcþia trebuie 
+sã se afle pe prima poziþie a unei liste (forme). Numele de funcþii sunt simpli atomi simbolici - de 
+aceea, evaluarea unui simbol ce reprezintã numele unei funcþii nu implicã invocarea funcþiei, ci 
+simpla întoarcere a eventualei valori asociate. Prezentãm în continuare câteva dintre funcþiile mai 
+importante:
+
+2.3.1. Funcþii aritmetice ºi logice
+
+	+, -, *, /, MIN, MAX, TRUNCATE, LOGAND, LOGIOR, LOGNOT, LOGXOR 
+desemneazã funcþiile aritmetice ºi logice (pe biþi) uzuale. Cu excepþia lui TRUNCATE ºi 
+LOGNOT, ele pot avea oricâte argumente. Exemple:
+	*(* 1 2 3 4)	| *(- 10 1 2 3)	| *(LOGIOR 2 4 8)
+	24		| 4		| 14
+
+2.3.2. Selectori
+
+	Limbajul Lisp oferã puternice facilitãþi de prelucrare a listelor. Principalele primitive care 
+selecteazã elemente dintr-o listã sunt:
+? FIRST (sau CAR)	- primul element al listei;
+? REST (sau CDR)	- lista obþinutã dacã se eliminã primul element;
+? SECOND (sau CADR), THIRD ( sau CADDR)	- al doilea, al treilea element;
+? simbolurile cu structura: "C" urmat de un numãr oarecare de "A" ºi/sau "D" ºi terminate cu 
+"R" desemneazã o prescurtare a compunerilor de CAR si CDR, de exemplu: (CDADR 
+<expr> ) <=> (CDR (CAR (CDR <expr> ))). Nu se pot compune în acest mod mai mult de 
+trei funcþii.
+? LAST	- întoarce lista ce conþine doar ultimul element al unei liste;
+? NTH	- întoarce elementul al n-lea (primul element are indicele 0);
+? NTHCDR	- întoarce sublista ce începe la indicele n.
+Exemple:
+*(FIRST '(a b c))	| *(FIRST (REST '(a b)))	| *(NTH 2 '(a b c))
+A			| B				| C
+*(REST '(a b c))	| *(CADR '(a b c))		| *( LAST '(a b c d))
+(B C)			| B				| (D)
+
+2.3.3. Constructori
+
+	Listele reprezintã structuri de date dinamice. Funcþiile din aceastã categorie construiesc 
+noi liste sau adaugã noi elemente la liste existente. Aceste operaþii sunt principalele consumatoare 
+de memorie în Lisp.
+Observaþie: Aceste operaþii presupun în limbajele de programare procedurale clasice folosirea 
+unor funcþii ca "new" în Pascal, sau "malloc" în C. Alocarea ºi eliberarea zonelor de memorie este 
+o operaþiune transparentã în Lisp, sistemul având grijã sã elibereze zonele ce nu mai sunt referite 
+printr-un mecanism numit "garbage collector". Principalii constructori sunt:
+? CONS	- aºteaptã 2 argumente. Dacã al doilea argument se evalueazã la o listã, atunci 
+adaugã primul argument ca prim element al listei ºi întoarce noua listã.
+? APPEND	- aºteaptã un numãr nedefinit de liste, întoarce o listã care rezultã prin 
+concatenarea lor (se creeazã copii ale primelor n-1 argumente).
+? LIST	- aºteaptã un numãr nedefinit de obiecte Lisp, construieºte o listã ce are ca 
+elemente argumentele primite.
+? REVERSE	- întoarce o listã cu elementele listei argument luate în ordine inversã.
+? REMOVE	- aºteaptã douã argumente, dintre care al doilea trebuie sã fie listã. Întoarce o 
+copie a listei din care sunt eliminate apariþiile la nivel superficial ale primului argument.
+? SUBST	- aºteaptã 3 argumente, al treilea trebuind sã fie listã. Întoarce o copie a listei 
+în care toate apariþiile celui de-al doilea argument (de pe orice nivel de imbricare) sunt 
+înlocuite cu primul argument.
+Exemple:
+*(SETQ a '(1 2))	| *(APPEND a '(3 4) a)		| *(REVERSE '(1 2 3))
+(1 2)			| (1 2 3 4 1 2)			| (3 2 1)
+*(CONS 0 a)		| *(LIST a '(3 4) a)		| *(LIST 'a 'b 'c)
+(0 1 2)			| ((1 2) (3 4) (1 2))		| (A B C)
+*a			| *(REMOVE 1 '(1 (1) a))	| *(CONS '(a) '(b c))
+(1 2)			| ((1) A)			| ((A) B C)
+
+2.3.4. Legare
+
+	Principalele primitive prin intermediul cãrora se poate lega o valoare la un simbol sunt 
+SETQ, SETF ºi SET. Ele aºteaptã douã argumente, cel de-al doilea fiind valoarea la care se face 
+legarea. Al doilea parametru se evalueazã întotdeauna, valoarea rezultatã fiind ºi cea întoarsã de 
+formele SET. Cele 3 funcþii diferã între ele prin modul în care trateazã primul parametru:
+? SETQ	- primul parametru nu se evalueazã ºi el trebuie sã fie un atom simbolic, altul 
+decât T sau NIL. Valoarea se leagã la respectivul simbol.
+? SET		- (legare indirectã) primul parametru se evalueazã, în urma evaluãrii trebuind 
+sã se întoarcã un atom simbolic, la care se va face atribuirea.
+? SETF	- (legare prin referinþã) este asemãnãtoare cu SETQ, în sensul cã primul 
+parametru nu se evalueazã, dar este mult mai generalã. SETF este o funcþie genericã. Ea 
+"ºtie" sã schimbe valoarea oricãrui câmp ce poate fi referit. Primul argument trebuie sã 
+reprezinte o formã care, daca s-ar evalua, ar întoarce valoarea unui anumit câmp. 
+Respectivul câmp este cel setat de SETF. Exemple:
+*(SETF alfa 'a)	      	| *(SET alfa 'beta)	| *(SET (CAR '(a b)) 5)
+a			            | beta				| 5
+*alfa					| *alfa				| *a
+a						| a					| 5
+*a						| *a				| *(SET (CAR '(1 2)) 5)
+ERR: Unbound var: a		| beta				| ERR: SYMBOL expected
+
+2.3.5. Predicate
+
+	Simbolurilor T ºi NIL li se asociazã în Lisp semnificaþia de TRUE, respectiv FALSE. 
+Unele predicate în loc de T întorc o expresie oarecare diferitã de NIL (exemple: MEMBER, OR, 
+AND). Existã diverse clase de predicate: ce testeazã relaþii între numere, ce testeazã relaþii între 
+ºiruri de caractere, ce testeazã identitatea sau izomorfismul structural al obiectelor, ce testeazã 
+apartenenþa unei expresii la o listã, ce testeazã apartenenþa unui obiect Lisp la un tip sau subtip. 
+Le vom prezenta în aceastã ordine.
+? ZEROP	- are argumentul valoarea zero ?
+? PLUSP	- este argumentul un numãr pozitiv ?
+? MINUSP	- este argumentul un numãr negativ ?
+? EVENP	- este argumentul un numãr par ?
+? =		- sunt toate argumentele egale între ele ?
+? >		- sunt argumentele aranjate în ordine descrescãtoare ?
+? <		- sunt argumentele aranjate în ordine crescãtoare ?
+Exemple:
+	*(< 1 3 5 7)	| *(= 1.0 1)	| *(> 5 2 3)
+	T				| T				| NIL
+? STRING-EQUAL (sau STRING=)	- sunt cele doua ºiruri de caractere egale, formate 
+din aceleaºi caractere, în aceeaºi ordine? (Pentru testarea identitãþii se foloseºte EQ sau 
+EQL.)
+? STRING-LESSP (STRING<)	- dacã primul ºir de caractere este lexicografic mai mic 
+decât al doilea, se întoarce indicele caracterului din primul ºir care este mai mic decât cel 
+corespondent din al doilea, altfel se întoarce NIL.
+? CHAR-LESSP	- sunt argumentele caractere în ordine alfabetica?
+? ALPHA-CHAR-P	- este argumentul caracter alfa?
+? CHAR-EQUAL	- reprezintã toate argumentele aceeaºi literã (literele mari sau mici 
+sunt tratate identic)?
+
+
+	*(STRING= "abc" "abc")	| *(STRING< "aaa" "aab")
+	T						| 2
+	
+	
+? ENDP (sau NULL)	- întoarce T daca argumentul e o listã vidã, NIL în caz contrar.
+? EQ			- întoarce T dacã cele douã argumente desemneazã acelaºi obiect 
+Lisp. Poate fi aplicat pe orice tip de argumente.
+? EQUAL		- întoarce T dacã cele douã argumente desemneazã obiecte cu 
+aceeaºi structurã. Douã argumente care sunt "egale" conform lui EQ vor fi egale ºi conform 
+lui EQUAL, reciproca nefiind adevãratã. 
+
+Exemple:
+*(ENDP ())			| *(EQ 'a 'b)			| *(EQUAL '(a b) '(a b))
+T					| NIL					| T
+*(NULL '(a b))		| *(EQ '(a b) '(a b))	| *(EQUAL 1 1.0)
+NIL					| NIL					| NIL
+
+
+? MEMBER	- testeazã dacã primul argument este element în lista reprezentatã de cel de-al 
+doilea argument. În caz afirmativ se întoarce sublista ce începe cu acel element, altfel se 
+întoarce NIL. Testarea egalitãþii se face implicit cu EQ, dar se poate specifica orice predicat 
+binar cu ajutorul cuvântului cheie :TEST. Cãutarea se face doar la nivel superficial. 
+Exemple:
+*(MEMBER 'MOTHER '(TELL ME MORE ABOUT YOUR MOTHER PLEASE))
+(MOTHER PLEASE)
+*(MEMBER 'MOTHER '((FATHER SON)(MOTHER DAUGHTER)))
+NIL
+*(MEMBER '(A B) '((A B) (C D)) )
+NIL
+*(MEMBER '(A B) '((A B) (C D)) :TEST #'EQUAL)
+((A B) (C D))
+? TYPEP	- testeazã apartenenþa obiectului reprezentat de primul argument la tipul 
+reprezentat de al doilea argument.	
+Corespunzãtor cu fiecare tip de date existent în Common Lisp sistemul defineºte implicit niºte 
+predicate ce testeazã apartenenþa unui obiect la acel tip. Cu excepþia predicatului ATOM, celelalte 
+sunt formate prin adãugarea literei "P" la simbolul ce reprezintã numele tipului (exemple: 
+SYMBOLP, NUMBERP, LISTP, STRINGP, CHARACTERP, INTEGERP, FLOATP, 
+ARRAYP, CONSP). Exemple:
+	*(ATOM 'ALFA)	| *(ATOM '(a b))	| *(CHARACTERP #\a)
+	T				| NIL				| T
+	*(ATOM ())		| *(SYMBOLP 2)		| *(TYPEP 'ALFA 'SYMBOL)
+	T				| NIL				| T
+	Predicatele pot fi combinate cu ajutorul funcþiilor AND, OR, NOT. Datoritã faptului cã 
+AND ºi OR nu-ºi evalueazã toate argumentele, ci doar atâtea câte sunt necesare pentru 
+deducerea valorii de adevãr, ele mai sunt folosite ºi pentru controlul evaluãrii.
+
+2.3.6. Funcþii de intrare/ieºire
+
+? TERPRI	- trimite un caracter new-line la ieºirea standard
+? PRINT, PRIN1, PRINC	- scriu în fiºierul standard de ieºire valoarea argumentului. 
+Spre deosebire de celelalte douã, PRINT trimite un caracter new-line înaintea scrierii. Spre 
+deosebire de celelalte douã, PRINC nu scrie ºi caracterele ghilimele (") la tipãrirea 
+argumentelor de tip STRING
+? PPRINT	- scriere indentatã, "frumoasã", a argumentului
+? READ		- asteaptã introducerea de la consolã a unui obiect Lisp (atom, listã, 
+formã, vector, etc.), pe care îl întoarce neevaluat.
+? (FORMAT <canal> <format> )	- folositã pentru scriere cu format conform sintaxei: dupã al 
+doilea argument trebuie sã urmeze atâtea argumente câte sunt specificate în format. <canal> 
+specificã locul unde se face scrierea (T specificã ieºirea standard, NIL indicã scrierea într-un 
+ºir de caractere). Dintre specificatorii de format - introduºi de caracterul "~" - amintim:
+	~A - scrie argumentul urmãtor care poate fi orice obiect
+	~D - scrie argumentul urmãtor care trebuie sã fie numãr
+	~% - trece la linie nouã
+Exemple:
+*(PRINT '(PLEASE PRINT THIS))	;trece la linie nouã
+(PLEASE PRINT THIS)			;efectul funcþiei PRINT
+(PLEASE PRINT THIS)			;valoare întoarsã
+*(TERPRI)
+		;efect lateral TERPRI
+NIL		;valoare intoarsa
+*(SETF input (READ))	; se introduce: (table chair (pen))
+(TABLE CHAIR (PEN))
+*input
+(TABLE CHAIR (PEN))
+*(FORMAT T "~%The list ~A has ~D elements."
+	  input (LENGTH input) )
+The list (TABLE CHAIR (PEN)) has 3 elements.
+3.	DESFÃªURAREA LUCRÃRII
+	1. Se vor testa toate funcþiile prezentate în lucrare.
+
+	2. Sã se indice tipul elementelor de mai jos ºi apoi sã se verifice cu ajutorul predicatelor: 
+ATOM, SYMBOLP, STRINGP, NUMBERP, LISTP, CHARACTERP.
+	a) CAR		b) Un_cuvant*ceva?	c) oare ce9
+	d) 9ec		e) "a a a"		f) ()
+	g) >		h) (a s (d k))		i) ( NIL () )
+	j) (((j)))	k) 97			l) #\A
+
+	3. Sã se evalueze manual formele de mai jos ºi apoi sã se verifice:
+(ATOM NIL)	(LISTP NIL)		(SYMBOLP NIL)	(NULL NIL)
+(ATOM '(a b))	(LISTP '(a b))		(NULL '(a b))	(NULL (REST '(b))
+(ATOM 'alfa)	(LISTP 'alfa)		(SYMBOLP 'alfa)
+(ATOM "a a")	(SYMBOLP "a a")		(TYPEP 1.0 'INTEGER)
+
+
+
+	4. Sã se scrie în Lisp formele ce calculeazã expresiile :
+	a) 2 + 3 + (20 - 5 * 6 / 2) / 5
+	b) (4 - 2 + 3 * 5 / 7 )* 125
+	c) 11 - 3 - (43 + (15 - 11)*2 +1)
+
+	5. Sã se evalueze manual ºi apoi cu ajutorul interpretorului formele:
+(SETF a (+ 3 2 5))	| a
+(+ a (* 3 2 6))		| (SETF a ( SETF b (+ a b)))
+(SETF b (+ 10 a))	| a				| b
+
+(CONS 'a '(b c))		| (CAR '(a b c))
+(CONS '(b c) '(a))		| (FIRST '(a b c))
+(CONS NIL NIL)			| (CDR '(a b c))
+(CONS 'a (CONS '(b) NIL))	| (REST '(a b c))
+(CONS 'a 'b)			| (SECOND '(a b c))
+
+(SETF a '( ((1) (2)) ((3)) 4))	| (CDDR a)
+a				| (CADAR a)
+(CAR a)				| (THIRD a)
+(CAR (CAR a))			| (CAAR a)
+(CAR (CDR a))			| (NTH a 2)
+(CADR a)			| (LAST (CAR a))
+
+(LENGTH a)			| (MEMBER a a)
+(LENGTH (CAR a))		| (MEMBER 'me '(how are you))
+(CONS (CAR a) a)		| (MEMBER 'nice '(what a nice day))
+(LENGTH (CONS (CAR a) a))	| (MEMBER 'me '( (you) and (me) ))
+
+(SETQ p '(l i s 1))		| (LIST p q)
+(SETQ q '(l i s 2))		| (APPEND p q)
+
+(APPEND NIL NIL NIL)		| (APPEND t NIL p)
+(LIST NIL NIL NIL)		| (LIST 'alfa)
+
+(REVERSE p)			| (REVERSE (LIST p q s))
+(REVERSE (REVERSE p))
+
+(SETF p '(un mar si o para))
+(SUBST 'niste 'o (SUBST 'struguri 'para p))
+
+(> 1 3 5.1)		| (> 1 5 3)		| (MIN 1.1 10 2.5)
+(< 1 3 5.1)		| (< 1 5 3)		| (MAX 1.1 10 2.5)
+
+
+	6. Sã se scrie formele care selecteazã atomul 'alfa' din listele:
+	a) (o (lista (alfa)))		b) (((o) lista) alfa)
+	c) ( este ( ceva (mai jos : ( alfa) )) )
+
+	7. Sã se indice care dintre expresiile de mai jos produc eroare dacã se evalueazã ºi de ce 
+:
+	a) (APPEND 'a 'b 'c)		b) (APPEND NIL NIL)
+	c) (LIST 'a 'b 'c)		d) (LIST 'x)
+	e) (MAX (1. '2. 3.))		f) (MIN '(1. 2. 3.))
+	g) ( > '(a b c) '(a b))		h) (<	(LENGTH '(a b c))
+						(LENGTH '(a c)))
+	i) (SETF 'alfa 'beta)		j) (+ 2. 'a)
+ 
+
+ 
+ 
+
+
+
+
+4
+

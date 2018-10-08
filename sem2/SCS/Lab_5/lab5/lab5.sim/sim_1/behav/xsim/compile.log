@@ -1,0 +1,6 @@
+INFO: [VRFC 10-163] Analyzing VHDL file "D:/Andrei/Scoala/SCS/Lab_5/lab5/lab5.srcs/sources_1/new/debouncer.vhd" into library xil_defaultlib
+INFO: [VRFC 10-307] analyzing entity debouncer
+INFO: [VRFC 10-163] Analyzing VHDL file "D:/Andrei/Scoala/SCS/Lab_5/lab5/lab5.srcs/sources_1/imports/Lab 5/dff.vhd" into library xil_defaultlib
+INFO: [VRFC 10-307] analyzing entity dff
+INFO: [VRFC 10-163] Analyzing VHDL file "D:/Andrei/Scoala/SCS/Lab_5/lab5/lab5.srcs/sources_1/new/fifo.vhd" into library xil_defaultlib
+INFO: [VRFC 10-307] analyzing entity fifo

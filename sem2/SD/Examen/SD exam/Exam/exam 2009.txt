@@ -1,0 +1,24 @@
+partea de teorie:
+era o problema cu un sistem bancar de gestiune a
+creditelor. Puteau sa fie de mai multe tipuri si fiecare avea asociat
+un algoritm de calculare a scadentei.
+cerinte : - aplicarea a 2 design patternuri si o diagrama de clase
+               - GRASP si principii
+ de design a claselor pentru problema data
+               - coupling, coehision si metode de masurare
+
+problema:
+Administrarea
+unei asociatii de locatari. O asociatie are mai multe blocuri, un bloc
+mai multe scari, o scara mai multe apartamente. Se permite adaugarea de
+noi asociatii. Calcularea platii la apa, gaz, curent pe apartament si
+pe scara.
+cerinte: - use
+ case
+              - aplicarea unui pattern arhitectural
+              - diagrama de clase
+               - sequence diagram
+               - design pattern
+               - ce metoda de parsare de a xml putem folosi
+               - structura unui xml ce contine aceste informatii
+              - cod java/C# pentru parsare si calcularea platii pentru un apartament 

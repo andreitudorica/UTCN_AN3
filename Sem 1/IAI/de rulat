@@ -1,0 +1,33 @@
+(firerule (?x ?y (constraint (rang) (rang) (> rang-1 rang-2))) ((related ?x ?y este-superior-lui))) 
+
+
+(retrieve
+	(?y ?x)
+	(union
+		(?x ?y (constraint (rang) (rang) (> rang-1 rang-2)))
+		(and 
+			(?x ?y (constraint (rang) (rang) (= rang-1 rang-2)))
+			(?x ?y (constraint (varsta) (varsta) (> varsta-1 varsta-2)))
+		)
+	)
+)
+
+(retrieve
+	(?y)
+	(union
+		(Tudorica ?y (constraint (rang) (rang) (> rang-1 rang-2)))
+		(and 
+			(Tudorica ?y (constraint (rang) (rang) (= rang-1 rang-2)))
+			(Tudorica ?y (constraint (varsta) (varsta) (> varsta-1 varsta-2)))
+		)
+	)
+)
+
+(retrieve 
+	(?soldier)
+	(and
+		(Tatomir ?large este-in-comanda)
+		(?small ?large este-subunitate-pentru)
+		(?soldier ?small este-in-structura)
+	)
+)

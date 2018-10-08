@@ -1,0 +1,379 @@
+LUCRAREA 6
+Structurarea datelor. Liste de asociaþie, 
+proprietãþi, vectori, structuri.
+
+1.	SCOPUL LUCRÃRII
+	Lucrarea are drept scop familiarizarea cu unele noþiuni noi privitoare la cele mai simple 
+metode de structurare a datelor prin care utilizatorul este ajutat în controlul modului de memorare 
+a datelor necesare. În acest scop sunt prezentate listele de asociaþii, listele de proprietãþi pe care le 
+poate avea un simbol ºi vectorii.
+2.	CONSIDERAÞII TEORETICE
+2.1.	Liste de asociaþii
+	Listele de asociaþii sunt structuri de date alcãtuite din celule CONS, fiecare pereche fiind 
+alcãtuitã dintr-un selector, CAR, ºi o valoare, CDR. Listele de asociaþii se folosesc la asocierea 
+obiectelor fãrã a implica un simbol ca proprietar al atributelor. O listã de asociaþii are urmãtoarea 
+formã: ( ... (selector . valoare) ... ).
+	Un avantaj al reprezentãrii prin liste de asociaþii este dat de posibilitatea de adãugare a 
+unei intrãri noi in listã ºi de actualizare a unei valori din lista de asociaþii. Dezavantajul listelor de 
+asociaþii este dat de faptul cã avem o cãutare liniarã a valorilor în listã, cãutare care poate fi 
+ineficientã în timp.
+	Pentru actualizarea unei liste de asociaþii se pot utiliza constructorii prezentaþi în 
+continuare.
+? ACONS aºteaptã trei parametri, un selector, un obiect valoare si o listã de asociaþii; 
+construieºte o nouã listã de asociaþii din elementele listei de asociaþii specificate la care 
+adaugã o intrare nouã alcãtuitã din perechea (selector . valoare). Formele (ACONS s v a) ºi 
+(CONS (CONS s v) a) sunt echivalente.
+? PAIRLIS aºteaptã ca parametri doua liste de lungime egalã, precum ºi opþional o listã de 
+asociaþii; construieºte o nouã listã de asociaþii din elementele primei liste asociate cu 
+elementele celei de a doua liste ºi o adaugã listei de asociaþii furnizate ca parametru opþional, 
+dacã acesta existã. Exemplu:
+	*(PAIRLIS '(unu doi) '(1 2) '((trei . 3)))
+	((UNU . 1 )(DOI . 2)(TREI . 3))
+	Principalii operatori de cãutare sunt prezentaþi în continuare.
+? ASSOC aºteaptã ca parametri un selector ºi o listã de asociaþii; cautã într-o listã de asociaþii 
+pânã la prima pereche al cãrei câmp CAR satisface predicatul de egalitate cu selectorul 
+prevãzut; aceastã pereche este apoi întoarsã ca rezultat.
+? RASSOC aºteaptã ca parametri un selector ºi o listã de asociaþii; cautã într-o listã de 
+asociaþii pânã la prima pereche al cãrei câmp CDR satisface predicatul de egalitate cu 
+selectorul prevãzut; aceastã pereche este apoi întoarsã ca rezultat. Exemplu:
+	*(ASSOC 'trei '((unu . 1)(doi . 4)(trei . 9)(patru . 16)))
+	(TREI . 9)
+	Observaþii:
+a) Se returneazã doar prima sublistã cu cheia cãutatã; dacã existã, celelalte sunt 
+"ascunse" de prima.
+b) Este posibil ca NIL sã fie un element al unei liste de asociaþii în locul unei perechi 
+CONS.
+c) Actualizarea listelor de asociaþii se poate face ºi cu forma specialã SETF ca în 
+exemplul:
+	*(SETF (CAR (ASSOC 'doi '((unu . 1)(doi . 4)(trei . 9))) 2)
+	2
+d) Verificarea egalitãþii se face cu predicatul EQ daca nu se specificã drept parametru 
+opþional cuvântul cheie :test urmat de funcþia doritã pentru verificare. Exemple:
+	*(ASSOC '(a) '((a . b)((a)  c)))
+	NIL
+	*(ASSOC '(a) '((a . b)((a) . c)) :test #'EQUAL)
+	((A) . C)
+2.2.	Liste de proprietãþi
+	Printre componentele oricãrui obiect Lisp se numãrã ºi lista de proprietãþi, unde sunt 
+memorate valorile unor atribute ale obiectului. Fiecare listã de proprietãþi conþine intrãri asociate 
+cu chei indicatoare. Nu sunt admise duplicãri printre indicatori (nu sunt permise douã proprietãþi 
+cu acelaºi nume). La crearea unui simbol nou lista sa de proprietãþi este vidã.
+	Deºi conceptual sunt similare cu listele de asociaþii, listele de proprietãþi prezintã 
+anumite diferenþe în sensul cã nu mai sunt liste de perechi cu punct ci sunt o înºiruire în care pe 
+poziþiile impare sunt numele de proprietate iar pe poziþiile pare se gãsesc valorile 
+corespunzãtoare. Este de remarcat cã aceste liste de proprietãþi nu sunt liste obiºnuite, funcþiile 
+normale de manipulare a listelor nu lucreazã pe aceste liste. Operatorii care proceseazã aceste 
+liste de proprietãþi sunt prezentaþi în continuare:
+? GET aºteaptã ca parametri un simbol ºi un indicator; cautã în lista de proprietãþi a simbolului 
+specificat o proprietate cu numele dat de indicator ºi returneazã valoarea proprietãþii sau NIL 
+daca nu existã. Exemple:
+	*(SETF (GET 'mar 'culoare) 'rosu)
+	ROSU
+	*(GET 'mar 'culoare)
+	ROSU
+	Pentru actualizarea valorii unei proprietãþi se poate utiliza construcþia:
+(SETF (GET simbol indicator) valoare).
+	Este de remarcat cã funcþia GET nu discerne absenþa unei proprietãþi de o proprietate 
+cu valoarea NIL. Din acest motiv este recomandatã utilizarea funcþiei REMPROP pentru 
+înlãturarea unei proprietãþi ºi nu actualizarea valorii proprietãþii cu NIL, dacã aceasta nu mai 
+existã.
+? REMPROP aºteaptã ca parametri un simbol ºi un indicator; înlãturã proprietatea indicatã a 
+simbolului; ca rezultat întoarce o valoare logicã, T dacã ºtergerea s-a fãcut efectiv sau NIL 
+dacã proprietatea nu existã.
+	Modificarea proprietãþilor este efectuatã prin operaþii distructive de adãugare sau 
+înlãturare a proprietãþilor ce altereazã efectiv lista de proprietãþi si nu este realizatã prin crearea 
+unei copii noi a listei.
+? SYMBOL-PLIST are ca parametru un simbol; întoarce ca rezultat lista de proprietãþi a 
+obiectului identificat de simbol sub o formã similarã unei liste de asociaþii.
+2.3.	Vectori
+	Un tablou este un obiect alcãtuit din mai multe componente dispuse ordonat într-o 
+secvenþã. Un tablou cu o singurã dimensiune se mai numeºte ºi vector. Tabloul este o structurã de 
+date corespunzãtoare matricelor ºi care se regãseºte în majoritatea limbajelor de programare. 
+Tablourile pot fi generale, fiecare element poate fi un obiect de orice tip, sau specializate, fiecare 
+element are un tip de obiect bine precizat. În fiecare implementare de Lisp în parte se limiteazã 
+numãrul maxim de dimensiuni ale unui tablou ºi numãrul maxim de elemente pentru un anumit 
+tablou.
+Observaþie:	În versiunea Golden Common Lisp v1.0 nu sunt permise tablouri cu mai multe 
+dimensiuni, fiind permise doar construcþii unidimensionale de tip vector.
+	Pentru construirea unui tablou este necesar ca acesta sã fie iniþializat prin funcþia 
+prezentatã în continuare.
+? MAKE-ARRAY aºteaptã ca parametri o listã de numere pozitive corespunzãtoare 
+dimensiunilor tabloului ºi opþional tipul elementelor unui tablou specializat. Daca vrem sã 
+iniþializãm vectori, parametrul poate fi prezentat sub forma unui întreg pozitiv ºi nu sub 
+forma unei liste cu un singur element. Rezultatul întors de aceastã funcþie este de forma: 
+<VECTOR T dim adr>, unde dim este dimensiunea tabloului iar adr este o adresã alcãtuitã 
+din offset:segment. Pentru realizarea accesului la tabloul definit prin MAKE-ARRAY se 
+poate captura rezultatul întors de aceastã funcþie primitivã într-un SETF prin care sã obþinem 
+un nume pentru tablou. Exemple:
+	;; Crearea unui vector cu 7 elemente
+	*(MAKE-ARRAY 7)
+	;; Crearea unui tablou bidimensional cu numele "matr"
+	*(SETQ matr (MAKE-ARRAY '(3 4)))
+	;; Crearea unui vector cu elemente numere reale
+	*(MAKE-ARRAY 5 :element-type 'single-float)
+Pentru accesarea unui element al tabloului se poate utiliza funcþia prezentatã în continuare.
+? AREF aºteaptã ca parametri un tablou ºi o listã de numere pozitive pe post de indici 
+(numãrul elementelor specificate în aceastã listã trebuie sã fie egal cu numãrul de dimensiuni 
+ale tabloului, iar fiecare indice sã fie mai mic sau egal cu dimensiunea corespunzãtoare). 
+Funcþia face acces la elementul specificat din tablou si întoarce acest obiect ca rezultat.
+	Pentru actualizarea valorii unui element al unui tablou se poate folosi:
+(SETF (AREF tablou indici) valoare)
+2.4.	Utilizarea structurilor
+	În Lisp existã posibilitatea reprezentãrii obiectelor oricât de complexe prin liste în care 
+componentele ocupã poziþii relativ arbitrare. Dezavantajul constã în efortul sporit necesar la 
+accesarea componentelor, pentru care trebuie sã cunoaºtem locul memorãrii (CAR, CADR, ... ) 
+ºi nu putem face acces doar printr-un nume generic.
+	Programarea structuratã presupune cã limbajul, ºi nu utilizatorul, gestioneazã detaliile 
+privind modul în care sunt memorate datele. În acest scop s-a prevãzut în Lisp forma 
+DEFSTRUCT, care este un macro care permite utilizatorului crearea ºi manipularea tipurilor de 
+date agregat, asemãnãtor cu structurile din C (struct) ºi înregistrãrile din Pascal (RECORD).
+	(DEFSTRUCT <nume-structurã>
+		(<descriere-câmp1>) ... (<descriere-câmpN>) )
+? <nume-structurã> trebuie sã fie un simbol ºi devine parte componentã a funcþiilor 
+constructor, selector, precum ºi a predicatelor care se definesc automat la crearea 
+unei noi structuri.
+? <descriere câmp> trebuie neapãrat sã fie alcãtuitã cel puþin dintr-un simbol care sã 
+constituie un nume de câmp, utilizat ca parte componentã a funcþiei selector care se 
+defineºte automat la crearea unei noi structuri.
+	Opþional se poate specifica o valoare implicitã pentru iniþializarea câmpului respectiv, iar 
+cu ajutorul cuvântului cheie ":type" se poate specifica un anumit tip pentru câmpul respectiv. 
+Dacã lipsesc opþiunile, descrierea unui câmp poate fi fãcutã specificând doar numele câmpului ºi 
+nu o listã. Cu ajutorul cuvântului cheie ":include" se pot defini structuri imbricate, care conþin alte 
+structuri.
+	Exemplu de creare a unei structuri corespunzãtoare unei date agregat de tip student cu 
+câmpurile: nume, prenume, vârsta, notã si materie; valoarea implicitã la iniþializare pentru câmpul 
+materie este "Programare funcþionalã".
+	*(DEFSTRUCT student
+		(nume		NIL)
+		(prenume	NIL)
+		(varsta		NIL)
+		(nota		NIL)
+		(materie	"Programare functionala") )
+	STUDENT
+	Printre efectele formei DEFSTRUCT se numãrã ºi crearea automatã a unor funcþii 
+pentru manipularea obiectelor de tip agregat, prezentate în continuare.
+? constructor - este o funcþie al cãrei nume este alcãtuit din ºirul "MAKE-" la care se 
+concateneazã numele structurii definite; efectul evaluãrii formei este crearea unui obiect cu 
+structura specificatã ºi iniþializarea corespunzãtoare valorilor implicite ale câmpurilor 
+respective. Exemplu de creare a unui obiect cu numele student-1 de tipul student:
+	*(SETF student-1 (MAKE-student))
+	#<STUDENT adr>
+	Se pot specifica la crearea unui obiect de un anumit tip valori implicite noi pentru 
+iniþializare, diferite de cele specificate în DEFSTRUCT, folosind un cuvânt cheie corespunzãtor. 
+Exemplu:
+	*(SETF student-2 (MAKE-student :nota 10))
+	#<STUDENT adr>
+? predicat - este o funcþie al cãrei nume este alcãtuit din numele structurii definite, la care se 
+concateneazã ºirul "-P"; efectul evaluãrii este T sau NIL, dupã cum obiectul furnizat ca 
+parametru este sau nu un obiect cu structura specificatã. Un predicat cu acelaºi rol este 
+TYPEP, care acceptã ca parametri un obiect ºi un tip (nume de structurã). Exemplu:
+	*(student-P student-1)	| *(TYPEP student-1 'student)
+	T			| T
+? selectori - sunt funcþii al cãror nume este alcãtuit din numele structurii definite la care se 
+concateneazã respectiv numele câmpurilor definite; efectul evaluãrii este selectarea valorii 
+corespunzãtoare câmpului. Exemplu:
+*(student-nota student-1)	| *(SETF (student-nota student-1) 7)
+NIL				| 7
+*(student-curs student-1)	| *(student-nota student-1)
+"Programare functionala"	| 7
+	Aºa dupã cum s-a observat din exemplele prezentate, forma SETF poate fi utilizatã 
+pentru actualizarea valorilor câmpurilor selectate dintr-un obiect de o anumitã structurã.
+3.	DESFÃªURAREA LUCRÃRII
+	1. Sã se evalueze secvenþele:
+*(SETF tari	'( (Romania . Bucuresti) (Bulgaria . Sofia)
+		   (Ungaria . Budapesta) (Anglia . Londra )
+		   (Franta . Paris) (Italia . Roma) ) )
+*(ASSOC 'Anglia tari)
+*(RASSOC 'Paris tari)
+*(SETF tari (PAIRLIS '(Rusia Spania) '(Moscova Madrid) tari))
+*(ASSOC '(a b) '( ((a e) . 1) ((a c) . 22) ((a b) . 3) (c . 4)) )
+*(ASSOC '(a b) '( ((a e) . 1) ((a b) . 3) (c . 4) )
+*(SETF parinti '(	(Dan (George Doina)) (Corina (Ion Elena))
+			(Dan (Marin Angela)) ) )
+*(ASSOC 'Corina parinti)
+*(ASSOC '3 '((1 a)(2 b c)(3 d e f)(4 g h i j)))
+*(PAIRLIS '(a b (a b)) '(1 2 3))
+
+	2. Studiaþi o versiune a funcþiei de sistem SUBLIS furnizatã la surse, urmãrind prin 
+trasare efectul funcþiilor care lucreazã asupra listelor de asociaþii.
+
+	3. În diferite situaþii este utilã o tehnicã de programare care utilizeazã marcarea 
+temporarã a anumitor obiecte cu ajutorul proprietãþilor. Spre exemplu este prezentatã pentru 
+studiu funcþia de reuniune care primeºte ca argumente oricâte liste alcãtuite din elemente atomice 
+ºi întoarce ca rezultat reuniunea acestora privite ca mulþimi.
+
+	4. Urmãriþi pe exemplele urmãtoare comportarea listelor de proprietãþi:
+	*(SETF (GET 'mar1 'culoare) 'rosu)
+	*(SETF (GET 'mar1 'marime) 'medie)
+	*(SYMBOL-PLIST 'mar1)
+	*(SETF (SYMBOL-PLIST 'mar1) '(fel fruct marime 10))
+	*(GET 'mar1 'fel)
+	*(REMPROP 'mar1 'marime)
+	*(REMPROP 'mar1 'varsta)
+
+	5. Urmãriþi prin intermediul funcþiilor definite în secþiunea de surse memorarea relaþiilor 
+de rudenie prin liste de proprietãþi.
+
+	6. O altã tehnicã des utilizatã este prezentatã în aplicaþia de calcul al ariilor ºi 
+perimetrelor figurilor geometrice. În acest exemplu tipurile de obiecte geometrice (pãtrat, cerc) 
+sunt memorate ca proprietãþi ale obiectelor spre a putea face referirea la funcþiile corespunzãtoare 
+de calcul al ariei ºi perimetrului (similar programãrii obiectuale).
+
+	7. Urmãriþi modul de utilizare a vectorilor ºi a structurilor de date prin intermediul 
+exemplului furnizat.
+4.	ÎNTREBÃRI ªI PROBLEME
+	1. Gãsiþi asemãnãrile ºi deosebirile între un obiect care are o anumitã proprietate a cãrei 
+valoare este NIL ºi un obiect care nu are respectiva proprietate.
+
+	2 De ce nu sunt echivalente urmãtoarele douã forme?
+	*(GET (SYMBOL-PLIST x) y)	ºi	*(GET x y)
+
+	3. Verificaþi definirea vectorilor ºi structurilor prin furnizarea unor tipuri elementelor 
+constituente.
+
+	4. Îmbogãþiþi exemplul prezentat de utilizare a vectorilor ºi structurilor prin adãugarea 
+de câmpuri noi structurii ºi scrierea unor funcþii pentru parcurgerea ºi afiºarea selectivã a 
+elementelor din tablou.
+
+	5. Extindeþi exemplul prezentat prin adãugarea unor tipuri noi de obiecte geometrice.
+
+	6. Propuneþi o modalitate de structurare a datelor utilizând tabele de dispersie (hashing).
+5.	SURSE
+;;; versiune a functiei "SUBLIS" care nu va suporta cuvinte cheie
+;;; lista de asociatii modifica elementul cu cel asociat
+;;  Ex:  *(SUBLIS '((1 . UNU)(2 . DOI)(+ . PLUS))  '(+ (+ 1 1) 2))
+;;	  (PLUS (PLUS UNU UNU) DOI)	
+(DEFUN our-sublis (lasoc arb)
+(COND	((ASSOC arb lasoc) (REST (ASSOC arb lasoc)))
+	((ATOM arb) arb)
+	(T (LET ( ($1 (our-sublis lasoc (FIRST arb)))
+		  ($2 (our-sublis lasoc (REST arb))) )
+		(IF (AND (EQL $1 (FIRST arb))(EQL $2 (REST arb)))
+		    arb
+		    (CONS $1 $2)) ))
+))
+
+;;; reuniunea unui numar nespecificat de multimi
+(DEFUN reun ( &rest lis-multimi)
+; este marcat fiecare elemet intalnit prin actualizarea
+; unei proprietati oarecare $$$ cu valoarea elementului
+(MAPC	#'(LAMBDA (ls)
+		(MAPC	#'(LAMBDA (e)
+				(SETF (GET e '$$$) T) )
+			ls))
+	lis-multimi
+)
+; sunt colectate elementele care au proprietatea respectiva
+; se inlatura respectiva proprietate pentru a nu lasa urme nedorite
+(MAPCAN #'(LAMBDA (ls)
+		(MAPCAN #'(LAMBDA (e)
+				(IF (REMPROP e '$$$) (LIST e) NIL))
+			ls))
+	lis-multimi
+)
+)
+
+
+
+
+;;; relaþii de rudenie implementate prin liste de proprietãþi
+(SETF (GET 'Andrei 'tata) 'Vasile)
+(SETF (GET 'Andrei 'mama) 'Alexandra)
+(SETF (GET 'Alexandra 'tata) 'Dan)
+(SETF (GET 'Alexandra 'mama) 'Maria)
+(SETF (GET 'Vasile 'tata) 'Iosif)
+(SETF (GET 'Vasile 'mama) 'Ana)
+(SETF (GET 'Iosif 'tata) 'George)
+(SETF (GET 'Ana 'mama) 'Ioana)
+(DEFUN Bunic-Patern (x)
+	(IF (GET x 'tata) (GET (GET x 'tata) 'tata) ))
+(DEFUN Adam (x)
+	(IF (GET x 'tata) (Adam (GET x 'tata)) x ))
+(DEFUN Parinti (x)
+	(APPEND (IF (GET x 'tata) (LIST (GET x 'tata)) )
+		 (IF (GET x 'mama) (LIST (GET x 'mama)) ) ))
+(DEFUN Stramosi (x)
+(IF (Parinti x)
+	(APPEND (Parinti x)
+		(MAPCAN #'Stramosi (Parinti x) ) )
+))
+
+;;; similitudini cu modul de programare obiectuale
+;;; alegerea functiilor care se aplica
+;;; este data de proprietatile obiectelor
+(DEFUN sqr (x) (* x x))
+(SETF pi 3.14159)
+
+;; regula de calcul arie si perim. pt. ob. de tip "patrat"
+(SETF (GET 'patrat 'arie)
+	#'(LAMBDA (ob) (sqr (GET ob 'latura))) )
+(SETF (GET 'patrat 'perimetru)
+	#'(LAMBDA (ob) (* 4 (GET ob 'latura))) )
+;; regula de calcul arie si perim. pt ob. de tip "cerc"
+(SETF (GET 'cerc 'arie)
+	#'(LAMBDA (ob) (* pi (sqr (GET ob 'raza)))) )
+(SETF (GET 'cerc 'perimetru)
+	#'(LAMBDA (ob) (* 2 pi (GET ob 'raza))) )
+; instantierea unui obiect cu o singura proprietate
+(DEFUN inst (ob tipob prop valprop)
+	(SETF (GET ob 'tip) tipob)
+	(SETF (GET ob prop) valprop)
+)
+
+;; definire functii generice "perimetru" si "arie"
+;; se pot aplica pe orice obiect de tip cunoscut
+(DEFUN perimetru (ob)
+	(FUNCALL (GET (GET ob 'tip) 'perimetru) ob) )
+(DEFUN arie (ob)
+	(FUNCALL (GET (GET ob 'tip) 'arie) ob) )
+
+;;; Exemplu de utilizare structuri
+;; definirea structurii pentru obiecte student
+(DEFSTRUCT student
+	(nume nil :type string)
+	(prenume nil :type string)
+	(nota 5 :type 'integer)
+)
+;; definirea functiilor pentru prelucrarea unui obiect student
+(DEFUN act-stud (stud)
+	(SETF (student-nume stud) (READ))
+	(SETF (student-prenume stud) (READ))
+	(SETF (student-nota stud) (READ))
+	(TERPRI)
+)
+(DEFUN afis-stud (stud)
+	(PRINT (student-nume stud))
+	(PRINT (student-prenume stud))
+	(PRINT (student-nota stud))
+	(TERPRI)
+)
+;; definirea functiilor pentru prelucrarea unui vector
+(DEFUN init-vect-stud (vector)
+(DO (	(i 0 (+ i 1))
+	(n (LENGTH vector)) )
+	((= i n))
+	(SETF (AREF vector i) (MAKE-student))
+))
+(DEFUN act-vect-stud (vector)
+(DO (	(i 0 (+ i 1))
+	(n (LENGTH vector)) )
+	((= i n))
+	(act-stud (AREF vector i))
+))
+(DEFUN afis-vect-stud (vector)
+(DO (	(i 0 (+ i 1))
+	(n (LENGTH vector)) )
+	((= i n))
+	(afis-stud (AREF vector i))))
+;; definirea obiectului grupa, un vector cu elemete de tip student
+(SETF grupa (MAKE-array 3 :element-type 'student))
+ 
+
+ 
+ 
+
+
+
+49
+
+

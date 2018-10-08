@@ -1,0 +1,5 @@
+ grupa1 grupa2 grupa3 grupa4 grupa5 grupa6 grupa7 grupa8 grupa9 grupa10 grupa11 grupa12 grupa13 grupa14 grupa15 grupa16
+ pluton1 pluton2 pluton3 pluton4 pluton5 pluton6 pluton7 pluton8
+ compania1 compania2 compania3 compania4 compania5 compania6 compania7 compania8
+ batalionul1 batalionul2 batalionul3 batalionul4
+ divizia1 divizia2

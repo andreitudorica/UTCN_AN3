@@ -1,0 +1,357 @@
+LUCRAREA 10
+Potrivirea ºabloanelor
+
+1.	SCOPUL LUCRÃRII
+	Se urmãreºte exemplificarea tehnicilor de pattern matching (Symbolic Pattern Matching 
+= potrivirea simbolicã a ºabloanelor) printr-un algoritm concret implementat în Lisp. De 
+asemenea, se urmãreºte experimentarea performanþelor algoritmului precum ºi aplicarea ºi 
+evaluarea sa pe diverse probleme concrete.
+2.	CONSIDERAÞII TEORETICE
+	Prin exemplele care urmeazã se încearcã sugerarea tipurilor de aplicaþii pentru care 
+limbajul Lisp minimizeazã efortul de implementare ºi asigurã eleganþa ºi compactitatea 
+programelor.
+2.1.	Prelucrare prin potrivirea ºabloanelor
+	În programare, o parte însemnatã a prelucrãrilor din diverse aplicaþii se bazeazã pe ideea 
+de a potrivi unele structuri de obiecte din universul problemei cu alte structuri de obiecte, numite 
+ºabloane. Aceastã potrivire este ghidatã de cãtre un proces de identificare a structurilor care pot 
+constitui obiectul potrivirii în raport cu niºte ºabloane predefinite. Procesul descris aici poartã 
+denumirea de prelucrare prin identificare ghidatã a unor ºabloane (pattern matching 
+processing).
+	Funcþia de ghidare, de identificare a potrivirii între ºabloane ºi expresiile date, descrisã în 
+lucrarea de faþã este, drept urmare, un instrument de bazã în astfel de aplicaþii.
+2.2.	Descrierea funcþiei de potrivire
+	Funcþia de potrivire este construitã astfel încât sã stabileascã eventualele asemãnãri 
+(egalitãþi, potriviri) între o listã (liniarã) model (ºablon) ºi o listã de elemente (simboluri), folosind 
+ºi o listã de asociaþie (al cãrei rol va reieºi în continuare). În consecinþã, funcþia de matching match 
+va avea trei parametri:
+1) expresia-ºablon (p), conþinând (la nivel superficial) atomi ºi unele expresii de potrivire 
+formate cu simboluri speciale (?, +, >, <);
+2) o expresie datã (d);
+3) o listã de asociaþii (assignments).
+	Sã urmãrim câteva cazuri de ºabloane ºi date (ca argumente), care ne vor fixa un model 
+de lucru al funcþiei de potrivire.
+a) p ºi d sunt identice, cu o listã de asignãri vidã:
+	*(match '(culoare mar rosu) '(culoare mar rosu) NIL)
+	T
+b) p ºi d sunt diferite:
+	*(match '(culoare mar verde) '(culoare mar rosu) NIL)
+	NIL
+c) ªablonul p conþine simbolul special ?, care se potriveºte cu un simbol oarecare din expresia 
+d:
+	*(match '(culoare ? rosu) '(culoare mar rosu) NIL)
+	T
+d) ªablonul p conþine simbolul special +, care corespunde la unul sau mai multe simboluri 
+oarecare din expresia d:
+	*(match '(culoare +) '(culoare mar rosu) NIL)
+	T
+e) ªablonul p conþine expresia specialã de potrivire (> x), caz în care variabilei x i se atribuie 
+simbolul corespunzãtor din expresia d, adicã aceastã expresie specialã se potriveºte cu un 
+simbol oarecare din expresia d, simbol care este asociat variabilei x în lista assignments 
+returnatã ca valoare a funcþiei de potrivire:
+	*(match '(culoare (> fruct) rosu) '(culoare mar rosu) NIL)
+	((fruct mar))
+f) ªablonul p conþine expresia specialã de potrivire (+ l), ea potrivindu-se cu unul sau mai 
+multe simboluri oarecare din expresia d. În lista assignments returnatã se asociazã lui l lista 
+simbolurilor cu care s-a potrivit expresia specialã:
+	*(match '(culoare (+ rezultat)) '(culoare mar rosu) NIL)
+	((rezultat (mar rosu)))
+g) ªablonul p conþine expresia specialã de potrivire (< x), care înseamnã cã valoarea variabilei x 
+trebuie sã fie simbolul sau secvenþa de simboluri corespunzãtoare din expresia d, altfel funcþia 
+de potrivire returnând NIL. Practic funcþia match înlocuieºte în p expresia specialã cu ceea 
+ce este atribuit variabilei x în lista assignments ºi apoi încearcã potrivirea în noile condiþii a 
+simbolurilor curente printr-un apel recursiv:
+	*(match '(culoare (< fruct) rosu) '(culoare mar rosu)
+		'((fruct mar)))
+	((fruct mar))
+	*(match '(culoare (< fruct) rosu) '(culoare mar rosu)
+		'((fruct portocala)))
+	NIL
+h) Expresia specialã (RESTRICT ? pred1 pred2 ... predn) în p înseamnã cã predicatele 
+pred1, pred2, ..., predn din expresia specialã trebuie sã fie adevãrate pe simbolul curent din 
+expresia d, altfel funcþia de potrivire returnând NIL.
+	Tot în cadrul surselor se aflã definite diferite funcþii (cele mai multe fiind funcþii de 
+acces) apelate de match:
+? shove-gr adaugã perechea (x simbolul_atribuit_lui_x) în lista de asociaþie, unde variabila x 
+provine, în momentul apelului, din expresia specialã (> x);
+? shove-pl adaugã perechea (l lista_atribuitã_lui_l) în lista de asociaþie, unde variabila l provine 
+din expresia specialã (+ l), iar lista_atribuitã_lui_l este completatã cu câte un nou simbol la 
+fiecare apel al funcþiei;
+? pull-value extrage valoarea atribuitã (simbolul sau lista de simboluri asociatã) lui variable în 
+lista de asociaþie;
+? pattern-indicator extrage indicatorul (primul simbol) dintr-o expresie specialã de ºablon: 
+">", "<", "+" sau RESTRICT;
+? pattern-variable extrage variabila (al doilea simbol) dintr-o expresie specialã de ºablon, cum 
+ar fi: ">", "<" ºi "+";
+? restriction-indicator extrage indicatorul de restrictie (al doilea simbol) dintr-o expresie 
+specialã RESTRICT;
+? restriction-predicates extrage lista predicatelor de restricþie;
+? test testeazã toate predicatele de restricþie pe simbolul curent din expresia d.
+2.3.	Prelucrãri prin potrivire de ºabloane
+	Prelucrãrile bazate pe pattern matching acoperã o zonã largã de aplicaþii. De exemplu, 
+se poate transforma o problemã tipicã propusã calculatorului în limbaj (cvasi)natural într-o 
+expresie algebricã prefixatã, ale cãrei variabile sunt iniþializate printr-un dialog cu utilizatorul. 
+Aceastã problemã de algebrã este rezolvatã de cãtre funcþia translate. Se poate constata cât de 
+mult se simplificã codul unei aplicaþii folosind acest limbaj al ºabloanelor. Funcþia translate 
+lucreazã recursiv, deoarece ºi limbajul natural este recursiv. Apelurile recursive se fac pe 
+subexpresii din limbaj natural atribuite unor variabile l, r, în lista de asociaþie, atribuiri fãcute în 
+prealabil în urma identificãrii prin match a unui ºablon potrivit cu întreaga expresie curentã. (Aici 
+match-value este identicã cu pull-value.)
+3.	DESFÃªURAREA LUCRÃRII
+	1) Se va studia codul sursã al funcþiei match prin prisma cazurilor a-h. Se vor trasa ºi 
+inspecta toate exemplele aferente acestor cazuri. Se vor studia ºi urmãtoarele exemple:
+	*(match '(culoare portocala rosu) '(culoare mar rosu) NIL)
+	*(match '(+ mama +) '(De cand mama mi-a vorbit) NIL)
+	*(match '((+ l) mama (+ r)) '(De cand mama mi-a vorbit) NIL)
+	*(SETQ sab '((+ l) (RESTRICT ? colorp) (+ r)))
+	*(SETQ date '(Creionul este albastru ºi roºu))
+	*(match sab date NIL)
+
+	2) Se vor studia, trasa ºi inspecta cele douã mostre de pattern matching processing. 
+Pentru primul exemplu (o problemã de algebrã), cu mat1 ºi mat2 se vor evalua:
+	*(translate mat1)
+	*(rezolv mat1)
+	*(translate mat2)
+	*(rezolv mat2)
+
+
+	3) Comparaþi efortul depus în programarea celor douã aplicaþii cu efortul necesar pentru 
+programarea lor fãrã a face apel la potrivirea ºabloanelor.
+4.	ÎNTREBÃRI ªI PROBLEME
+	1) Pentru apelul de mai jos:
+	*(match '(+ a +) '(a a a a a a) NIL)
+sã se indice al câtelea a din date se potriveºte cu a-ul din ºablon. Pornind de la modul de lucru al 
+funcþiei primitive OR, sã se recunoascã pe codul funcþiei match cum se rezolvã acest 
+nedeterminism.
+
+	2) Sã se foloseascã funcþia match pentru a recunoaºte o listã care începe ºi se terminã cu 
+acelaºi cuvânt (simbol), de exemplu (Ana se plimba cu Ana).
+
+	3) Sã se extindã funcþia match astfel încât ºabloanele p sã poatã include ºi urmãtoarele 
+expresii speciale:
+	a) "*" se potriveºte cu zero sau mai multe simboluri oarecare din expresia d;
+	b) (RESTRICT  +  pred1 ... predn) ºi (RESTRICT  *  pred1 ... predn) care înseamnã cã 
+predicatele trebuie sã fie adevãrate pe unul sau mai multe, respectiv pe zero sau mai multe 
+simboluri oarecare din expresie;
+	c) (RESTRICT  (> x)  p1 ... pn), adicã, dacã predicatele sunt adevãrate pe simbolul 
+curent din expresia d, atunci variabilei x i se atribuie drept valoare acest simbol.
+
+	4) Se considerã o listã de asociaþie formatã din perechi (<nume-funcþie> . 
+<definiþie-funcþie>). Sã se determine tipul de recursivitate al funcþiilor din lista de asociaþie 
+(simplã, dublã etc.).
+
+	5) Dându-se o funcþie recursivã simplã, sã se scrie o funcþie care întoarce o funcþie 
+nerecursivã cu acelaºi efect ca prima funcþie.
+5.	SURSE
+;;;; Programul de matching, m.p
+(DEFUN match (p d assignments)
+  (COND ((AND	(NULL p) (NULL d))		;Succes
+	    (COND ((NULL assignments) T)
+		  (T assignments)))
+	((OR	(NULL p) (NULL d)) NIL)		;Eºuare
+	((OR	(EQUAL (FIRST p) '?)		;Potrivire
+						;ºablonul "?"
+		(EQUAL (FIRST p) (FIRST d)))	;Elemente identice
+	    (match (REST p) (REST d) assignments))
+
+
+	((EQUAL (FIRST p) '+)			;Potrivire
+						;ºablonul "+"
+	    (OR (match (REST p) (REST d) assignments)
+		(match p (REST d) assignments)))
+	((ATOM (FIRST p)) NIL)			;Atom nepotrivit.
+	((EQUAL (pattern-indicator (FIRST p)) '>)	;Potrivire
+							;(> variabilã)
+	    (match (REST p) (REST d)
+		   (shove-gr	(pattern-variable (FIRST p))
+				(FIRST d)
+				assignments)))
+	((EQUAL (pattern-indicator (FIRST p)) '<)	;Substituire
+							;variabila
+	    (match (CONS (pull-value (pattern-variable (FIRST p))
+			 	     assignments)
+			 (REST p))
+		    d
+		    assignments))
+	((EQUAL (pattern-indicator (FIRST p)) '+)	;Potrivire
+							;(+ variabila)
+	    (LET ((new-assignments
+			(shove-pl (pattern-variable (FIRST p))
+				  (FIRST d)
+				  assignments)))
+		  (OR	(match (REST p) (REST d) new-assignments)
+			(match p (REST d) new-assignments))))
+	((AND	(EQUAL	(pattern-indicator (FIRST p))	;Potrivire
+							;cu restrictie
+			'RESTRICT)
+		(EQUAL (restriction-indicator (FIRST p)) '?)
+		(test (restriction-predicates (FIRST p)) (FIRST d)))
+	    (match (REST p) (REST d) assignments))))
+
+;;; Macro-uri selector
+(DEFMACRO pattern-indicator (l)
+  `(FIRST ,l))
+(DEFMACRO pattern-variable (l)
+  `(SECOND ,l))
+(DEFMACRO match-value (key a-list)
+  `(SECOND (ASSOC ,key ,a-list)))
+(DEFMACRO pull-value (variable a-list)
+  `(SECOND (ASSOC ,variable ,a-list)))
+
+
+
+;;; Functii mutator
+(DEFMACRO shove-gr (variable item a-list)
+  (APPEND ,a-list (LIST (LIST ,variable ,item))))
+(DEFUN shove-pl (variable item a-list)
+  (COND ((NULL a-list) (LIST (LIST variable (LIST item))))
+	((EQUAL variable (FIRST (FIRST a-list)))
+		(CONS	(LIST variable (APPEND (SECOND (FIRST a-list))
+					       (LIST item)))
+			(REST a-list)))
+	(T (CONS (FIRST a-list)
+		 (shove-pl variable item (REST a-list))))))
+
+(DEFMACRO restriction-indicator (pattern-item)
+  `(SECOND pattern-item))
+(DEFMACRO restriction-predicates (pattern-item)
+  `(REST (REST pattern-item)))
+
+;;; Functia auxiliara pentru verificarea daca elementele din
+;;; lista de date satisfac predicatele date
+(DEFUN test (predicates argument)
+  (COND ((NULL predicates) T)                     ;Toate testele T?
+	((FUNCALL (FIRST predicates) argument)    ;Acest test T?
+		(test (REST predicates) argument))
+	(T NIL)))                                 ;Acest test NIL?
+
+(DEFUN culoarep (cuvant) (MEMBER cuvant '(roºu galben albastru)))
+(DEFUN bad-word-p (word) (MEMBER word '(shucks darn)))
+
+;;; O problema de algebra
+(DEFVAR operatori '(+ - * / expt))
+(DEFUN expt (m n)
+(DO	((rez 1 (* m rez))
+	 (count 1 (- count 1)))
+	((ZEROP count) rez)))
+
+(DEFVAR mat1
+ '(Numarul clientilor cu care a lucrat Tom
+   este
+   suma dintre de doua ori patratul numarului de articole pe care
+   le-a vandut
+   si costul unui articol))
+
+
+
+(DEFVAR mat2
+ '(Numarul bilelor negre din cutie
+   este
+   diferenta dintre numarul de bile albe si
+       produsul dintre numarul de bile rosii si
+       data calendaristica // numarul zilei din luna // la care s-a
+	     desfasurat extragerea))
+
+; Functia de mai jos imita programul STUDENT,
+; un vechi program de Inteligenta artificiala.
+(DEFUN translate (e)
+(LET (a-list NIL)
+(COND	((SETQ a-list (match '((+ l) este (+ r)) e NIL))
+		`(=	,(translate (match-value 'l a-list))
+			,(translate (match-value 'r a-list))))
+	((SETQ a-list (match
+		'(diferenta dintre (+ l) si (+ r)) e NIL))
+		`(-	,(translate (match-value 'l a-list))
+			,(translate (match-value 'r a-list))))
+	((SETQ a-list (match
+		'(suma dintre (+ l) si (+ r)) e NIL))
+		`(+	,(translate (match-value 'l a-list))
+			,(translate (match-value 'r a-list))))
+	((SETQ a-list (match
+		'(produsul dintre (+ l) si (+ r)) e NIL))
+		`(*	,(translate (match-value 'l a-list))
+			,(translate (match-value 'r a-list))))
+	((SETQ a-list (match '(de doua ori  (+ r)) e NIL))
+		`(* 2 ,(translate (match-value 'r a-list))))
+	((SETQ a-list (match '(patratul (+ r)) e NIL))
+		`(EXPT ,(translate (match-value 'r a-list)) 2))
+	((SETQ a-list (match '((+ l) la patrat) e NIL))
+		`(EXPT ,(translate (match-value 'l a-list)) 2))
+	((SETQ a-list (match '((RESTRICT (> v) NUMBERP)) e NIL))
+		(match-value 'v a-list))
+	(T e))))
+
+(DEFUN calcul (expr)
+(COND	((EQL (FIRST expr) '=)
+		(SETQ a (calc (THIRD expr)))
+		(FORMAT T "~%~A este ~%               ~D "
+			(SECOND expr) a))
+	(T (FORMAT T "~%Imi pare rau. Nu pot rezolva problema"))
+))
+
+(DEFUN calc (expr)
+(COND ((AND (LISTP expr) (= (LENGTH expr) 3))
+	(LET ((st
+		(IF (OR (NUMBERP (SECOND expr))
+			(MEMBER (FIRST (SECOND expr))
+				operatori))
+			(calc (SECOND expr))
+			(aflu-val (SECOND expr)) ))
+	      (dr
+		(IF (OR (NUMBERP (THIRD expr))
+			(MEMBER (FIRST (THIRD expr))
+				operatori))
+			(calc (THIRD expr))
+			(aflu-val (THIRD expr)) )) )
+	   (COND ((EQL (FIRST expr) '+) (+ st dr))
+		 ((EQL (FIRST expr) '-) (- st dr))
+		 ((EQL (FIRST expr) '*) (* st dr))
+		 ((EQL (FIRST expr) 'expt) (expt st dr))
+		 ((EQL (FIRST expr) '/) (/ st dr))
+	   )
+      ))
+      (T (IF (ATOM expr) expr (FIRST expr)))))
+
+(DEFUN aflu-val (expr)
+	(FORMAT T "~%Care este ~Ã%    " expr)
+	(READ))
+
+(DEFUN rezolv (problema)
+	(calcul (translate problema)))
+
+;;; Un program pseudo-psihiatru, care imitã programul Doctor,
+;;; un alt vechi program de Inteligenþã artificialã,
+;;; cunoscut, de asemenea, ca Eliza
+(DEFUN doctor ()
+  (PRINT '(Speak up!))
+  (TERPRI)
+  (DO	((sentence (READ) (READ)) (a-list NIL NIL) (mother))
+	(NIL)
+    (COND ((SETQ a-list (match '(I am worried (+ l)) sentence NIL))
+           (PRINT `(How long have you been worried
+                        ,@(match-value 'l a-list))))
+          ((match '(+ mother +) sentence NIL)
+           (SETQ mother T)
+           (PRINT '(Tell me more about your family)))
+
+          ((match '(+ computers +) sentence NIL)
+           (PRINT '(Do machines frighten you)))
+          ((OR (match '(No) sentence NIL)
+               (match '(Yes) sentence NIL))
+           (PRINT '(Please do not be so short with me)))
+          ((match '(+ (RESTRICT ? bad-word-p) +) sentence NIL)
+           (PRINT '(Please do not use words like that)))
+          (mother (SETQ mother NIL)
+                  (PRINT '(Earlier you spoke of your mother)))
+          (T (PRINT '(I am sorry our time is up))
+             (RETURN 'Goodbye)))
+    (TERPRI)))
+ 
+
+ 
+ 
+
+
+
+92
+
+

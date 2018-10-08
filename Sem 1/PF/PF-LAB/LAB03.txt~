@@ -1,0 +1,259 @@
+LUCRAREA 3
+Recursivitate ºi iteraþie
+
+1.	SCOPUL LUCRÃRII
+	Lucrarea are ca scop familiarizarea cu stilul recursiv de definire a funcþiilor în Lisp.
+2.	CONSIDERAÞII TEORETICE
+	Limbajul Lisp permite ºi chiar încurajeazã folosirea recursivitãþii în definirea funcþiilor. 
+Recursivitatea permite utilizarea unor tehnici puternice de rezolvare a problemelor, cum ar fi de 
+exemplu "divide et impera". Totodatã, exprimãrile recursive sunt în general mai elegante ºi mai 
+concise.
+	Ideea de bazã în aplicarea recursivitãþii este un mod de gândire în care problema este 
+descompusã în versiuni mai mici ale aceleiaºi probleme. Componentele unei programãri recursive 
+sunt deci:
+1. descompunerea problemei în forme care implicã versiuni mai simple ale aceleiaºi probleme
+2. specificarea unei modalitãþi de compunere a acestor versiuni mai simple pentru a rezolva 
+problema originalã
+3. identificarea unor situaþii de bazã în care problema poate fi rezolvatã direct fãrã a necesita 
+descompuneri
+4. specificarea unor teste pentru identificarea acestor cazuri de bazã care sã fie luate în 
+considerare înaintea pasului recursiv
+Spre exemplu, în cazul calculului lungimii unei liste, prin funcþia lungime:
+1) se descompune în calculul lungimii restului listei: (lungime (REST lista))
+2) acest calcul se compune prin operaþia de adunare cu unitatea pentru a gãsi soluþia problemei 
+originale:
+	(+ 1 (lungime (REST lista)))
+3) situaþia de bazã apare în cazul liste vide care are lungimea 0
+4) se verificã dacã lista este vidã: (NULL lista)
+(DEFUN lungime (lista)
+(COND	((NULL lista) 0)
+	(T (+ 1 (lungime (REST lista))))
+))
+	Funcþia de inversare a listelor este prezentatã în continuare. În aceastã primã versiune 
+recursivã se observã greutatea pentru interpretorul Lisp de a adãuga un element la sfârºitul unei 
+liste. Aceastã operaþie are loc prin construirea întregii liste care duce la un consum mare de celule 
+CONS.
+(DEFUN rev0 (ls)
+(IF	(NOT (NULL ls))
+	(APPEND (rev0 (REST ls))
+		(LIST (FIRST ls))))
+)
+	O modalitate mai eficientã este de a avea ca parametri atât lista originalã cât ºi o listã 
+parþial inversatã. Aceastã a doua listã va avea la început primul element rezultat din parcurgerea 
+listei originale ºi, în momentul în care lista originalã va deveni vidã, recursivitatea se va opri ºi se 
+va întoarce rezultatul corespunzãtor. Având în vedere cã în aceastã listã se va memora un rezultat 
+parþial, aceastã modalitate de programare este numitã cu parametru de acumulare.
+(DEFUN rev1 (ls)
+	(rev1ac ls NIL))
+(DEFUN rev1ac (ls rez)
+(COND	((ENDP ls) rez)
+	(T (rev1ac (REST ls) (CONS (FIRST ls) rez)))
+))
+3.	DESFÃªURAREA LUCRÃRII
+	1. Se vor discuta ºi testa inclusiv folosind trasarea (cu TRACE, INSPECT, STEP) 
+funcþiile prezentate în continuare.
+
+	3. Se va desena manual graful de apel, pe câte un exemplu, pentru funcþiile care 
+implementeazã calculul factorialului, inversarea unei liste ºi calculul numãrului de atomi dintr-o 
+listã.
+
+	4. Sã se descrie în variantele recursivã ºi recursivã cu parametru de acumulare funcþii 
+care:
+a) calculeazã lungimea unei liste
+b) testeazã dacã o listã este ordonatã crescãtor
+c) eliminã dintr-o listã elementele nenumerice
+d) eliminã dintr-o listã toþi atomii nenumerici, indiferent de nivelul de imbricare pe care se aflã
+e) însumeazã atomii numerici de pe nivelul superficial al unei liste
+f) însumeazã atomii numerici de pe toate nivelurile unei liste
+g) calculeazã al n-lea element din ºirul lui Fibonacci
+4.	ÎNTREBÃRI ªI PROBLEME
+	1. Sã se scrie funcþiile care:
+a) sorteazã o listã
+b) calculeazã adâncimea maximã a unei liste multinivel
+c) concateneazã douã liste
+d) concateneazã un numãr nedefinit de liste
+e) substituie toate apariþiile unui element cu un altul într-o listã
+
+	2. Sã se compare consumul de resurse ºi durata de execuþie între variantele recursivã ºi 
+respectiv recursivã cu parametru de acumulare ale unei funcþii.
+
+	3. Sã se descrie funcþiile care:
+a) interclaseazã douã liste ordonate
+b) interclaseazã un numãr nedefinit de liste ordonate
+c) citeºte un numãr de stringuri de la tastaturã ºi întoarce lista ordonatã
+ 
+	4. Sã se descrie funcþiile care implementeazã operaþiile elementare (construcþie, 
+reuniune, intersecþie, diferenþã) asupra multi-seturilor. Un multiset este o generalizare a noþiunii 
+de set, în care un element are ataºat numãrul de apariþii. De exemplu, lista
+(a b c a a b) are asociat multiset-ul ((a . 3) (b . 2) (c . 1))
+5. SURSE
+;;; Calculul valorii functiei exponentiale
+;;; cu baza intreaga si exponent natural
+;; varianta recursiva
+(DEFUN exp0 (m n)
+(COND	((ZEROP n) 1)
+	(T (* m (exp0 m (- n 1))))
+))
+;; varianta recursiva cu parametru de acumulare
+(DEFUN exp1 (m n)
+	(exp1acc m n 1))
+(DEFUN exp1acc (m n prod)
+(COND	((ZEROP n) prod)
+	(T (exp1acc m (- n 1) (* prod m)))
+))
+
+;;; Calculul factorialului unui numar
+;; varianta recursiva
+(DEFUN fact0 (n)
+(COND	((> n 0) (* n (fact0 (- n 1))))
+	((ZEROP n) 1)
+	(T "Argument negativ sau nenumeric!?")
+))
+;; varianta recursiva cu parametru de acumulare
+(DEFUN fact1 (n)
+	(fact1acc n 1))
+
+(DEFUN fact1acc (n rez)
+(IF (ZEROP n)	rez	(fact1acc (- n 1) (* n rez)))
+)
+
+;;; Operatii simple pe liste
+
+;;; ultima celula CONS a unei liste.
+(DEFUN last0 (lis)
+(COND	((ATOM lis) lis)
+	((ENDP (REST lis)) lis)
+	(T (last0 (REST lis)))
+))
+
+;;; lista primelor "n" elemente dintr-o lista data
+;; varianta recursiva
+(DEFUN fata0 (ls n)
+(COND	((OR (NULL ls) (ZEROP n)) NIL)
+	(T (CONS	(FIRST ls)
+			(fata0 (REST ls) (- n 1))))
+))
+;; varianta recursiva cu parametru de acumulare
+(DEFUN fata1 (ls n)
+	(fat1ac ls n NIL))
+(DEFUN fat1ac (ls n rez)
+(COND	((OR (ENDP ls) (ZEROP n)) (REVERSE rez))
+	(T (fat1ac 	(REST ls)
+			(- n 1)
+			(CONS (FIRST ls) rez)))
+))
+
+;;; inversarea unei liste se face si in listele interioare
+(DEFUN rev-all (ls)
+(COND	((ATOM ls) ls)
+	(T (APPEND	(rev-all (REST ls))
+			(LIST (rev-all (FIRST ls)))))
+))
+
+;;; numarul atomilor dintr-o lista
+(DEFUN nratoms (x)
+(COND	((NULL x) 0)
+	((ATOM x) 1)
+	(T (+	(nratoms (FIRST x))
+		(nratoms (REST x))))
+))
+
+;;; copia unei liste
+(DEFUN copie (x)
+(COND	((ATOM x) x)
+	(T (CONS (copie (FIRST x)) (copie (REST x))))
+))
+
+;;; variantã pentru EQUAL care nu trateaza compararea structurilor 
+(DEFUN our-equal (obj1 obj2)
+(COND	((AND (ATOM obj1) (ATOM obj2))
+		(COND	((NUMBERP obj1) (= obj1 obj2))
+			((STRINGP obj1) (STRING= obj1 obj2))
+			(T (EQ obj1 obj2)))
+	)
+	((OR (ATOM obj1) (ATOM obj2)) NIL)
+	((EQ obj1 obj2) T)
+	((AND (LISTP obj1) (LISTP obj2))
+		(AND	(our-equal (FIRST obj1) (FIRST obj2))
+			(our-equal (REST obj1) (REST obj2)))
+	)
+))
+
+;;; eliminarea parantezelor interioare dintr-o listã
+;; variantã recursivã
+(DEFUN striv0 (lis)
+(COND	((NULL lis) NIL)
+	((ATOM lis) (LIST lis))
+	(T (APPEND (striv0 (FIRST lis))
+		   (striv0 (REST lis))))
+))
+;; varianta cu parametru de acumulare
+(DEFUN striv1 (lis)
+	(striv-acc lis NIL))
+(DEFUN striv-acc (lis rez)
+(COND	((NULL lis) rez)
+	((ATOM lis) (APPEND rez (LIST lis)))
+	((striv-acc (REST lis) (striv-acc (FIRST lis) rez)))))
+
+;;; o solutie pentru problema turnurilor din Hanoi
+(DEFUN hanoi (n sursa dest aux)
+(COND	((= n 1) (PRINT (LIST 'muta 'de 'pe sursa 'pe dest)))
+	(T	(hanoi (- n 1) sursa aux dest)
+		(PRINT (LIST 'muta 'de 'pe sursa 'pe dest))
+		(hanoi (- n 1) aux dest sursa))
+)	'**ok**	)
+
+;;; operatii cu multimi reprezentate ca liste de elemente
+(DEFUN reun0 (x y)
+(COND	((ENDP x) y)
+	((MEMBER (FIRST x) y)
+		(reun0 (REST x) y))
+	(T (CONS (FIRST x)
+		 (reun0 (REST x) y)))
+))
+(DEFUN inters0 (x y)
+(COND	((ENDP x) NIL)
+	((MEMBER (FIRST x) y)
+		(CONS (FIRST x) (inters0 (REST x) y)))
+	((inters0 (REST x) y))
+))
+(DEFUN diferenta (x y)
+(COND	((NULL x) NIL)
+	((MEMBER (FIRST x) y)
+		(diferenta (REST x) y))
+	((CONS	(FIRST x)
+		(diferenta (REST x) y)))
+))
+(DEFUN dif-simetrica (x y) (reun0 (diferenta x y) (diferenta y x)))
+(DEFUN test-inclusa (x y)
+(COND	((NULL x) T)
+	((MEMBER (FIRST x) y)(test-inclusa (REST x) y))
+	(T NIL)
+))
+(DEFUN test-disjuncte (x y)
+(COND	((NULL x) T)
+	((MEMBER (FIRST x) y) NIL)
+	((test-disjuncte (REST x) y))
+))
+
+;;; multimea partilor unei multimi	
+(DEFUN parti (x)
+(IF (NULL x) '(NIL) (extinde-cu (FIRST x) (parti (REST x)))) )
+;; intoarce multimea de multimi ce rezulta din adaugarea
+;; primului argument (un element)
+;; in fiecare multime din al doilea argument (multime de multimi)
+(DEFUN extinde-cu (elem set-multimi)
+(COND	((NULL set-multimi) NIL)
+	((CONS	(CONS elem (FIRST set-multimi))
+		(CONS	(FIRST set-multimi)
+			(extinde-cu elem (REST set-multimi)))))
+))
+ 
+
+ 
+ 
+
+
+
+20
+

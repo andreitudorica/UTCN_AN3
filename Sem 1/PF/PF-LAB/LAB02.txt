@@ -1,0 +1,265 @@
+LUCRAREA 2
+Reprezentare internã. Controlul evaluãrii.
+Definirea funcþiilor
+
+1.	SCOPUL LUCRÃRII
+	Se prezintã modul în care sunt reprezentate intern listele în Lisp pentru a permite 
+înþelegerea diferenþei dintre identitatea ºi izomorfismul structural al obiectelor. De asemenea, sunt 
+prezentate cunoºtinþele de bazã necesare pentru a putea defini noi funcþii.
+2.	CONSIDERAÞII TEORETICE
+2.1.	Reprezentarea internã a listelor.
+
+2.1.1. Perechi punct ºi celule CONS
+
+	Notaþia ( <x> . <y> ), unde <x> ºi <y> stau pentru orice construcþie (atomi, liste etc.), 
+este echivalent cu rezultatul evaluãrii formei (CONS '<x> '<y> ). Apelul CONS alocã dinamic 
+spaþiu pentru un element de listã Lisp. Elementele unei liste Lisp poartã numele de celule CONS 
+ºi pot fi vãzute ca niºte structuri cu douã câmpuri: câmpul CAR (FIRST) ºi câmpul CDR 
+(REST). Funcþiile CAR ºi CDR, aplicate asupra unei celule CONS, întorc cele doua câmpuri. 
+Când avem de-a face cu liste, câmpul CDR conþine adresa urmãtoarei celule CONS, dar în 
+general ambele câmpuri pot conþine adresa unui obiect Lisp oarecare, indiferent de tip. Deci 
+putem memora în câmpurile CAR adrese de celule CONS (liste încuibãrite) sau în câmpurile 
+CDR adrese de atomi.
+	Pentru a putea denota în notaþie externã o celulã CONS, indiferent dacã aceasta este 
+element de lista sau nu (câmpul CDR nu conþine adresa unei alte celule CONS), se foloseºte 
+notaþia cu perechi punct, cele douã elemente ale unei perechi desemnând conþinutul câmpurilor 
+CAR ºi CDR dintr-o celulã CONS.
+	Urmãtoarele notaþii sunt echivalente:
+(a b c d)	<=>	(a . (b c d))	<=> (a . (b . (c d)))	<=>
+(a b . (c d))	<=>	(a b c .(d) )	<=> (a b c d . NIL)	<=>
+(a . (b . (c . (d))))	<=>	(a . (b . (c . (d . NIL))))
+(a)	<=>	(a . NIL)	<=>	(CONS 'a NIL)
+
+
+Exemple:	       Notaþie externã		 Reprezentare internã
+                                         -¦¦T¦¬  -¦¦T¦¬  -¦¦T¦¬
+                 ( a (b) c )             - a-o+¦>+ .-o+¦>+ c-.-
+                                         L¦¦+¦-  L¦++¦-  L¦¦+¦-
+                                                   -
+                                                 -¦+T¦¬
+                                                 - b-.-
+                                                 L¦¦+¦-
+                                                 -¦¦T¦¬
+                 ( a . b )                       - a-b-
+                                                 L¦¦+¦-
+Urmãtoarele construcþii nu pot fi scrise fãrã punct:
+	(a . b)		<=>	(CONS 'a 'b)	
+	(a b c . d)	<=>	(a . (b . (c . d)))
+2.1.2. Identitate ºi izomorfism
+	Un nume (simbol) identificã unic un obiect de tip atom simbolic intern. Douã liste sunt 
+considerate identice (EQ întoarce T la compararea lor) dacã sunt construite din exact aceleaºi 
+celule CONS ºi deci ocupã acelaºi loc în memorie. Douã liste sunt considerate egale d.p.d.v. 
+structural (EQUAL întoarce T la compararea lor), chiar daca nu sunt identice, dar în notaþie 
+externã sunt scrise la fel. Oricare douã obiecte care sunt "egale" conform lui EQ vor fi "egale" ºi 
+din punctul de vedere al lui EQUAL - nu ºi invers însã! EQ ºi EQUAL vor produce întotdeauna 
+acelaºi rezultat atunci când ambele argumente sunt atomi simbolici. Exemple:
+	*(EQ 'a 'b)		| *(EQUAL '(a b) '(a b))
+	NIL			| T
+	*(EQUAL 'a 'b)		| *(EQ '(a b) '(a b))
+	NIL			| NIL
+	*(EQ 'a 'a)		| *(EQUAL '(a b c) '(a b))
+	T			| NIL
+
+*(SETF A '( (a b) h (a b) ))	| *(EQUAL B '(h (a b)) )
+((a b) h (a b))			| T
+*(SETF B (REST a) )		| *(EQUAL (CAR A) (CAR(LAST A)))
+(h (a b))			| NIL
+*(EQ (REST A) '(h (a b)) )	| *(EQ (CAR A) (CAR (LAST A)))
+NIL				| NIL
+*(EQ (REST A) B)		| *(EQ (LAST A) (LAST B))
+T				| T
+2. 2.	Funcþii pentru controlul evaluãrii
+1. QUOTE	- Returneazã argumentul neevaluat. Caracterul apostrof în faþa unei expresii 
+este de fapt o prescurtare a unei forme QUOTE. Exemple:
+	*'a			| *''a		| *'(a 'b c)
+	A			| (QUOTE a)	| (A (QUOTE B) C)
+	*(QUOTE a)		| *(QUOTE 'a)
+	A			| (QUOTE A)
+2. EVAL	- Aceastã funcþie stã la baza funcþionãrii sistemului Lisp, nucleul 
+interpretorului efectuând în buclã forma:	(PRINT (EVAL (READ) ) ).
+EVAL este folositã în programe atunci când se doreºte o dublã evaluare a unei forme. Exemple:
+*(SETF a '(FIRST(QUOTE (a b c))))	| *(EVAL 'b)
+(FIRST (QUOTE (A B C)))			| A
+*(SETF b 'a)				| *(EVAL b)
+A					| (FIRST (QUOTE (A B C)))
+*b					| *(EVAL (EVAL b))
+A					| A
+*a					| *(EVAL a)
+(FIRST (QUOTE (A B C)))			| A
+3. OR		- Evalueazã parametrii de la stânga spre dreapta pânã când una dintre forme 
+întoarce o valoare diferitã de NIL, valoare care reprezintã rezultatul lui OR. Dacã toate 
+formele produc NIL, rezultatul este NIL. Formele ce urmeazã primei forme ce a întors 
+valoarea ne-NIL nu se mai evalueazã!
+4. AND	- Evalueazã formele argumente pânã când una întoarce NIL, considerat 
+rezultatul lui AND. Dacã nici una nu întoarce NIL, AND va întoarce valoarea ultimei forme. 
+Formele ce urmeazã primei forme ce a întors valoarea NIL nu se mai evalueazã!
+5. COND	- Formele COND au sintaxa:
+	(COND	(val1 f11 f12 ... f1m)		; unde vali sunt considerate
+		(val2 f21 f22 ... f2n)		; forme ce întorc valori booleene
+		...				; iar
+		(valp fp1 fp2 ... fpq))		; fij sunt forme
+Se evalueazã formele vali în ordine pânã când e întâlnit primul care întoarce o valoare ne-NIL. În 
+continuare se evalueazã formele fij aflate în lista respectivã, rezultatul lui COND fiind valoarea 
+ultimei forme din listã. Dacã nici un predicat din COND nu e diferit de NIL, se întoarce NIL. 
+Exemplu:
+	*(SETF a (SETF b (SETF c 'orice) ) )		| *a
+	*(COND	(NIL (SETF c 'RAU!) )			| E-ATOM
+		((LISTP c) 'TOT_RAU)			| *b
+		((ATOM c) (SETF a 'e-atom) )		| ORICE
+		((SYMBOLP c) (SETF b 'simb) ) )		| *c
+	E-ATOM						| ORICE
+
+6. IF		- Este o formã particularã a lui COND, anume:
+(IF   <f-test>   <f-then>   <f-else>)	este echivalent cu
+
+(COND   (<f-test>  <f-then>)   (T  <f-else>) )
+7. WHEN ºi UNLESS	- Sunt forme particulare ale lui COND:
+(WHEN ftest f1 f2 ... fn)	<=>	(COND (ftest f1 f2 ... fn) )
+(UNLESS ftest f1 ... fn)	<=>	(COND (ftest NIL) (T f1 f2 ... fn))
+2. 3.	Definirea funcþiilor
+	Funcþia DEFUN permite definirea de noi funcþii. Forma DEFUN nu îºi evalueazã 
+parametrii ºi are urmãtoarea sintaxã:
+	(DEFUN <numeF> <par-list> <f1> <f2> ... <fm>)
+defineºte o funcþie cu numele <numeF> ºi corpul dat de formele <f1>, <f2>, ..., <fm>.
+	a) Daca <par-list> e o listã de forma (p1 p2 ... pn), atunci se defineºte o funcþie cu numãr 
+fix de argumente - n - ce se vor evalua înainte de apel. În urma definirii, un apel de tipul (numef 
+pa1 pa2 ... pan) va avea ca efect:
+1) legarea temporarã a parametrilor formali pi la valori evaluate ale parametrilor actuali pai
+2) evaluarea formelor f1, f2, ..., fm
+3) refacerea valorilor simbolurilor pi la cele anterioare apelului
+4) întoarcerea valorii formei fm ca valoare a apelului.
+Exemplu:
+*(DEFUN margini (l)			
+	(CONS (FIRST l) (LAST l)))
+MARGINI
+*(margini '(a b c))		
+(A C)
+	b) Daca "par-list" are o formã mai complicatã, spre exemplu:
+(p1 ... pn &optional o1 ... om &rest var &aux a1 ... ap)
+	caz în care se defineºte o funcþie cu n parametri obligatorii ºi m parametri opþionali, 
+"var" se leagã la lista de valori din forma de apel ce rãmâne prin scoaterea primelor m+n valori, 
+iar ai sunt variabile auxiliare locale funcþiei.
+3.	DESFÃªURAREA LUCRÃRII
+	1. Sã se scrie urmãtoarele liste în notaþia cu punct:
+	a) ((a b) c)		b) (a (b c))		c) (a (b (c)))
+	d) ( () )		e) ((a) (b) (c))
+
+	2. Sã se scrie urmãtoarele construcþii folosind cât mai puþine puncte în notaþie:
+	a) (x (a b) . (c d))		b) ( (a . b) . (c . d) )
+	c) ( (a . NIL) . NIL) )		d) ( ((a) . (b)) . (c . (d . NIL)) )
+	e) ( (NIL . (NIL . NIL)) . NIL )
+
+	3. Sã se reprezinte cu ajutoclidrul celulelor CONS listele:
+	a) (a b c d)		b) (a (b c) d)		c) ( (a) (b) (c))
+	d) (a (b (c)))		e) (((a) b) c)		f) (((a)))
+	g) (a . b)		h) ((a b) . c)		i) ( (a) .(b . NIL) )
+	j) ( a . (b . (c . d)))	k) ( (a . b) (c . d) (e . f) )
+
+	4. Sã se evalueze:
+	*(SETF a (SETF b (SETF c 'orice)))	| *(EVAL 'a)
+	*(SETF orice '(CONS a b))		| *(EVAL a)
+	*(EVAL ''a)				| *(EVAL (EVAL a))
+
+	*(OR (CDR '(b)) (CAR '(a b)) (SETF a 'oare?) )		| *a
+	*(OR)							| *b
+	*(AND (CAR '(a b)) (CDR '(b)) (SETF b 'oare?) )
+	*(AND)
+
+	*(OR (AND 'ceva '(SETF a nil))		| *a
+		(EQ a b)			| *b
+		(SETF b '(hopa)))
+
+	5. Fie formele de mai jos:
+	*(SETF p '(a (b (c)) d))		| *(SETF q (REST p))
+	*(SETF r (SECOND p))		| *(SETF s (CONS (REST r) q))
+	Sã se calculeze valorile atomilor p, q, r, s ºi sã se reprezinte în notaþia cu celule CONS.
+	6. Fie p, q, r, s setaþi conform exerciþiului anterior. Sã se evalueze:
+	*(EQUAL (SECOND p) '(b (c)))	| *(EQUAL 'a (FIRST p))
+	*(EQ (SECOND p) '(b (c)))	| *(EQ 'a (FIRST p))
+	*(EQ (SECOND p) (FIRST q))	| *(EQ (REST r) (FIRST s))
+	*(EQ (SECOND p) (SECOND s))	| *(EQ (REST r) '((c)))
+	7. Sã se evalueze:
+	*(SETF a '(a (b c) d) )		| *(EQ a c)
+	*(SETF b (REST a) )		| *(EQUAL a (APPEND a NIL))
+	*(SETF c (CONS 'a b) )		| *(EQ a (APPEND a NIL))
+	*(EQUAL a c)			| *(EQ (CADDR a) (last a))
+	*(EQ (FIRST a) (FIRST c))	| *(EQ (CONS 'a 'b)(CONS 'a 'b))
+	*(EQ (REST a) (REST c))
+
+	*(MEMBER 'a '(b e (a) a d) )		| *(MEMBER 'a '(b e (a) d) )
+	*(MEMBER '(a) '(e (a) a d) )
+	*(MEMBER '(a) '(e (a) a d) :test #'EQUAL )
+	*(MEMBER b a)				| *(MEMBER b a
+						|	   :test #'EQUAL)
+
+	8. Sã se examineze definiþiile de funcþii ºi sã se testeze efectul lor:
+(DEFUN first (l)    | (DEFUN third (l)    | (DEFUN medn1 (&rest l)
+    (CAR l))        |     (CADDR l))      |     (/ (APPLY #'+ l)
+(DEFUN rest (l)     | (DEFUN med3 (p q r) |        (LENGTH l)))
+    (CDR l))        |     (/ (+ p q r)) )
+(DEFUN second (l)   | (DEFUN medn (&rest l)
+    (CADR l))       |     (/ (EVAL (CONS '+ l)) (LENGTH l)))
+
+(DEFUN heron1 (a b c )
+	(SETF p (/ (+ a b c) 2) )
+	(* p (- p a) (- p b) (- p c)) )
+(DEFUN heron2 (a b c &aux p)
+	(SETF p (/ (+ a b c) 2) )
+	(* p (- p a) (- p b) (- p c)) )
+(DEFUN heron3 (a b c &aux (p (/ (+ a b c)) ) )
+	(* p (- p a) (- p b) (- p c)) )
+
+(DEFUN heron4 (a b c)
+	(LET ( ( p ) )
+		(SETF p (/ (+ a b c) 2))
+		(* p (- p a) (- p b) (- p c))
+	)
+)
+
+(DEFUN heron5 (a b c)
+	(LET ( (p (/ (+ a b c) 2) ) )
+		(* p (- p a) (- p b) (- p c))
+	)
+)
+
+(DEFUN ?12-a (el)
+(IF (NUMBERP el)
+	(IF (= el 1) 'UNU!
+	    (IF (= el 2) 'DOI! )
+	)
+))
+
+(DEFUN ?12-b (el)
+ (WHEN (NUMBERP el)
+	(WHEN (= el 1) 'UNU!)
+	(WHEN (= el 2) 'DOI!)
+))
+
+
+(DEFUN ?123 (el)
+(COND	((NUMBERP el)
+		(COND	((= el 1) 'UNU)
+			((= el 2) 'DOI)
+			((= el 3) 'TREI)
+			(T 'ALT_NUMAR)
+		)
+	)
+	(T 'ALTCEVA)
+))
+
+(DEFUN tip-el (el)
+(COND	((AND (ATOM el) (LISTP el)) "LISTA VIDA")
+	((LISTP el) "LISTA NEVIDA")
+	((SIMBOLP el) "ATOM SIMBOLIC")
+	((STRINGP el) "ATOM SIR")
+	(T "ATOM NUMERIC")
+))
+ 
+
+ 
+ 
+
+
+
+
+

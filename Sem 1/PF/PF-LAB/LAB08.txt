@@ -1,0 +1,450 @@
+LUCRAREA 8
+Arbori în Lisp
+
+1.	SCOPUL LUCRÃRII
+	Lucrarea are drept scop familiarizarea cu metodele de prelucrare a structurilor 
+arborescente în limbajul Lisp.
+2.	CONSIDERAÞII TEORETICE
+	Obiectele recursive liniare, numite ºi liste liniare sau secvenþe, constituie cele mai simple 
+tipuri recursive. Un tip de obiecte recursive neliniare foarte rãspândit este tipul listelor din limbajul 
+Lisp.
+	Un tip arborescent este o cascadã de obiecte a cãror structurã este alcãtuitã din douã 
+sau mai multe obiecte descendente de tip arborescent, precum ºi un obiect de un anumit tip numit 
+ºi nod (în cazul particular al arborilor binari aceºti descendenþi sunt sub-arborii stâng ºi respectiv 
+drept).
+	Termenul de arbore este utilizat în Lisp pentru a referi unele perechi CONS, precum ºi 
+toate perechile CONS accesibile tranzitiv prin legãturi CAR ºi CDR pânã când nu se mai întâlnesc 
+alte perechi CONS (acestea poartã ºi numele de frunze ale arborelui). Listele ºi arborii nu sunt 
+mutual exclusive, sunt doar puncte de vedere diferite privitoare la structuri ºi perechi CONS.
+	Traversarea, inspectarea obiectelor neliniare de tip arborescent este constituita de fapt 
+din liniarizarea acestor structuri, adicã transformarea lor conceptualã într-o listã liniarã. În cazul 
+tipului arborescent sunt posibile ºase ordonãri liniare grupate în trei categorii:
+1) prefix	- nod, stânga, dreapta;	nod, dreapta, stânga
+2) infix	- stânga, nod, dreapta;	dreapta, nod, stânga
+3) postfix	- stânga, dreapta, nod;	dreapta, stânga, nod
+	În acest mod, traversarea obiectelor arborescente se reduce la parcurgerea unei secvenþe 
+rezultate din liniarizarea conceptualã a arborescenþei într-o ordine prestabilitã.
+	Operaþia de cãutare a unui obiect dintr-o structurã arborescentã se reduce la operaþia de 
+cãutare a apartenenþei unui nod într-o structurã de listã liniarã, adicã în secvenþa rezultatã în urma 
+unei liniarizãri realizate în urma traversãrii. Acest mod de privire a operaþiei este relativ ineficient, 
+în special în cazurile în care luarea în calcul a informaþiei de structurare cuprinse în obiectul 
+arborescent ar avea un efect benefic asupra cãutãrii, adicã daca sunt cuprinse în arbore informaþii 
+de ordine.
+	Operaþia de construire a unui arbore dintr-o secvenþã de obiecte prezentata pe un 
+anumit suport este operaþia inversã traversãrii. Dacã arborele se prezintã în ordine infix, aceastã 
+operaþie este imposibilã. Dacã secvenþa se prezintã în ordine prefix sau postfix, construcþia 
+arborelui dintr-o secvenþã este posibila dacã existã o modalitate pentru a discerne nodurile 
+terminale din arbore (frunzele).
+	Funcþii ºi predicate întâlnite în prelucrarea structurilor arborescente sunt:
+? COPY-TREE - are doi parametri, sursa operaþiei de copiere ºi destinaþia acestei operaþii. 
+Funcþia realizeazã operaþia de copiere a listelor alcãtuite din perechi CONS. Execuþia acestei 
+funcþii se realizeazã prin apeluri recursive pe poziþiile CAR ºi CDR pânã la întâlnirea unui 
+obiect atomic sau nul.
+? ENDP - are ca parametru o listã. Este un predicat care testeazã dacã s-a ajuns la sfârºitul 
+listelor prin verificarea ATOM ºi NULL. Se utilizeazã în cazuri în care de o importanþã 
+deosebitã este viteza prelucrãrii ºi nu siguranþa acesteia.
+? PUSH - aºteaptã ca parametri un obiect ºi o poziþie în cadrul unui alt obiect. Efectul acestui 
+macro constã în adãugarea elementului specificat pe poziþia respectivã. Urmãtoarele forme 
+sunt echivalente:
+	(PUSH ob poz)	=	(SETF poz (CONS ob poz)). 
+Exemplu:
+	*(SETF x '(a (b c) d))
+	(A (B C) D)
+	*(PUSH 'm (CADR x))
+	(M B C)
+	*x
+	(A (M B C) D)
+2.1.	Reprezentarea arborilor în Lisp
+	Existenþa unui set puternic de funcþii de manipulare a listelor la nivelul limbajului induce 
+imediat posibilitatea reprezentãrii arborilor prin liste imbricate. De exemplu un arbore de tipul:
+                              10
+                        /      |    \
+                       5       8     15
+                     /    \   /  \
+                    1      6 7    9
+poate fi reprezentat prin lista:
+(10 (5 (1 6))
+    (8 (7 9))
+    15)
+sau, dacã orice nod poate avea maximum trei fii, prin lista:
+(10 (5 	(1 nil nil nil)
+	nil
+	(6 nil nil nil))
+    (8  ...
+3.	DESFÃªURAREA LUCRÃRII
+	1. Sã se discute modalitatea de reprezentare a structurilor arborescente, precum ºi 
+algoritmii implementaþi în sursele prezentate.
+
+	2. Sã se traseze (inspecteze), pentru vizualizarea recursivitãþii, toþi algoritmii de 
+manipulare a structurilor arborescente dezvoltaþi în sursele prezentate.
+
+	3. Sã se traseze în mod pas cu pas, pentru vizualizarea secvenþialã a structurilor 
+arborescente, funcþiile de inserare nod ºi de eliminare nod din toþi algoritmii de manipulare a 
+structurilor arborescente dezvoltaþi în sursele prezentate.
+
+	4. Sã se scrie funcþiile de eliminare, tipãrire ºi funcþia principalã pentru exemplul cu 
+arbori binari de cãutare, care foloseºte structuri (DEFSTRUCT).
+
+	5. Urmãriþi particularitãþile de definire a arborilor utilizând facilitatea de structurare 
+DEFSTRUCT din Lisp.
+
+	6. Sã se studieze arborii care se formeazã în cuprinsul aplicaþiei de codificare dupã 
+algoritmul Huffman.
+4.	ÎNTREBÃRI ªI PROBLEME
+	1. Sã se scrie un program Lisp care afiºeazã toate frunzele din cadrul unui arbore.
+
+	2. Sã se scrie un program Lisp care calculeazã adâncimea maximã dintr-un arbore.
+
+	3. Observaþi similitudinea celor douã rezolvãri precedente cu funcþiile de atomizare a 
+unei liste ºi de calcul a adâncimii maxime într-o listã.
+
+	4. Sã se gãseascã o modalitate de reprezentare a arborilor prin liste de asociaþie sau 
+proprietãþi ºi sã se propunã un algoritm de inserþie si eliminare pe modelul creat.
+5.	SURSE
+;;; Funcþiile de mai jos lucreazã pe arbori binari de cãutare
+;;; de forma: (( cheie . contor) nodst noddr ).
+;;; cheie este ºir de caractere, contor este numarul de apariþii,
+;;; nodst ºi noddr sunt liste pentru subarborii stânga ºi dreapta.
+
+;; Creare nod
+(DEFUN mk-nod ($sir &optional (nr 1) st dr )
+	(LIST (CONS $sir nr) st dr ))
+
+
+
+;; Tiparire arbore
+(DEFUN pr-arb ($arb &optional (offs 0) )
+(WHEN (NOT (NULL $arb))
+	(pr-arb (SECOND $arb) ( + offs 4))
+	(pr-nod $arb offs)
+	(pr-arb (THIRD $arb ) ( + offs 4))
+))
+;; Tipãrirea unui nod la offs spaþii de la margine
+(DEFUN pr-nod ($nod &optional (ofs 0) )
+(DO*	( (i ofs (- i 1)) )
+	((= i 0) (PRINC (FIRST $nod )) (TERPRI))
+	(PRINC " ")
+))
+
+;; Inserarea unui sir in arbore
+;; Daca exista deja, se va incrementa contorul.
+(DEFUN inser (sir arb )
+(COND	((NULL arb ) (mk-nod sir))
+	((STRING-EQUAL sir (CAAR arb))
+		(INCF (CDAR arb )) arb)
+	((STRING-LESSP sir (CAAR arb))
+		(SETF (SECOND arb) (inser sir (SECOND arb))) arb)
+	(T (SETF (THIRD arb) (inser sir (THIRD arb))) arb)
+))
+
+;; Eliminarea unui nod din arbore
+(DEFUN elim-nod (sir arb )
+(COND	((NULL arb) nil)
+	((STRING-LESSP sir (CAAR arb))
+		(SETF (SECOND arb)(elim-nod sir (SECOND arb))) arb)
+	((STRING-LESSP (CAAR arb) sir )
+		(SETF (THIRD arb) (elim-nod sir (THIRD arb))) arb)
+; Daca exista nod cu cheia egala cu sir
+; si are mai multe aparitii, atunci contor se va decrementa.
+	((NOT (= 1 (CDAR arb)))
+		(DECF (CDAR arb)) arb)
+	((OR (NULL (SECOND arb)) (NULL (THIRD arb)))
+		(OR (SECOND arb) (THIRD arb)))
+	(T (LET (vnodMAX-MIN)
+		(SETF (SECOND arb) (elimMAX-MIN (SECOND arb)))
+		(SETF (FIRST arb) vnodMAX-MIN)
+		arb))
+))
+
+
+
+;; Elimina cel mai mare nod dintr-un subarbore.
+;; Valoarea eliminata o lasa in vnodMAX-MIN.
+(DEFUN elimMAX-MIN (arb)
+(COND	((NULL (THIRD arb))
+		(SETF vnodMAX-MIN (FIRST arb))
+		(SECOND arb))
+	(T	(SETF (THIRD arb) (elimMAX-MIN (THIRD arb)))
+		arb)
+))
+;;; Funcþiile de mai jos lucreazã pe arbori binari de cãutare.
+(DEFUN inserbin (x a)
+(COND	((NULL a) (LIST x))
+	((< x (FIRST a))
+		(LIST	(FIRST a)
+			(inserbin x (CADR a))
+			(CADDR a)))
+	((> x (FIRST a))
+		(LIST	(FIRST a)
+			(CADR a)
+			(inserbin x (CADDR a))))
+	(T a)
+))
+(DEFUN elimin (x a)
+(COND	((NULL a) NIL)
+	((< x (FIRST a))
+		(LIST	(FIRST a)
+			(elimin x (CADR a))
+			(CADDR a)))
+	((> x (FIRST a))
+		(LIST	(FIRST a)
+			(CADR a)
+			(elimin x (CADDR a))))
+	((NULL (CADDR a)) (CADR a))
+	((NULL (CADR a)) (CADDR a))
+	(T (LET ((b (elim (CADR a))))
+		(LIST	(CADR b)
+			(FIRST b)
+			(CADDR a))))
+))
+
+
+
+
+(DEFUN elim (a)
+(COND	((NULL (CADDR a)) (LIST (CADR a) (FIRST a)))
+	(T (LET ((b (elim (CADDR a))))
+		(LIST	(LIST	(FIRST a)
+				(CADR a)
+				(FIRST b))
+			(CADR b))
+	))
+))
+
+(DEFUN mainbin ()
+(SETF arb NIL)
+(FORMAT T "~%
+Introduceti numerele ce doriti sa fie inserate in arbore~%")
+(DO ((ins (READ) (READ)))
+	((OR (NULL ins) (NOT (NUMBERP ins)))
+		'Am-terminat (printarbbin arb 0))
+	(SETF arb (inserbin ins arb))
+	(printarbbin arb 0)
+	(FORMAT T "~%               ")
+)
+(FORMAT T "~%
+Introduceti numerele ce doriti sa fie eliminate din arbore~%")
+(DO ((elm (READ) (READ)))
+	((OR (NULL elm)(NOT (NUMBERP elm)))
+		'Am-eliminat (printarbbin arb 0))
+	(SETF arb (elimin elm arb))
+	(printarbnin arb 0)
+	(FORMAT T "~%               ")
+))
+
+(DEFUN indbin (k)
+(FORMAT T "~%")
+(DO ((i k (- i 1)))
+	((ZEROP i))
+	(FORMAT T " ")
+))
+
+(DEFUN printarbbin (arb h)
+(COND 	((NULL arb))
+	(T	(printarbbin (CADDR arb) (+ h 3))
+		(indbin h) (PRINC (FIRST arb))
+		(printarbbin (CADR arb) (+ h 3)) )
+))
+
+
+;;; Funcþiile de mai jos lucreazã
+;;; pe arbori binari perfect echilibraþi.
+
+(DEFUN index (l i)
+(COND	((EQL i 1) (FIRST l))
+	(T (index (REST l) (- i 1)))
+))
+
+(DEFUN front (l k)
+(COND	(( > k 0)
+		(CONS (FIRST l)(front (REST l) (- k 1))))
+	(T NIL)
+))
+
+(DEFUN restl (l i)
+(COND 	((ZEROP i) l)
+	(T (restl (REST l) (- i 1)))
+))
+
+(DEFUN consarbeq (ln)
+(COND	((NULL ln) NIL)
+	(T
+	(COND	((= (LENGTH ln) 2)
+			(LIST	(FIRST ln)
+				(LIST (SECOND ln) NIL NIL)
+				NIL))
+		((= (LENGTH ln) 1)
+			(LIST (FIRST ln) NIL NIL))
+		(T
+			(LET ((nc (TRUNCATE (+ (/ (LENGTH ln) 2) 1))))
+				(LIST	(index ln nc)
+					(consarbeq (front ln (- nc 1)))
+					(consarbeq (restl ln nc))))
+		)
+	))
+))
+
+(DEFUN indechi (k)
+(FORMAT T "~%")
+(DO ((i k (- i 1)))
+	((ZEROP i))
+	(FORMAT T " ")
+))
+
+(DEFUN printarbechi (arb h)
+(COND	((NULL arb))
+	(T
+		(printarbechi (CADDR arb) (+ h 3))
+		(indechi h) (PRINC (FIRST arb))
+		(printarbechi (CADR arb) (+ h 3)))
+))
+
+(SETF list '(8 9 7 3 2 1 5 6 4))
+(SETF arbore (consarbeq list))
+(printarbechi arbore 0)
+
+
+;;; Funcþiile de mai jos lucreazã pe arbori binari de cãutare
+;;; definiþi cu ajutorul structurilor.
+
+(DEFSTRUCT arb
+	(val	nil)
+	(arbst	nil)
+	(arbdr	nil)
+)
+(DEFUN inserstr (x a)
+(COND	((NULL (arb-val a)) (SETF (arb-val a) x))
+	((< x (arb-val a))
+		(IF (arb-arbst a)
+			(inserstr x (arb-arbst a))
+			(inserstr x (SETF (arb-arbst a) (MAKE-arb)))))
+	((> x (arb-val a))
+		(IF (arb-arbdr a)
+			(inserstr x (arb-arbdr a))
+			(inserstr x (SETF (arb-arbdr a) (MAKE-arb)))))
+	(T a)
+))
+
+(DEFUN mainstr ()
+(SETF arbin (MAKE-arb))
+(FORMAT T "~%
+Introduceti numerele ce doriti sa fie inserate in arbore~%")
+(DO ((ins (READ) (READ)))
+	((OR (NULL ins) (NOT (NUMBERP ins)))
+		'Am-terminat (printarbstr arbin 0))
+	(inserstr ins arbin)
+	(printarbstr arbin 0)
+	(FORMAT T "~%               ")
+))
+
+(DEFUN indstr (k)
+(FORMAT T "~%")
+(DO ((i k (- i 1)))
+	((ZEROP i))
+	(FORMAT T " ")
+))
+
+(DEFUN printarbstr (a h)
+(COND	((NULL a))
+	(T	(printarbstr (arb-arbdr a) (+ h 3))
+		(indstr h) (PRINC (arb-val a))
+		(printarbstr (arb-arbst a) (+ h 3)))
+))
+
+(SETF ListaTestHuff	'(	;; lista text pentru testare
+			  "A" "B" "C" "D" "E" "F" "A" "B" "C" "D"
+			  "A" "B" "A" "B" "A" "A" "A" "A" "A" "A"))
+
+;;;	Constructor MultiSet
+(DEFUN MultiSet (Lista) (MultiSetAc Lista NIL))
+(DEFUN MultiSetAc (Lista Ac)
+(COND	((NULL Lista) Ac)
+	(T (MultiSetAc (REST Lista) (Inc (FIRST Lista) Ac)))
+))
+(DEFUN Inc (El MultiSet)	;; inserare ELement in MultiSet
+(COND	((NULL MultiSet)   (CONS (CONS El 1) MultiSet))
+	((EQUAL El (CAAR MultiSet))
+		(CONS	(CONS	El
+				(+ 1 (CDAR MultiSet)))
+			(CDR MultiSet)))
+	(T (CONS (CAR MultiSET) (Inc El (CDR MultiSet))))
+))
+
+;;	Generearea listei de probabilitati de aparitie
+(DEFUN ListProb (Text)
+(LET* ((Aparitii (MultiSet Text))
+       (NrT (LENGTH Text))	 )
+(MAPCAR	#'(LAMBDA (x) (CONS (FIRST x) (LIST (/ (REST x) NrT))))
+		Aparitii)
+))
+
+;; Start algoritm de constructie arbore Huffman
+(ListProb ListaTestHuff)
+
+;;	Selectori pentru nodul din arborele Huffman
+(DEFUN Prob (Pereche)	(FIRST (REST Pereche)))
+(DEFUN Nod  (Pereche)	(FIRST Pereche))
+
+;;	Sortarea unei liste dupa probabilitatea de aparitie
+(DEFUN SortIn (Lista)
+(COND	((NULL Lista) NIL)
+	(T (InserH (FIRST Lista)(SortIn (REST Lista))))
+))
+
+;;	Inserare nod in arbore Huffman
+(DEFUN InserH (Pereche Lista)
+(COND	((NULL Lista) (LIST Pereche))
+	((< (Prob Pereche) (Prob (FIRST Lista)))
+		(CONS Pereche Lista))
+	(T (CONS (FIRST Lista) (InserH Pereche (REST Lista))))
+))
+
+;;	Construirea arborelui Huffman, dupa probabilitati
+(DEFUN ConsArb (Lista)
+(COND	((NULL Lista) NIL)
+	((NULL (REST Lista)) (Nod (FIRST Lista)))
+	(T (ConsArb (InserH	(Comb (FIRST Lista) (SECOND Lista))
+				(REST (REST Lista)))))
+))
+;;	Combinarea a doua noduri
+(DEFUN Comb (Pereche1 Pereche2)
+(LIST	(LIST 'Node (Nod Pereche1) (Nod Pereche2))
+	(+ (Prob Pereche1) (Prob Pereche2))
+))
+
+;;	Etichetarea arborelui Huffman
+(DEFUN ExCale (Arbore) (ExC Arbore ""))
+(DEFUN ExC (Arbore Cale)
+(COND	((Frunza Arbore) (LIST (LIST Arbore Cale)))
+	(T (APPEND	(ExC	(LeftTree  Arbore)
+				(STRING-APPEND Cale "0"))
+			(ExC	(RightTree Arbore)
+				(STRING-APPEND Cale "1"))))
+))
+
+;;	Selectori pentru arborele Huffman
+(DEFUN Frunza (Arbore)   (ATOM Arbore))
+(DEFUN LeftTree  (Arbore)   (SECOND Arbore))
+(DEFUN RightTree (Arbore)   (THIRD  Arbore))
+
+;;;	Functia principala de apel pentru Huffman-izare
+(DEFUN Huffman (ListaProb)
+(ExCale  (ConsArb  (SortIn ListaProb))))
+
+(DEFUN CodHuff (ListaText)
+(MAPCAR #'(LAMBDA (x)
+		(SECOND (ASSOC x
+			       (Huffman (ListProb ListaText))
+			       :test #'EQUAL)))
+	ListaText)
+)
+
+(CodHuff ListaTestHuff)
+ 
+
+ 
+ 
+
+
+
+69

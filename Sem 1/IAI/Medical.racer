@@ -1,0 +1,258 @@
+(in-knowledge-base medicaldb medical-database)
+
+(signature 
+	:atomic-concepts
+	(	
+	
+		;;; persoane/top
+		persoana
+		pacient
+		tratament
+		personal-medical
+		diagnostic
+
+		;;; personal-medical
+		farmacist
+		asistent
+		medic
+		dentist 
+		
+		;;;asistenti
+		infirmier
+		brancardier
+		sora
+		
+		;;;medici
+		nutritionist
+		generalist
+		radiolog
+		
+		;;;medici generalisti
+		medic-clinic
+		medic-paraclinic
+		
+		;;;medic paraclinic
+		medic-de-familie
+		
+		
+		
+		
+		
+	)
+	
+	:roles
+	(
+		(is-pacient-of 
+			:inverse is-medic-of
+			:domain pacient
+			:range medic
+		)
+		
+		(is-assistant-of
+			:inverse is-assisted-by
+			:domain asistent
+			:range medic
+		)
+		
+		(este-sub-tratament
+			:inverse pacientul-sub-tratament
+			:domain pacient
+			:range tratament
+		)
+		
+		(medic-curant
+			:inverse se-ocupa-de-tratament
+			:domain tratament
+			:range  medic-clinic
+		)
+		(a-cerut-tratament
+			:inverse tratament-cerut-de
+			:domain medic-de-familie
+			:range tratament
+		)
+		
+		(este-medicul-de-familie
+			:inverse are-medicul-de-familie
+			:domain medic-paraclinic
+			:range persoana
+		)
+		(tratament-asistat-de
+			:inverse asista-la-tratament
+			:domain tratament
+			:range asistent
+		
+		)
+		(diagnostic-current
+		:domain tratament
+		:range  diagnostic
+		)
+		
+		
+	)
+
+	:individuals 
+	(
+		;;; persons
+		Tudor
+		Ciomu
+		Andreea
+		Calin
+		Raul
+		Vlad
+		Dobrescu
+		Todoran
+		Niculina
+		Pierre
+		Timea
+		Flaviu
+		T1
+		T2
+		
+
+
+
+	)
+	
+	:features
+	(
+		
+	)
+
+	:attributes 
+	(
+		(real age)
+		
+	)
+)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+;;; structure
+
+(equivalent
+	persoana
+	(or
+		personal-medical
+		pacient
+	)
+)
+
+
+(equivalent
+	personal-medical
+	(or
+		farmacist
+		asistent
+		medic
+		dentist 
+	)
+)
+
+(disjoint farmacist asistent)
+(disjoint asistent medic)
+(disjoint farmacist medic)
+(disjoint asistent medic)
+(disjoint farmacist dentist)
+(disjoint dentist asistent)
+(disjoint dentist medic)
+(disjoint tratament persoana)
+
+
+
+(equivalent
+	asistent
+	(or
+		infirmier
+		brancardier
+		sora
+	)
+)
+(disjoint infirmier brancardier)
+(disjoint sora infirmier)
+(disjoint sora brancardier)
+
+
+
+(equivalent
+	medic
+	(or
+		nutritionist
+		generalist
+		radiolog
+	)
+)
+
+(equivalent
+	generalist
+	(or
+		medic-clinic 
+		medic-paraclinic
+	)
+
+)
+(disjoint medic-clinic medic-paraclinic)
+(equivalent 
+	medic-paraclinic
+	medic-de-familie
+)
+
+(implies (some is-pacient-of medic) pacient)
+(implies (some is-assistant-of medic) asistent)
+(implies (some is-assisted-by asistent) medic)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; instances
+
+
+(instance Tudor persoana)
+(instance Ciomu persoana)
+(instance Calin persoana)
+(instance Vlad persoana)
+(instance Timea persoana)
+(instance Flaviu persoana)
+(instance Dobrescu medic-clinic)
+(instance Timea medic-de-familie)
+(instance Niculina sora)
+(instance Diagnostic_Vag diagnostic)
+
+(instance Ciomu medic-clinic)
+(instance Ciomu (= age 50))
+(related  Ciomu Tudor is-medic-of)
+
+(instance T1 tratament)
+(related Vlad T1 este-sub-tratament)
+(related Timea T1 a-cerut-tratament)
+(related Dobrescu T1 se-ocupa-de-tratament)
+(related Niculina T1 asista-la-tratament)
+(related T1 Diagnostic_Vag diagnostic-current)
+
+(instance T2 tratament)
+(related Ciomu T2 se-ocupa-de-tratament)
+
+
+
+
+
+;;;(instance Calin pacient)
+(instance Calin (= age 21))
+(related  Calin Ciomu is-pacient-of)
+
+(related Andreea Todoran is-assistant-of)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;; queries
+
+
+(retrieve (?x) (?x pacient))
+(retrieve (?x) (?x medic))
+(retrieve (?x) (?x asistent))
+(retrieve (?x) (?x T1 asista-la-tratament))

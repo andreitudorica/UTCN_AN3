@@ -1,0 +1,358 @@
+LUCRAREA 5
+Expresii LAMBDA. Funcþii de ordin 
+superior. Repetiþie prin mapare
+
+1.	SCOPUL LUCRÃRII
+	În aceastã lucrare sunt prezentate modalitatea de a defini ºi utiliza funcþii anonime în 
+Lisp prin intermediul expresiilor LAMBDA. De asemenea este prezentat modul de utilizare a 
+funcþiilor de ordin superior, care aplicã alte funcþii legate ca valoare unor simboluri care pot fi 
+transmise ºi ca parametri. Este arãtat si un iterator care aplicã o funcþie pe o listã de argumente.
+2.	CONSIDERAÞII TEORETICE
+2.1.	Expresii LAMBDA
+	În Lisp programele (funcþiile) ºi datele au aceeaºi reprezentare internã: liste formate din 
+celule CONS. Aceastã omogenitate în reprezentare permite tratarea unitarã a datelor ºi a 
+funcþiilor. Întrucât existã date anonime (de exemplu 1., "abc" , (+ 2 3) ), ar trebui sã existe ºi 
+funcþii anonime. Acestea sunt în Lisp LAMBDA-expresiile. Exemplu: (LAMBDA (x y) (+ x y)) 
+specificã o funcþie de douã argumente care calculeazã suma lor. LAMBDA-expresiile nu sunt 
+forme, ele nu se pot evalua direct, dar se pot aplica pe date analog funcþiilor obiºnuite: pe prima 
+poziþie a unei liste apare o LAMBDA-expresie, nu neapãrat un nume de funcþie. Exemplu de 
+aplicare LAMBDA-expresie:
+	*((LAMBDA (x y) (+ x y)) 2 3)
+	5
+Observaþie: Lista de parametri formali a LAMBDA-expresiilor este analaogã celei permise de 
+DEFUN, adicã pot apare parametri introduºi de cuvintele cheie "&optional", "&rest", "&aux".
+	Intern LAMBDA-expresiile sunt folosite ºi pentru a specifica corpul funcþiilor definite 
+de utilizator. Forma (SYMBOL-FUNCTION <simbol>) întoarce LAMBDA-expresia ce a fost 
+ataºatã unui simbol de cãtre DEFUN. De fapt DEFUN este echivalent cu o setare indirectã prin 
+intermediul SYMBOL-FUNCTION. Exemplu:
+	*(DEFUN foo (x y)		| *(SETF (SYMBOL-FUNCTION 'foo)
+		(+ x y))		|	'(LAMBDA (x y) (* x y)) )
+	foo				| (LAMBDA (x y) (* x y))
+	*(SYMBOL-FUNCTION 'foo)		| *(foo 3 10)
+	(LAMBDA (x y) (+ x y))		| 30
+2.2.	Argumente funcþionale
+	În general pentru a ataºa unui simbol o funcþie se foloseºte DEFUN. Interpretorul nu 
+"ºtie" sã aplice funcþii ce sunt ataºate ca valoare unui simbol. În unele cazuri însã este nevoie sã 
+putem aplica funcþii sau LAMBDA-expresii, ce sunt ataºate ca valoare unui simbol. Cel mai 
+frecvent caz este atunci când dorim sa transmitem ca parametru unei funcþii o altã funcþie sau 
+LAMBDA-expresie. În aceste cazuri trebuie folosite primitivele FUNCALL ºi APPLY. Sã 
+amintim cã în Common Lisp expresiile funcþionale se citeazã cu "#'" care este o prescurtare 
+pentru FUNCTION, nu cu "'" prescurtarea pentru QUOTE!
+	(FUNCALL <form> <arg1> <arg2> ... <argn>)
+<form> trebuie sã fie o formã Lisp care în urma evaluãrii sã întoarcã o expresie funcþionalã (nume 
+de funcþie, LAMBDA-expresie, macrodefiniþie, CLOSURE, etc). Se evalueazã <form> ºi se 
+aplicã funcþia întoarsã în urma evaluãrii pe cele n argumente ce urmeazã.
+	(APPLY <form> <larg> )
+<form> trebuie sã fie o formã care în urma evaluãrii sã întoarcã o expresie funcþionalã, iar <larg> 
+trebuie sã fie o listã ce conþine argumente în numãrul ºi de tipul aºteptat de funcþia întoarsã ca 
+efect al evaluãrii <form>. Se aplicã funcþia întoarsã pe argumentele conþinute în lista <larg>.
+	Formele FUNCALL ºi APPLY se folosesc în general atunci când:
+I. aplicãm funcþii transmise ca parametri altor funcþii
+II. aplicãm funcþii construite de alte funcþii Lisp
+În plus funcþia APPLY mai este folositã atunci când dorim sã construim prin program lista de 
+argumente pe care se aplicã o funcþie. Exemple:
+*(DEFUN foo (x) (+ x 10))		| *(APPLY foo '(5))
+foo					| 50
+*(SETQ foo #'(LAMBDA (x) (* x 10)))	| *(FUNCALL #'foo 5)
+(LAMBDA (x) (* x 10))			| 15
+*(foo 5)				| *(FUNCALL (LIST 'LAMBDA () 10) )
+15					| 10
+*(FUNCALL foo 5)			| *(APPLY #'MAX `(,(+ 2 3) ,(* 2 3)))
+50 					| 6
+
+*(DEFUN foo-2 (fun-param)		| *(foo-2 #'LIST)
+	(FUNCALL fun-param 'ALFA))	| (ALFA)
+foo-2
+2.3.	Repetiþie prin mapare
+(MAPCAR <fun> <larg1> <larg2> ... <largn>)
+	- <fun> trebuie sã fie o formã care în urma evaluãrii sã întoarcã o expresie funcþionalã 
+ce acceptã n argumente. Se aplicã funcþia pe n-tuplele construite din elementele aflate pe poziþii 
+corespondente în cele n liste ºi se returneazã lista ce conþine rezultatele aplicãrilor.
+
+
+Exemplu:
+	*(MAPCAR	#'(LAMBDA (x y z) (list x y z))
+			'(a1 a2 a3 a4)
+			'(b1 b2 b3)
+			'(c1 c2 c3) )
+	((A1 B1 C1) (A2 B2 C2) (A3 B3 C3))
+
+(MAPLIST <fun> <larg1> <larg2> ... <largn>)
+	- ca ºi MAPCAR, dar argumentele funcþiei nu sunt n-tuple de elemente din liste, ci 
+n-tuple de liste scurtate succesiv. Exemplu:
+	*(MAPLIST #'(LAMBDA (x) x) '(1 2 3 4))
+	((1 2 3 4) (2 3 4) (3 4) (4))
+	*(MAPLIST #'LIST '(1 2) '(a b))
+	( ((1 2) (a b)) ((2) (b)) )
+
+(MAPC <fun> <larg1> <larg2> ... <largn>)
+	- ca ºi MAPCAR, dar nu returneazã lista rezultatelor, ci <larg1>. E folositã când e 
+important doar efectul lateral al aplicãrii repetate a funcþiei întoarse de evaluarea formei <fun>. 
+Exemplu:
+	*(MAPC #'SET '(a b) '(3 u))		| *b
+	(a b)					| u
+	*a
+	3
+
+(MAPL <fun> <larg1> <larg2> ... <largn>)
+	- ca ºi MAPLIST, dar nu se întoarce lista rezultatelor, ci <larg1>.
+
+(MAPCAN <fun> <larg1> <larg2> ... <largn>)
+	- ca ºi MAPCAR, dar rezultatul întors nu este lista ce conþine rezultatele aplicãrii 
+iterative a funcþiei, ci lista ce rezultã prin concatenarea rezultatelor aplicãrii funcþiei. Este clar cã 
+pentru aceasta trebuie ca funcþia aplicatã sã întoarcã liste. Atenþie, concatenarea se face distructiv, 
+prin modificarea ultimului pointer din fiecare listã (se foloseºte NCONC, nu APPEND)! 
+Exemplu:
+	*(MAPCAN #'(LAMBDA (x)
+			(LIST x 0 ) )
+		  '(1 2 3) )
+	(1 0 2 0 3 0)
+
+(MAPCON <fun> <larg1> <larg2> ... <largn>)
+	- ca ºi MAPCAN, dar argumentele pentru funcþie sunt liste scurtate succesiv. 
+
+
+Exemplu:
+ 	*(MAPCON #'(LAMBDA (x) (APPEND x nil) )
+		 '(1 2 3))
+	(1 2 3 2 3 3)
+3.	DESFÃªURAREA LUCRÃRII
+	1. Sã se evalueze formele din exerciþiile de mai jos.
+
+	((LAMBDA (x y) (+ x y)) 2. 3.)
+	((LAMBDA (x y)
+		((LAMBDA (x z) (+ x y z) ) (+ x y) y)) 4. 5. )
+	(SETQ a 'LIST)		      	| (SETQ CAR 'CDR)
+	(a 'a 'b 'c)			| (CAR '(a b) )
+	(FUNCALL a 'a 'b 'c)		| (FUNCALL CAR '(a b))
+	(APPLY a '(a b c))		| (APPLY CAR '((a b)) )
+	(FUNCALL 'LIST 'a 'b)		| (FUNCALL 'CAR '(a b))
+	(APPLY 'LIST '(a b))		| (APPLY 'CAR '((a b)) )
+
+	( (LAMBDA (fun larg)
+		(APPLY	fun	(CONS 'arg0 larg)) )
+				#'LIST	(APPEND '(1 2) '(3 4)) )
+	(FUNCALL	(APPEND	'(LAMBDA (x y))
+					'((CONS x y))	)
+			'a '(b) )
+
+	(MAPCAR #'+ '(1 2 3) '(4 5 6))		| b
+	(MAPCAR #'LIST '(1 2 3))		| a
+	(MAPCAR #'LIST '(1 2 3) '(a b c))	| (MAPLIST	#'APPEND
+	(SETQ a 1 b 2 c 3)			|		'(1 2 3)
+	(MAPC #'SET '(a b c) '(c a b))		|		'(a b c) )
+
+	2. Se vor discuta ºi executa funcþiile prezentate în cadrul surselor.
+
+	3. Implementaþi o versiune a funcþiei MEMBER-IF. MEMBER-IF acceptã ca parametri 
+un predicat unar ºi o listã. Se întoarce sublista, dacã existã, ce începe cu primul element ce 
+satisface predicatul.
+4.	ÎNTREBÃRI ªI PROBLEME
+	1. Scrieþi o funcþie care aplicã o altã funcþie pe atomii unei liste multinivel, întorcând o 
+structurã arborescentã izomorfã, dar în care frunzele (atomii) sunt înlocuiþi cu rezultatul aplicãrii 
+funcþiei asupra lor. Exemplu:
+	*(map-leaf	#'NUMBERP   '(1 (2 x) (4)))
+	(T (T NIL) (T))
+
+	2. Implementaþi o versiune proprie pentru MAPCAR.
+5.	SURSE
+;;; intoarce o copie a listei argument din care elimina
+;;; toate elementele de pe primul nivel care satisfac testul
+(DEFUN our-remove-if (test lis)
+(MAPCAN #'(LAMBDA (x)
+		(IF (NOT (FUNCALL test x)) (LIST x)) )
+	lis
+))
+
+;;; aplica o functie succesiv pe elementele unei liste ca si MAPCAR 
+;;; pentru o functie de un argument, dar colecteaza doar rezultatele
+;;; non-nil
+(DEFUN mapcarn (fun lis)
+(MAPCAN #'(LAMBDA (x)
+		(IF (SETF x (FUNCALL fun x))
+			(LIST x) ))
+	lis
+))
+
+;;; lungimea maxima a sublistelor unei liste
+;; varianta recursiva
+(DEFUN lgm1 (l)
+(IF (ATOM l)
+	0
+	(MAX	(LENGTH l)
+		(lgm1 (CAR l))
+		(lgm1 (CDR l)))
+))
+;; iteratie cu "DO"
+(DEFUN lgm2 (l)
+(DO (	(rez (LENGTH l))
+	(ll l (REST ll)) )
+	((ENDP ll) rez)
+	(IF (LISTP (FIRST ll))
+		(SETF rez (max rez (lgm2 (FIRST ll))))
+	)
+))
+
+
+
+
+;; iteratie cu "MAPCAR"
+(DEFUN lgm3 (l)
+(IF (ATOM l)
+	0
+	(MAX (LENGTH l) (APPLY #'MAX (MAPCAR #'lgm3 l)))
+))
+
+;;; numãrul de apariþii, pe orice nivel, ale unui atom i^ntr-o listã
+(DEFUN aparitii (elem lista)
+(COND	((EQL elem lista) 1)
+	((ATOM lista) 0)
+	((APPLY #'+
+		(MAPCAR #'(LAMBDA (x)
+				(aparitii elem x) )
+			 lista)))
+))
+
+;;; numarul de atomi dintr-o lista
+(DEFUN nratoms (l)
+(COND	((NULL l) 0)
+	((ATOM l) 1)
+	(T (APPLY #'+ (MAPCAR #'nratoms l)))
+))
+
+;;; eliminarea parantezelor interioare unei liste
+(DEFUN strivire1 (x)
+(COND	((NULL x) NIL)
+	((ATOM x) (LIST x) )
+	(T (APPLY #'APPEND (MAPCAR #'strivire1 x)))
+))
+(DEFUN strivire2 (x)
+(COND	((NULL x) NIL)
+	((ATOM x) (LIST x) )
+	(T (MAPCAN #'strivire2  x) )
+))
+
+;;; inversarea elementelor dintr-o lista
+;;; inclusiv a celor de pe nivelurile interioare
+(DEFUN rev-all (lis)
+(REVERSE (MAPCAR	#'(LAMBDA (x) (IF (ATOM x) x (rev-all x) ))
+			lis)
+))
+
+
+
+;;; Operatii cu multimi
+;;; multimea elementelor unei liste
+;; varianta recursiva
+(DEFUN mkset0 (lis)
+(COND	((ENDP lis) NIL)
+	((MEMBER (CAR lis) (CDR lis))
+		(mkset0 (CDR lis)))
+	((CONS	(CAR lis)
+		(mkset0 (CDR lis)) ))
+))
+;; iteratie cu "MAPLIST"
+(DEFUN mkset1 (lis)
+(APPLY   #'APPEND
+	  (MAPLIST	#'(LAMBDA (x)
+				(IF (MEMBER (CAR x) (CDR x))
+				    NIL
+				    (LIST (CAR x))))
+			lis)
+))
+;; iteratie cu "MAPCON"
+(DEFUN mkset2 (lis)
+(MAPCON #'(LAMBDA (x)
+		(IF (MEMBER (CAR x) (CDR x))
+		    NIL
+		    (LIST (CAR x))))
+	lis))
+
+;; reuniunea a doua mulþimi folosind "MAPCON"
+(DEFUN reuniune1 (set1 set2)
+(MAPCON #'(LAMBDA (x)
+		(APPEND
+			(IF (NOT (MEMBER (CAR x) set2)) (LIST (CAR x)))
+			(IF (NULL (CDR x)) set2)))
+	set1))
+
+;; iteratie cu "MAPC"
+(DEFUN reuniune2 (set1 set2)
+(LET ((rez set2))
+	(MAPC	#'(LAMBDA (x)
+			(IF (NOT (MEMBER x set2))
+				(SETF rez (CONS x rez)) ) )
+		set1)
+	rez))
+
+
+;; intersectie a doua multimi folosind "mapcarn"
+(DEFUN inters1 (set1 set2)
+(mapcarn #'(LAMBDA (x)
+		(IF (MEMBER x set2) x) )
+	 set1))
+;; iteratie cu "MAPCON"
+(DEFUN inters2 (set1 set2)
+(MAPCON #'(LAMBDA (x)
+		(IF (MEMBER (FIRST x) set2) (LIST (FIRST x))))
+	set1))
+
+;;; multimea partilor unei multimi
+(DEFUN m-parti (set)
+(IF (NULL set)
+	'(())
+	(extinde-cu	(FIRST set)
+			(m-parti (REST set)))
+))
+(DEFUN extinde-cu (elem set-seturi)
+(APPEND set-seturi
+	   (MAPCAR	#'(LAMBDA (x) (CONS elem x) )
+			set-seturi)
+))
+;; intoarce multimea de liste ce rezulta prin
+;; inserarea unui elemet in toate pozitiile unei liste
+(DEFUN pune-peste-tot (elem lis)
+(LET ((fata) (aux))
+	(CONS	(APPEND lis (LIST elem))
+		(MAPLIST #'(LAMBDA (x)
+				  (SETQ aux (APPEND fata (LIST elem) x))
+				  (SETQ fata (APPEND fata (LIST (CAR x))))
+				  aux)
+ 			 lis)
+	)
+))
+
+;;; multimea permutarilor de elemente ale unei liste
+(DEFUN perm (lis)
+(COND	((NULL lis) '(()) )
+	(T (MAPCAN
+		#'(LAMBDA (x) (pune-peste-tot (CAR lis) x))
+		(perm (CDR lis))))
+))
+
+
+;;; multimea combinarilor de "n" elemente dintr-o lista
+(DEFUN comb (n lis)
+(COND	((= n (LENGTH lis)) (LIST lis))
+	((ZEROP n) '(NIL))
+	((APPEND 	(comb n (REST lis))
+			(MAPCAR	#'(LAMBDA (x)
+					(CONS (FIRST lis) x))
+				(comb (- n 1) (REST lis)))
+	))
+))
+
+;;; multimea aranjamentelor de "n" elemente dintr-o lista
+(DEFUN aranj (n lis)
+	(MAPCAN  #'perm  (comb n lis))
+)
+ 
+
+ 
+ 
+
+
+
+40
+
+

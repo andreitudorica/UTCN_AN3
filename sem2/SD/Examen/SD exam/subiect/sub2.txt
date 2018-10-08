@@ -1,0 +1,41 @@
+sub 1:
+
+1. Identificati principalii actori si cazurile de utilizare pt un sistem bancar accesibil 
+atat on -line cat si la oficiile bancii.
+
+2. Sa presupunem ca BD a sistemului de la punctul 1 se numeste eBank.Tabela ce contine clientii 
+sistemului se numeste Customer( Id, Home, Adrress, Birthdate) iar cea care contine conturile 
+acestora Accounts ( Id, CustomerId, Account, CreationDate, AccountType).
+   Scrieti o clasa Java care ofera urmatoarele facilitati:
+
+ a) conectare la BD
+ b) inserare de noi clienti in tabela Customer
+ c) obtinerea de detalii privind conturile unui anumit client.
+
+3. Descrieti si implementati in java pattern-ul Composite.
+
+
+SUB 2:
+
+1. Modelarea structurii statice in vederea logica.
+
+2. Dp Composite.
+
+3. Tratati pe scurt :
+  a) testare si realizare use-case.
+  b) Diagrame de interactiune.
+  c) tipuri de .....in USDP.
+
+4. 1) Identificati actorii si realizati diagramele use-case pt. un sistem e-commerce prin
+intermediul caruia se ofera si se pot achizitiona produse de diverse tipuri din diverse 
+domenii.
+   2) Sa presupunem ca numele BD a sistemului este eCommerce si ca intre tabele se afla:
+Buyers (Id, Name, Address, Organization)
+Tranzaction (Id, ProductId, BuyerId, SupplierId)
+    Scrieti codul java care permite:
+- conectarea la O BD;
+- fiind dat un ID (corespunzator campului Id din tabela Buyers) obtine datele unui 
+cumparator/beneficiar;
+- insereaza o colectie de obiecte Tranzaction in tabela Tranzactions.
+   3) Scrieti codul java care implementeaza patter-ul Factory.
+ 

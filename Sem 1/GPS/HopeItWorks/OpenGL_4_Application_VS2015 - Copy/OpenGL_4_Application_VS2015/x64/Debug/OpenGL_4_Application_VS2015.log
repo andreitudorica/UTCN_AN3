@@ -1,0 +1,37 @@
+﻿  Shader.cpp
+d:\an3\opengl_4_application_vs2015\opengl_4_application_vs2015\shader.cpp(12): error C2039: 'string': is not a member of 'std'
+  d:\an3\opengl_4_application_vs2015\opengl_4_application_vs2015\predefined c++ types (compiler internal)(209): note: see declaration of 'std'
+d:\an3\opengl_4_application_vs2015\opengl_4_application_vs2015\shader.cpp(12): error C2653: 'Shader': is not a class or namespace name
+d:\an3\opengl_4_application_vs2015\opengl_4_application_vs2015\shader.cpp(12): error C4430: missing type specifier - int assumed. Note: C++ does not support default-int
+d:\an3\opengl_4_application_vs2015\opengl_4_application_vs2015\shader.cpp(12): error C2146: syntax error: missing ';' before identifier 'readShaderFile'
+d:\an3\opengl_4_application_vs2015\opengl_4_application_vs2015\shader.cpp(13): error C2143: syntax error: missing ';' before '{'
+d:\an3\opengl_4_application_vs2015\opengl_4_application_vs2015\shader.cpp(13): error C2447: '{': missing function header (old-style formal list?)
+d:\an3\opengl_4_application_vs2015\opengl_4_application_vs2015\shader.cpp(33): error C2653: 'Shader': is not a class or namespace name
+d:\an3\opengl_4_application_vs2015\opengl_4_application_vs2015\shader.cpp(33): error C2065: 'GLuint': undeclared identifier
+d:\an3\opengl_4_application_vs2015\opengl_4_application_vs2015\shader.cpp(33): error C2146: syntax error: missing ')' before identifier 'shaderId'
+d:\an3\opengl_4_application_vs2015\opengl_4_application_vs2015\shader.cpp(34): error C2143: syntax error: missing ';' before '{'
+d:\an3\opengl_4_application_vs2015\opengl_4_application_vs2015\shader.cpp(34): error C2447: '{': missing function header (old-style formal list?)
+d:\an3\opengl_4_application_vs2015\opengl_4_application_vs2015\shader.cpp(47): error C2653: 'Shader': is not a class or namespace name
+d:\an3\opengl_4_application_vs2015\opengl_4_application_vs2015\shader.cpp(47): error C2065: 'GLuint': undeclared identifier
+d:\an3\opengl_4_application_vs2015\opengl_4_application_vs2015\shader.cpp(47): error C2146: syntax error: missing ')' before identifier 'shaderProgramId'
+d:\an3\opengl_4_application_vs2015\opengl_4_application_vs2015\shader.cpp(48): error C2143: syntax error: missing ';' before '{'
+d:\an3\opengl_4_application_vs2015\opengl_4_application_vs2015\shader.cpp(48): error C2447: '{': missing function header (old-style formal list?)
+d:\an3\opengl_4_application_vs2015\opengl_4_application_vs2015\shader.cpp(60): error C2653: 'Shader': is not a class or namespace name
+d:\an3\opengl_4_application_vs2015\opengl_4_application_vs2015\shader.cpp(60): error C2039: 'string': is not a member of 'std'
+  d:\an3\opengl_4_application_vs2015\opengl_4_application_vs2015\predefined c++ types (compiler internal)(209): note: see declaration of 'std'
+d:\an3\opengl_4_application_vs2015\opengl_4_application_vs2015\shader.cpp(60): error C2146: syntax error: missing ')' before identifier 'vertexShaderFileName'
+d:\an3\opengl_4_application_vs2015\opengl_4_application_vs2015\shader.cpp(61): error C2143: syntax error: missing ';' before '{'
+d:\an3\opengl_4_application_vs2015\opengl_4_application_vs2015\shader.cpp(61): error C2447: '{': missing function header (old-style formal list?)
+d:\an3\opengl_4_application_vs2015\opengl_4_application_vs2015\shader.cpp(93): error C2653: 'Shader': is not a class or namespace name
+d:\an3\opengl_4_application_vs2015\opengl_4_application_vs2015\shader.cpp(95): error C2355: 'this': can only be referenced inside non-static member functions or non-static data member initializers
+d:\an3\opengl_4_application_vs2015\opengl_4_application_vs2015\shader.cpp(95): error C2227: left of '->shaderProgram' must point to class/struct/union/generic type
+d:\an3\opengl_4_application_vs2015\opengl_4_application_vs2015\shader.cpp(95): error C3861: 'glUseProgram': identifier not found
+  OpenGL_4_Application_VS2015.cpp
+d:\an3\opengl_4_application_vs2015\opengl_4_application_vs2015\opengl_4_application_vs2015.cpp(328): fatal error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "stdafx.h"' to your source?
+  Model3D.cpp
+d:\an3\opengl_4_application_vs2015\opengl_4_application_vs2015\model3d.cpp(226): fatal error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "stdafx.h"' to your source?
+  Mesh.cpp
+d:\an3\opengl_4_application_vs2015\opengl_4_application_vs2015\mesh.cpp(77): fatal error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "stdafx.h"' to your source?
+  Camera.cpp
+d:\an3\opengl_4_application_vs2015\opengl_4_application_vs2015\camera.cpp(53): fatal error C1010: unexpected end of file while looking for precompiled header. Did you forget to add '#include "stdafx.h"' to your source?
+  Generating Code...

@@ -1,0 +1,405 @@
+LUCRAREA 7
+Funcþii cu efect distructiv.
+Funcþii privite ca date. Macrodefiniþii
+
+1.	SCOPUL LUCRÃRII
+	Lucrarea are drept scop prezentarea unor noþiuni noi privitoare la funcþiile cu efect 
+distructiv, care lucreazã prin actualizãri direct asupra perechilor CONS. Este explicatã maniera 
+proprie limbajului Lisp de reprezentare unitara a datelor ºi a funcþiilor. De asemenea se prezintã 
+macrodefiniþiile ca o alternativã la utilizarea funcþiilor.
+2.	CONSIDERAÞII TEORETICE
+2.1.	Funcþii cu efect distructiv
+	Unitatea de bazã în spaþiul de lucru Lisp este celula de lista, perechea CONS, cu cele 
+doua câmpuri, CAR ºi CDR. Pe lângã funcþiile prezentate pânã acum, care asociazã aceste 
+elemente în structuri noi, existã ºi posibilitatea modificãrii unor structuri deja existente. Funcþiile 
+din aceastã subclasã mai poartã ºi numele de funcþii chirurgicale, având în vedere cã permit 
+actualizarea direct asupra acestor liste fãrã consum de celule CONS ºi deci fãrã consum de 
+memorie. Principalele funcþii din aceastã categorie sunt prezentate în continuare.
+? RPLACA primul parametru se evalueazã la o celulã CONS, al cãrei câmp CAR se 
+înlocuieºte cu valoarea celui de al doilea parametru.
+? RPLACD primul parametru se evalueazã la o celulã CONS, al cãrei câmp CDR se 
+înlocuieste cu valoarea celui de al doilea parametru. Exemple:
+	*(SETQ x '(a b c))
+	(A B C)
+	*(RPLACA x 'd)			*(RPLACD x 'd)
+	(D B C)				(D . D)
+	Aceste funcþii îºi au originea în primele implementãri de Lisp. Programatorii în versiunile 
+mai noi de Lisp preferã ca manierã de programare utilizarea funcþiei SETF pentru orice 
+modificare de structurã. Astfel, urmãtoarele forme sunt echivalente ca efect lateral, dar au 
+rezultate diferite:
+	(RPLACA x y)	=	(SETF (FIRST x) y)
+	(RPLACD x y)	=	(SETF (REST X) y)
+	Modificãrile efectuate asupra unei liste pot avea efect local sau global. În unele situaþii 
+este recomandatã construirea unor copii, în alte situaþii se recomandã ca modificarea sã fie vizibilã 
+peste tot. Un caz reprezentativ este constituit de funcþiile APPEND ºi NCONC care realizeazã 
+concatenarea argumentelor dar în maniere diferite. Funcþia APPEND realizeazã concatenarea 
+listelor furnizate ca parametri prin copierea nivelului superficial, iar NCONC realizeazã 
+concatenarea listelor furnizate ca parametri prin modificarea tuturor listelor argument în afarã de 
+ultima.
+Exemple:
+	*(SETQ x '(a b c))	| *(SETQ y '(d e f))
+	(A B C)			| (D E F)
+	*(APPEND x y)		| *(NCONC x y)
+	(A B C D E F)		| (A B C D E F)
+	*x			| *x	
+	(A B C)			| (A B C D E F)
+	2.2.	Macrodefiniþii
+	Macrodefiniþiile sunt construcþii sintactice bazate pe procese substitutive ale textelor 
+parametrizate ºi sunt admise atât de cãtre multe limbaje de asamblare puternice, cât ºi de unele 
+limbaje de nivel înalt. Spre deosebire de aceste limbaje, în Lisp un macro este executat prin 
+convertirea expresiilor ºi nu a ºirurilor de caractere.
+	Macrodefiniþiile Lisp permit extinderea posibilitãþilor de prelucrare într-un mod similar 
+cu definirea unor noi funcþii. Deºi se apeleazã sintactic ca ºi o LAMBDA-expresie, tratarea de 
+macro este realizatã prin expandare înainte de evaluarea normalã. Din acest considerent, definirile 
+de macro sunt scrise în aºa fel încât în urma expandãrii, care constã în evaluarea formei, sã rezulte 
+o formã Lisp corectã care urmeazã sã fie evaluatã.
+	Observaþii:
+? Prin acest proces de macroexpandare nu sunt evaluate argumentele, parametrii formali se 
+leagã direct la parametrii actuali neevaluaþi.
+? Procesul de macroexpandare se apeleazã recursiv pânã când forma rezultatã nu mai este 
+macro, în aºa fel încât se pot utiliza apeluri de macro în interiorul altui apel de macro.
+	Un macro este similar cu o LAMBDA-expresie corespunzãtoare unei funcþii, dar nu se 
+poate apela ca ºi o funcþie auxiliarã în interiorul unui iterator de tip MAPCAR.
+	Dacã suntem în cazul unui compilator incremental, cum sunt prevãzute pentru diferite 
+versiuni de Common Lisp, este de remarcat cã acestea sunt lipsite de faza de macroexpandare. 
+Din acest motiv toate definirile de macro sunt plasate la începutul fiºierului sursã, pentru a avea 
+disponibilã în compilare forma expandatã, în momentul apelului acesteia într-o eventualã utilizare 
+ulterioarã în interiorul unei funcþii sau macrodefiniþii.
+	DEFMACRO este o macrodefiniþie care executã definirea unui macro; aºteaptã ca 
+parametru numele de macro iar în continuare o LAMBDA-expresie similarã unei definiri de 
+funcþie.
+	Când pe prima poziþie a unei liste se gãseºte un simbol care corespunde unei 
+macrodefiniþii spunem ca ne aflãm în faþa unui apel de macro.
+	Definirea unui macro permite o facilitate adiþionalã de exprimare a unei structuri 
+complexe, care nu se întâlneºte în alte forme Lisp, facilitate cunoscutã ºi sub numele de 
+destructurare. Spre deosebire de o LAMBDA-expresie corespunzãtoare funcþiilor, unde în lista 
+parametrilor nu pot apãrea liste imbricate, în LAMBDA-expresiile corespunzãtoare 
+macrodefiniþiilor pot apare parametri care sã corespundã unor astfel de liste. Singura restricþie 
+provine din faptul cã apelul de macro trebuie sã furnizeze ca parametru o listã cu aceeaºi 
+structurã.
+	Lista precedatã de apostrof invers este foarte des utilizatã în macrodefiniþii, având în 
+vedere cã permite dupã expandare obþinerea unei forme Lisp, iar evaluarea eventualã a 
+parametrilor se face facil prin precedarea acestora de cãtre caracterul virgulã ",". În cazul în care 
+nu se foloseºte aceastã construcþie, aºa cum se va vedea ºi din exemplele prezentate, o mare 
+atenþie trebuie acordatã contextului în care are loc legarea ºi evaluarea eventualã a parametrilor.
+2.3.	Funcþii privite ca date
+	Manipularea funcþiilor ca ºi orice alt tip de date creeazã în Lisp posibilitatea utilizãrii 
+unor tehnici greu de imaginat în alte limbaje. Le vom exemplifica în continuare, printre altele, prin 
+funcþii auto-modificabile, auto-aplicative ºi auto-reproductibile.
+	Primul aspect care relevã uniformitatea modului de tratare a datelor ºi funcþiilor îl 
+constituie argumentele funcþionale. Am definit argumentele funcþionale ca funcþii care apar ca 
+argumente ale altor funcþii.
+	Un al doilea aspect care reflectã uniformitatea modului de tratare a datelor ºi a funcþiilor 
+îl reprezintã valorile funcþionale. Printr-o valoare funcþionalã se înþelege faptul cã asupra unei 
+funcþii se pot efectua operaþii de actualizare ca ºi în cazul datelor. O funcþie, la fel ca ºi o datã, 
+poate fi creatã, afiºatã, modificatã ºi ºtersã.
+	Pentru listarea definiþiei unei funcþii sau accesul la LAMBDA-expresia care defineºte 
+funcþia se poate utiliza forma SYMBOL-FUNCTION. SYMBOL-FUNCTION este o funcþie 
+care aºteaptã ca parametru un simbol care desemneazã o funcþie sau un macro ºi returneazã 
+definiþia globalã a funcþiei sau a macroului. Definirea globalã a unei funcþii poate fi alteratã prin 
+utilizarea funcþiei SETF cu parametrul SYMBOL-FUNCTION.
+	Aºa dupã cum se poate urmãri în exemplele prezentate în cadrul surselor, modificarea 
+definiþiei unei funcþii este efectuatã prin intermediul unei operaþii de actualizare asupra listei care 
+reprezintã definiþia globalã a funcþiei. În particular, o funcþie care ea însãºi executã aceastã 
+modificare se numeºte auto-modificabilã. Pentru exemplificarea acestui fenomen s-a imaginat un 
+program experimental, în evoluþie, care trãieºte douã perioade: o fazã de acumulare, a copilãriei, 
+în care învaþã o anumitã cantitate de cunoºtinþe ºi o fazã de maturitate în care aplicã cunoºtinþele 
+înglobate. Aceastã evoluþie ºi auto-modificare a programului se modeleazã prin actualizarea ºi 
+supravegherea unei variabile globale, în cazul nostru este vorba de variabila liberã vârsta.
+	În continuare se prezintã o implementare a funcþiilor de tip MEMO în Lisp. Aceste 
+funcþii realizeazã prelucrãri complexe asupra argumentelor, memorând într-o structurã locala, 
+pentru fiecare combinaþie de argumente, valoarea calculatã. Acest proces de memorare are loc în 
+vederea furnizãrii directe a rezultatului în urma unor apeluri ulterioare cu aceleaºi argumente. 
+Asemãnãtor cu inteligenþa umanã, care acumuleazã anumite cunoºtinþe, în urma unui apel al unui 
+proces calculaþional complex cu o anumitã combinaþie de parametri, se memoreazã undeva doar 
+asociaþia între datele de intrare, parametrii de apel ºi datele de ieºire, rezultatele. În acest mod, la 
+un apel ulterior în timp, cu aceiaºi parametri, rãspunsul este mult mai rapid, fãrã a implica o 
+eventualã etapã de calcul. În acest mod se obþine un compromis între tabelarea datelor urmata de 
+un proces de cãutare a lor ºi calculul acestora. Acest mecanism nu este aplicabil asupra funcþiilor 
+care în cadrul apelului au efecte laterale sau sunt dependente de variabile globale.
+	Memoria localã pe care o vom denumi tabel va fi constituitã ca o lista de asociaþii, pe 
+care convenim sa o memorãm ca proprietate memo a numelui de funcþie. În aplicaþie se utilizeazã 
+funcþia mod_memo care, primind ca argument o funcþie, o transformã pe aceasta într-o funcþie 
+MEMO. Procedeul preia vechea definiþie ºi o înlocuieºte cu o alta în care se verificã la fiecare 
+apel dacã nu cumva combinaþia de argumente se aflã deja în tabel. În caz de rãspuns afirmativ se 
+întoarce ca rezultat valoarea gãsitã în tabel. În caz contrar se calculeazã valoarea ºi aceasta este 
+introdusa în tabel.
+	Dupã cum se poate observa în cadrul surselor, funcþia nr-apel preia vechea definiþie a 
+unei funcþii adãugând un înveliº care corespunde incrementãrii proprietãþii contor a numelui 
+funcþiei, valoarea iniþialã a acesteia fiind 0. Aceastã funcþie poate fi utilizatã pentru numãrarea 
+apelurilor ºi poate deveni utilã în contextul studierii complexitãþii unor prelucrãri. În acest caz 
+numãrãm apelurile diferitelor funcþii pentru a determina locurile înguste ale prelucrãrii, funcþiile 
+care sunt apelate foarte des ºi sunt mari consumatoare de timp. Optimizarea acestor funcþii ar 
+avea influenþã maxima asupra performantei totale a aplicaþiei.
+	Unele limbaje mici sunt foarte puternice, în ciuda aparenþei lor insignifiante. Deºi existã 
+teste care sã permitã evaluarea codului generat de un compilator sau a vitezei de compilare, nu 
+existã un test care sã permitã evaluarea puterii unui limbaj, a posibilitãþilor sale de exprimare. 
+Într-un sens mai larg toate limbajele sunt echivalente, pentru ca toate sunt capabile sa acþioneze ca 
+maºini Turing, dar este evident cã limbajele sunt diferite.
+	Un test pentru mãsurarea puterii de exprimare a limbajelor este cel propus de Ken 
+Thompson, care are drept scop scrierea celui mai scurt program care sã se auto-reproducã, în 
+urma execuþiei sã producã o copie exactã a sursei sale. Acest exerciþiu poate fi foarte elegant 
+exprimat în Lisp pur, conþinând doar funcþii fãrã efecte laterale. Codul scris de John McCarthy ºi 
+Carolyn Talcott este prezentat în continuare:
+	((LAMBDA (X) (LIST X (LIST (QUOTE QUOTE) X)))
+		(QUOTE
+			(LAMBDA (X) (LIST X (LIST (QUOTE QUOTE) X))) ))
+3.	DESFÃªURAREA LUCRÃRII
+	1. Sã se evalueze secvenþele:
+*(SETQ a '(lispul este complicat) b (CDR a) c (CONS 'oare a) )
+*(SETQ d (CONS 'ce b))		    	*a	*b	*c	*d
+*(RPLACA a 'inotul)			*a	*b	*c	*d
+*(SETF (FIRST a) 'aratul)		*a	*b	*c	*d
+*(SETF (SECOND b) 'simplu)		*a	*b	*c	*d
+*(SETF (CDR (LAST c)) '(?))		*a	*b	*c	*d
+*(RPLACD a '(nu e simplu ?))		*a	*b	*c	*d
+*(RPLACD b 'bine)			*a	*b	*c	*d
+*(SETF x '(a b) y '(1 2) w (CONS x (LIST x y)))
+*(SETF z (APPEND x y))		   	*(EQ z x)
+*(SETF u (NCONC x y) )			*(EQ u x)
+*(NCONC x '(? !) )			*w	*z
+*(SETF x '(a b (c a (a x) b) a a b b) )
+*(SETF y (REMOVE 'a x))			*x
+*(SETF z (DELETE 'b x))			*x	*(EQ x z)
+*(SETF u (DELETE 'a x))			*x	*u	*(EQ x z)
+
+	2. Studiaþi funcþia de inversare a elementelor unei liste, urmãrind prin trasare efectul 
+funcþiilor cu efect distructiv asupra listei alese ca parametru de apel.
+
+	3. Studiaþi macrodefiniþiile urmãtoare ºi explicaþi comportarea apelurilor de macro 
+prezentate în cazurile urmãtoare:
+	*(SETF alfa 'val-a beta 'val-b)
+	*(DEFMACRO test1 (p1)
+		(PRINT p1))
+	*(DEFMACRO test2 (&rest rst)
+		(PRINT (CONS 'test2 rst)))
+	*(test1 alfa)		| *(test1 'alfa)
+	*(test1 beta)		| *(test1 'beta)
+
+	4. Urmãriþi definirea diferitelor variante ale unei forme care sã aibã aceeaºi comportare 
+ca ºi funcþia sistem OR ºi explicaþi erorile apãrute.
+
+	5. Urmãriþi definirea diferitelor variante ale unei forme care sã aibã aceeaºi comportare 
+ca ºi funcþia sistem WHILE ºi explicaþi erorile apãrute pe baza exemplelor de test.
+
+	6. Studiaþi exemplul simplu de destructurare propus pe apelul:
+(ar-if <expresie_aritmetica> -127 128 (2 1))
+al macrodefiniþiei ar-if prezentate în cadrul surselor, care implementeazã o formã de IF aritmetic 
+ce trateazã cazurile de numere negative ºi nule iar pentru numerele pozitive trateazã separat 
+numerele pare de cele impare.
+
+	7. Studiaþi definiþia unei funcþii auto-modificabile prezentate în cadrul surselor. Urmãriþi 
+evoluþia definiþiei acestei funcþii prin apeluri individuale sau apelul repetat din funcþia de test 
+prevãzutã. Vizualizaþi definiþia funcþiei înainte ºi dupã apeluri.
+
+	8. Studiaþi funcþia diferenþã prezentata, precum ºi varianta sa ca funcþie MEMO.
+
+	9. Verificaþi pe exemplul prezentat în cadrul surselor modificarea unei funcþii în aºa fel 
+încât sa îºi numere apelurile.
+4.	ÎNTREBÃRI ªI PROBLEME
+	1. Anticipaþi rãspunsurile interpretorului la:
+
+*(SETQ x '(a b c))		| *(SETF x '(a b c))
+*(RPLACD (LAST x) x)		| *(RPLACA x (CONS (CDR x) (CDR x)))
+*(SETF x '(a b c))		| *(RPLACA x (CONS 'p x))
+
+	2. Scrieþi forme echivalente pentru funcþia NCONC ºi pentru funcþia de inversare a unei 
+liste utilizând funcþia SETF ca funcþie cu efect distructiv asupra listelor.
+
+	3. Explicaþi comportarea urmãtorului apel de macrodefiniþie:
+(test2 alfa beta)
+
+	4. Concepeþi alte macrodefiniþii care sã utilizeze facilitatea de destructurare.
+
+	5. Explicaþi comportarea funcþiei auto-modificabile la apeluri repetate ale funcþiei de 
+test.
+
+	6. Studiaþi comparativ comportarea funcþiilor normale ºi a aceloraºi funcþii ca funcþii 
+MEMO. Stabiliþi când tabelarea funcþiilor este avantajoasã ºi când poate deveni stânjenitoare.
+5.	SURSE
+;;; Inversare prin modificarea distructiva a listei argument
+;;; Inverseaza si intoarce adresa ultimei celule CONS a listei.
+(DEFUN nreverse1 (lista)
+(DO	((ante ) (curent ) (urm lista) )
+	((ENDP urm) ante)
+	(SETF curent urm )
+	(SETF urm (rest urm))
+	(SETF (CDR curent) ante)
+	(SETF ante curent)
+))
+
+;;; Inverseaza o lista, tratand special capul listei originale.
+;;; Pentru ca aceasta celula sa ramana prima, apeleaza nreverse1.
+(DEFUN nreverse (lista)
+(LET ((ultim (CAR lista)) (rev (nreverse1 (CDR lista))) )
+	(PROG2	(RPLACD (CDR lista) rev)
+		(RPLACD lista (CDR rev))
+		(RPLACD rev nil)
+		(RPLACA lista (CAR rev))
+		(RPLACA rev ultim)
+)))
+
+;;; Macrodefinitie pentru actualizarea unei prorietati cu o valoare
+(DEFMACRO our-putprop (ob val prop)
+`(SETF	(GET (QUOTE ,ob) (QUOTE ,prop))
+	,val))
+;;; Macrodefinitie pentru o forma de tip IF False THEN f1 ELSE f2
+(DEFMACRO if-not (test f1 &optional f2)
+	`(IF ,test ,f2 ,f1) )
+
+;;; Variante pentru o formã echivalentã cu funcþia de sistem OR
+;; Argumentele se evalueazã de una sau de douã ori!
+;; Probleme dacã se evalueazã simboluri ca args, loc-args, rez.
+(DEFUN our-or1 ( &rest args )
+(DO* ((loc-args args (REST loc-args)) (rez))
+	((NULL loc-args))
+	(IF (SETF rez (EVAL (CAR loc-args)) )
+		(RETURN rez) )
+))
+;; Aºteaptã argumentele într-o listã.
+;; Probleme dacã se evalueazã simbolurile args, loc-args, rez.
+(DEFUN our-or2 (args)
+(DO* ((loc-args args (REST loc-args)) (rez))
+	((NULL loc-args))
+	(IF (SETF rez (EVAL (CAR loc-args)) )
+		(RETURN rez) )
+))
+;; Probleme dacã se evalueazã simbolurile locale args, loc-args,
+;; rez. Evaluarea se face în contextul interior!
+(DEFMACRO our-or3 (&rest args)
+(DO* ((loc-args args (REST loc-args)) (rez) )
+	((ENDP loc-args))
+	(IF (SETF rez (EVAL (CAR loc-args)))
+		(RETURN `(QUOTE ,rez)) )
+))
+
+;; our-or, varianta corecta! Evaluarea in contextul exterior!
+(DEFMACRO our-or ( &rest args)
+`(OR	,(CAR args)
+	(our-or ,@(CDR args) )
+))
+
+;;; Variante pentru o forma echivalenta cu functia de sistem WHILE
+(DEFMACRO while (cond &rest lforme)
+`(DO	()
+	((NOT ,cond))
+	,@lforme
+))
+
+
+
+
+(DEFMACRO while1 (cond &rest lforme)
+`(DO ((ret nil))
+	((NOT ,cond) ret)
+	(DO*	((forme (QUOTE ,lforme) (CDR forme))
+		 (forma (CAR forme) (CAR forme)))
+		((ENDP (CDR forme))
+		(SETF ret (EVAL forma)) )
+		(EVAL forma))
+))
+(DEFMACRO while2 (cond &rest lforme &aux ret)
+`(DO ()
+	((NOT ,cond) ret)
+	(SETF ret (PROGN ,@lforme))
+))
+(DEFMACRO while3 (cond &rest lforme)
+`(DO ((ret (CAR (LAST (QUOTE ,lforme)))))
+	((NOT ,cond)(EVAL ret))
+	,@lforme)
+)
+;;; Exemplu de testare forme WHILE
+(SETF n 0)
+(SETF d (while (< n 9) (PRINT n) (SETF n (+ n 1)) ))
+(PRINT 'intoarce)(PRINT d)
+(READ)
+
+;;; Exemplu de macrodefinitie care utilizeaza destructurarea
+(DEFMACRO ar-if (test neg zero (par impar))
+(LET ((var (GENSYM)))
+  `(LET ((,var ,test))
+	(COND	((< ,var 0) ,neg)
+		((= ,var 0) ,zero)
+		(T (COND ((= 0 (- ,var (* 2 (TRUNCATE (/ ,var 2)))))
+				,par)
+			 (T	,impar)
+		))
+	))
+))
+
+
+
+
+
+;;; Functie auto-modificabila
+;;; Trece, in functie de variabila globala varsta, prin doua
+;;; perioade: acumulare cunostinte si aplicarea lor.
+(SETF varsta 0)
+(DEFUN evolutie (x)
+(COND	((< varsta 7) (acumuleaza x)(SETF varsta (+ 1 varsta)))
+	(T (SETF (SYMBOL-FUNCTION 'evolutie)
+		  (LIST (CAR (SYMBOL-FUNCTION 'evolutie))
+			(CADR (SYMBOL-FUNCTION 'evolutie))
+			(CAR (LAST (SYMBOL-FUNCTION 'evolutie))))))
+)
+(aplica x)
+)
+(DEFUN acumuleaza (x)
+	(PRINT `(acumuleaza cu parametrul ,x)))
+(DEFUN aplica (x)
+	(PRINT `(aplica cu parametrul ,x))
+	(TERPRI))
+(DEFUN test ()
+(DO ((i 0 (+ i 1)))
+	((= i 10))
+	(PRINT `(varsta ,varsta))
+	(evolutie i)
+))
+;;; Exemplu de functie MEMO
+(SETF x '(a b c d ) y '(b c))
+(DEFUN dif (x y)
+	(DO ((par x (REST par)) (rez))
+		((NULL par) rez)
+		(UNLESS (MEMBER (CAR par) y)
+			(SETF rez (CONS (CAR par) rez)))))
+(DEFUN mod_memo (fun)
+(LET* ((old (SYMBOL-FUNCTION fun))
+	(larg (SECOND old))
+	(corp (CDDR old)) )
+(SETF (SYMBOL-FUNCTION fun)
+	`(LAMBDA ,larg
+		(LET* ((pmemo (GET (QUOTE ,fun) 'memo))
+			(args (LIST ,@larg))
+			(tabrez (ASSOC args pmemo :test #'EQUAL)))
+		(COND	(tabrez (CDR tabrez))
+			(T	(SETF tabrez (PROGN ,@corp))
+				(SETF	(GET (QUOTE ,fun) 'memo)
+					(CONS (CONS args tabrez) pmemo))
+				tabrez))))
+)))
+(mod_memo 'dif)
+
+;;; Exemplu de functie care isi numara apelurile intr-o proprietate
+(DEFUN p () (PRINT "qwerty"))
+(DEFUN nr (fun)
+(LET*	((old (SYMBOL-FUNCTION fun))
+	 (larg (SECOND old))
+	 (corp (CDDR old)) )
+	(SETF (SYMBOL-FUNCTION fun)
+		(CONS	'LAMBDA
+			(CONS	larg
+				(CONS (SUBST	fun '$$$
+						'(SETF (GET '$$$ 'contor)
+							(+ 1
+							   (GET '$$$ 'contor))))
+				      corp ))))
+	(SETF (GET fun 'contor) 0)
+))
+ 
+
+ 
+ 
+
+
+
+59

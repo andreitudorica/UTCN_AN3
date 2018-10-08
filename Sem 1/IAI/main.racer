@@ -1,0 +1,960 @@
+(in-knowledge-base militarydb military-technical-academy)
+
+(signature 
+	:atomic-concepts
+	(
+		;;; PERSON
+		person
+		civilian
+		soldier
+
+		;;; ACADEMIC RANKS
+		academic
+		professor
+		distinguished-professor
+		associate-professor
+		assistant-professor
+		lecturer
+		
+		;;; STUDENTS
+		student
+		
+		;;; MANAGERS
+		manager
+		food-manager
+		guns-manager
+		finance-manager
+		human-resource-manager
+		tailors
+		smith
+		
+		;;; MILITARY RANKS
+		ranked-soldier
+		general-of-the-army
+		general
+		lieutenant-general
+		major-general
+		brigadier-general
+		colonel
+		lieutenant-colonel
+		major
+		captain
+		first-lieutenant
+		second-lieutenant
+		cadet
+		
+		;;; STRUCTURE
+		department
+		academic-department
+		military-department
+		unitate
+		subunitate
+		grupa
+		pluton
+		companie
+		batalion
+		regiment
+		divizie
+		corp
+		armata
+
+		;;; MILITARY FUNCTIONS
+		comandant
+		comandant-de-grupa
+		comandant-de-pluton
+		comandant-de-companie
+		comandant-de-batalion
+		comandant-de-regiment
+		comandant-de-divizie
+		comandant-de-corp
+		comandant-de-armata
+	)
+	
+	:roles
+	(
+		(is-professor-of 
+			:inverse is-student-of
+			:domain academic
+			:range (or cadet student)
+		)
+		(is-superior-of 
+			:inverse is-inferior-of 
+			:transitive t
+			:domain ranked-soldier
+			:range ranked-soldier
+		)
+		(is-professor-at 
+			:domain academic
+			:range academic-department
+		)
+		(is-student-at 
+			:domain (or cadet student)
+			:range academic-department
+		)
+		(is-subunit-of
+			:transitive t
+			:domain military-department
+			:range military-department
+		)
+		(is-in-troop
+			:domain soldier
+			:range military-department
+		)
+		(is-in-command-of
+			:parent is-in-troop
+			:domain comandant
+			:range military-department
+		)
+		(is-under-command-of
+			:inverse is-in-command-of
+			:domain military-department
+			:range comandant
+		)
+		(a-primit-ordin-de-la
+			:inverse a-dat-ordin-lui
+			:domain ranked-soldier
+			:range comandant
+		)
+		(a-fost-pus-de-paza-de
+			:parent a-primit-ordin-de-la
+			:inverse a-pus-de-paza-pe
+			:domain ranked-soldier
+			:range comandant
+		)
+	)
+
+	:individuals 
+	(
+		;;; persons
+		Apan
+		Chindris
+		Chirap
+		Cobarzan
+		Colceriu
+		Cornean
+		Ghiran
+		Gliga
+		Giorfi
+		Halmaghi
+		Hojbota
+		Mera
+		Miclaus
+		Miron
+		MoldovanA
+		MoldovanT
+		Monda
+		Radu
+		Shara
+		Seceleanu
+		Sigartau
+		Simion
+
+		;;; academic departments
+		Electronics
+		ComputerScience
+		Telecommunications
+		Aeronautics
+		Explosives
+		Geodesy
+
+		;;; troops
+		group1 group2 group3 group4 group5 group6 group7 group8
+		group9 group10 group11 group12 group13 group14 group15 group16
+		pluton1 pluton2 pluton3 pluton4 pluton5 pluton6  pluton7 pluton8
+		compania1 compania2 compania3 compania4 compania5 compania6 compania7 compania8
+		batalionul1 batalionul2 batalionul3 batalionul4
+		regimentul1 regimentul2
+		divizia1
+	)
+	
+	:features
+	(
+		
+	)
+
+	:attributes 
+	(
+		(real age)
+		(cardinal rank)
+		(cardinal retras)
+		(cardinal pus-de-paza)
+		(cardinal sub-ordin)
+	)
+)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(instance Apan person)
+(instance Chindris person)
+(instance Chirap person)
+(instance Cobarzan person)
+(instance Colceriu person)
+(instance Cornean person)
+(instance Ghiran person)
+(instance Gliga person)
+(instance Giorfi person)
+(instance Halmaghi person)
+(instance Hojbota person)
+(instance Mera person)
+(instance Miclaus person)
+(instance Miron person)
+(instance MoldovanA person)
+(instance MoldovanT person)
+(instance Monda person)
+(instance Radu person)
+(instance Shara person)
+(instance Seceleanu person)
+(instance Sigartau person)
+(instance Simion person)
+
+(instance Mera general-of-the-army)
+(instance Mera distinguished-professor)
+(instance Mera (= age 50))
+(related Mera ComputerScience is-professor-at)
+
+(instance Cobarzan general)
+(instance Cobarzan professor)
+(instance Cobarzan (= age 40))
+(instance Cobarzan (= retras 0))
+
+(instance Miclaus general)
+(instance Miclaus professor)
+(instance Miclaus (= age 40))
+(instance Miclaus (= retras 0))
+
+(instance Colceriu lieutenant-general)
+(instance Colceriu professor)
+(instance Colceriu (= age 45))
+(instance Colceriu (= retras 0))
+
+(instance Halmaghi colonel)
+(instance Halmaghi associate-professor)
+(instance Halmaghi (= age 43))
+(instance Halmaghi (= retras 0))
+
+(instance Shara brigadier-general)
+(instance Shara associate-professor)
+(instance Shara (= age 48))
+(instance Shara (= retras 1))
+
+(instance Sigartau cadet)
+(instance Sigartau (= age 22))
+(instance Sigartau (= retras 0))
+
+(instance Simion student)
+(instance Simion (= age 23))
+(instance Simion (= retras 0))
+
+(related Mera Sigartau is-professor-of)
+(related Mera Simion is-professor-of)
+
+(instance Electronics academic-department)
+(instance ComputerScience academic-department)
+(instance Telecommunications academic-department)
+(instance Aeronautics academic-department)
+(instance Explosives academic-department)
+(instance Geodesy academic-department)
+
+(instance group1 grupa)
+(related group1 pluton1 is-subunit-of)
+(instance group2 grupa)
+(related group2 pluton1 is-subunit-of)
+(instance group3 grupa)
+(related group3 pluton2 is-subunit-of)
+(instance group4 grupa)
+(related group4 pluton2 is-subunit-of)
+(instance group5 grupa)
+(related group5 pluton3 is-subunit-of)
+(instance group6 grupa)
+(related group6 pluton3 is-subunit-of)
+(instance group7 grupa)
+(related group7 pluton4 is-subunit-of)
+(instance group8 grupa)
+(related group8 pluton4 is-subunit-of)
+(instance group9 grupa)
+(related group9 pluton5 is-subunit-of)
+(instance group10 grupa)
+(related group10 pluton5 is-subunit-of)
+(instance group11 grupa)
+(related group11 pluton6 is-subunit-of)
+(instance group12 grupa)
+(related group12 pluton6 is-subunit-of)
+(instance group13 grupa)
+(related group13 pluton7 is-subunit-of)
+(instance group14 grupa)
+(related group14 pluton7 is-subunit-of)
+(instance group15 grupa)
+(related group15 pluton8 is-subunit-of)
+(instance group16 grupa)
+(related group16 pluton8 is-subunit-of)
+
+(instance pluton1 pluton)
+(related pluton1 compania1 is-subunit-of)
+(instance pluton2 pluton)
+(related pluton2 compania2 is-subunit-of)
+(instance pluton3 pluton)
+(related pluton3 compania3 is-subunit-of)
+(instance pluton4 pluton)
+(related pluton4 compania4 is-subunit-of)
+(instance pluton5 pluton)
+(related pluton5 compania5 is-subunit-of)
+(instance pluton6 pluton)
+(related pluton6 compania6 is-subunit-of)
+(instance pluton7 pluton)
+(related pluton7 compania7 is-subunit-of)
+(instance pluton8 pluton)
+(related pluton8 compania8 is-subunit-of)
+
+(instance compania1 companie)
+(related compania1 batalionul1 is-subunit-of)
+(instance compania2 companie)
+(related compania2 batalionul1 is-subunit-of)
+(instance compania3 companie)
+(related compania3 batalionul2 is-subunit-of)
+(instance compania4 companie)
+(related compania4 batalionul2 is-subunit-of)
+(instance compania5 companie)
+(related compania5 batalionul3 is-subunit-of)
+(instance compania6 companie)
+(related compania6 batalionul3 is-subunit-of)
+(instance compania7 companie)
+(related compania7 batalionul4 is-subunit-of)
+(instance compania8 companie)
+(related compania8 batalionul4 is-subunit-of)
+
+
+(instance batalionul1 batalion)
+(related batalionul1 regimentul1 is-subunit-of)
+(instance batalionul2 batalion)
+(related batalionul2 regimentul1 is-subunit-of)
+(instance batalionul3 batalion)
+(related batalionul3 regimentul2 is-subunit-of)
+(instance batalionul4 batalion)
+(related batalionul4 regimentul2 is-subunit-of)
+
+(instance regimentul1 regiment)
+(related regimentul1 divizia1 is-subunit-of)
+(instance regimentul2 regiment)
+(related regimentul2 divizia1 is-subunit-of)
+
+(instance divizia1 divizie)
+
+
+(instance Apan cadet)
+(instance Apan (= age 22))
+(instance Apan (= retras 0))
+(related Apan group1 is-in-troop)
+
+(instance Chindris cadet)
+(instance Chindris (= age 21))
+(instance Chindris (= retras 0))
+(related Chindris group2 is-in-troop)
+
+(instance Chirap second-lieutenant)
+(instance Chirap (= age 22))
+(instance Chirap (= retras 0))
+(related Chirap group3 is-in-troop)
+
+(instance Gliga second-lieutenant)
+(instance Gliga (= age 22))
+(instance Gliga (= retras 0))
+(related Gliga group4 is-in-troop)
+
+(instance Cornean first-lieutenant)
+(instance Cornean (= age 20))
+(instance Cornean (= retras 0))
+(related Cornean pluton1 is-in-command-of)
+
+(instance Ghiran first-lieutenant)
+(instance Ghiran (= age 21))
+(instance Ghiran (= retras 0))
+(related Ghiran pluton2 is-in-command-of)
+
+(instance Giorfi captain)
+(instance Giorfi (= age 25))
+(instance Giorfi (= retras 0))
+(related Giorfi compania1 is-in-command-of)
+
+(instance Hojbota major)
+(instance Hojbota (= age 25))
+(instance Hojbota (= retras 0))
+(related Hojbota batalionul1 is-in-command-of)
+
+(instance Miron second-lieutenant)
+(instance Miron (= age 32))
+(instance Miron (= retras 0))
+(related Miron group7 is-in-troop)
+
+(instance MoldovanA captain)
+(instance MoldovanA (= age 29))
+(instance MoldovanA (= retras 0))
+(related MoldovanA compania2 is-in-command-of)
+
+(instance MoldovanT lieutenant-colonel)
+(instance MoldovanT (= age 29))
+(instance MoldovanA (= retras 0))
+(related MoldovanT regimentul1 is-in-command-of)
+
+(related Cobarzan divizia1 is-in-command-of)
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+
+
+
+
+
+
+
+
+
+
+;;; structure
+
+(equivalent
+	department
+	(or
+		academic-department
+		military-department
+	)
+)
+
+(disjoint academic-department military-department)
+
+
+;;; military department
+(equivalent
+	military-department
+	(or
+		unitate
+		subunitate
+	)
+)
+
+(disjoint unitate subunitate)
+
+(equivalent
+	subunitate
+	(or
+		grupa
+		pluton
+		companie
+	)
+)
+
+(equivalent
+	unitate
+	(or
+		batalion
+		regiment
+		divizie
+		corp
+		armata
+	)
+)
+
+(disjoint department person)
+
+
+
+
+
+
+
+
+
+
+
+;;; persons
+
+(equivalent 
+	person
+	(and
+		(or
+			civilian
+			soldier
+		)
+		(>= age 0)
+		(<= age 100)
+	)
+)
+
+(implies civilian person)
+(implies soldier person)
+(disjoint civilian soldier)
+
+
+
+;;; civilians
+
+(implies manager civilian)
+(implies student civilian)
+
+
+(equivalent
+	manager
+	(or
+		food-manager
+		guns-manager
+		finance-manager
+		human-resource-manager
+		tailors
+		smith
+	)
+)
+
+
+(disjoint student manager)
+
+
+
+;;; soldiers
+
+(equivalent 
+	ranked-soldier 
+	(or 
+		general-of-the-army  
+		general 
+		lieutenant-general 
+		major-general
+		brigadier-general
+		colonel
+		lieutenant-colonel
+		major
+		captain
+		first-lieutenant
+		second-lieutenant
+		cadet
+	)
+)
+
+
+(equivalent
+	academic
+	(or
+		professor
+		distinguished-professor
+		associate-professor
+		assistant-professor
+		lecturer
+	)
+)
+
+(equivalent
+	comandant
+	(or
+		comandant-de-grupa
+		comandant-de-pluton
+		comandant-de-companie
+		comandant-de-batalion
+		comandant-de-regiment
+		comandant-de-divizie
+		comandant-de-corp
+		comandant-de-armata
+	)
+)
+
+(implies academic soldier)
+(implies ranked-soldier soldier)
+(implies comandant ranked-soldier)
+(implies (some is-in-command-of divizie) (or general lieutenant-general major-general brigadier-general))
+(equivalent (some is-in-command-of divizie) comandant-de-divizie)
+(implies (some is-in-command-of regiment) (or colonel lieutenant-colonel))
+(equivalent (some is-in-command-of regiment) comandant-de-regiment)
+(implies (some is-in-command-of batalion) (or lieutenant-colonel major captain))
+(equivalent (some is-in-command-of batalion) comandant-de-batalion)
+(implies (some is-in-command-of companie) (or captain first-lieutenant))
+(equivalent (some is-in-command-of companie) comandant-de-companie)
+(implies (some is-in-command-of pluton) (or first-lieutenant second-lieutenant))
+(equivalent (some is-in-command-of pluton) comandant-de-pluton)
+(implies (some is-in-command-of grupa) second-lieutenant)
+(equivalent (some is-in-command-of grupa) comandant-de-grupa)
+(implies (some is-in-command-of military-department) (= retras 0))
+
+(implies (some a-dat-ordin-lui (some is-in-troop divizie)) comandant-de-divizie)
+(implies (some a-dat-ordin-lui (some is-in-troop regiment)) (or comandant-de-divizie comandant-de-regiment))
+(implies (some a-dat-ordin-lui (some is-in-troop batalion)) (or comandant-de-divizie comandant-de-regiment comandant-de-batalion))
+(implies (some a-dat-ordin-lui (some is-in-troop companie)) (or comandant-de-divizie comandant-de-regiment comandant-de-batalion comandant-de-companie))
+(implies (some a-dat-ordin-lui (some is-in-troop pluton)) (or comandant-de-divizie comandant-de-regiment comandant-de-batalion comandant-de-companie comandant-de-pluton))
+(implies (some a-dat-ordin-lui (some is-in-troop grupa)) (or comandant-de-divizie comandant-de-regiment comandant-de-batalion comandant-de-companie comandant-de-pluton comandant-de-grupa))
+
+(implies (some a-fost-pus-de-paza-de comandant) (= pus-de-paza 1))
+(implies (some a-primit-ordin-de-la comandant) (= sub-ordin 1))
+(implies ranked-soldier (at-most 1 a-primit-ordin-de-la))
+
+
+
+
+
+
+
+
+
+
+
+;;; definitions for the military hierarchy concepts
+
+
+(equivalent 
+	cadet 
+	(and 
+		ranked-soldier 
+		(= rank 1)
+		(all 
+			is-inferior-of 
+			(or 
+				general-of-the-army 
+				general
+				lieutenant-general
+				major-general
+				brigadier-general
+				colonel
+				lieutenant-colonel
+				captain
+				major
+				first-lieutenant
+				second-lieutenant 
+			)
+		)		
+	)
+)
+(equivalent 
+	second-lieutenant 
+	(and 
+		ranked-soldier 
+		(= rank 2)
+		(all 
+			is-inferior-of 
+			(or 
+				general-of-the-army 
+				general
+				lieutenant-general
+				major-general
+				brigadier-general
+				colonel
+				lieutenant-colonel
+				captain
+				major
+				first-lieutenant
+			)
+		)		
+	)
+)
+(equivalent 
+	first-lieutenant 
+	(and 
+		ranked-soldier 
+		(= rank 3)
+		(all 
+			is-inferior-of 
+			(or 
+				general-of-the-army 
+				general
+				lieutenant-general
+				major-general
+				brigadier-general
+				colonel
+				lieutenant-colonel
+				captain
+				major
+			)
+		)		
+	)
+)
+(equivalent 
+	captain 
+	(and 
+		ranked-soldier 
+		(= rank 4)
+		(all 
+			is-inferior-of 
+			(or 
+				general-of-the-army 
+				general
+				lieutenant-general
+				major-general
+				brigadier-general
+				colonel
+				lieutenant-colonel
+				major
+			)
+		)		
+	)
+)
+(equivalent 
+	major 
+	(and 
+		ranked-soldier 
+		(= rank 5)
+		(all 
+			is-inferior-of 
+			(or 
+				general-of-the-army 
+				general
+				lieutenant-general
+				major-general
+				brigadier-general
+				colonel
+				lieutenant-colonel 
+			)
+		)
+	)
+)
+(equivalent 
+	lieutenant-colonel 
+	(and 
+		ranked-soldier 
+		(= rank 6)
+		(all 
+			is-inferior-of 
+			(or 
+				general-of-the-army 
+				general
+				lieutenant-general
+				major-general
+				brigadier-general
+				colonel
+			)
+		)
+	)
+)
+(equivalent 
+	colonel 
+	(and 
+		ranked-soldier 
+		(= rank 7)
+		(all 
+			is-inferior-of 
+			(or 
+				general-of-the-army 
+				general
+				lieutenant-general
+				major-general
+				brigadier-general
+			)
+		)
+	)
+)
+(equivalent 
+	brigadier-general 
+	(and 
+		ranked-soldier 
+		(= rank 8)
+		(all 
+			is-inferior-of 
+			(or 
+				general-of-the-army 
+				general
+				lieutenant-general
+				major-general
+			)
+		)
+	)
+)
+(equivalent 
+	major-general 
+	(and 
+		ranked-soldier 
+		(= rank 9)
+		(all 
+			is-inferior-of 
+			(or 
+				general-of-the-army 
+				general
+				lieutenant-general
+			)
+		)
+
+	)
+)
+(equivalent 
+	lieutenant-general 
+	(and 
+		ranked-soldier 
+		(= rank 10) 
+		(all 
+			is-inferior-of 
+			(or 
+				general-of-the-army 
+				general
+			)
+		)
+	)
+)
+(equivalent 
+	general 
+	(and 
+		ranked-soldier 
+		(= rank 11) 
+		(all 
+			is-inferior-of 
+			general-of-the-army
+		)
+	)
+)
+(equivalent 
+	general-of-the-army 
+	(and 
+		ranked-soldier 
+		(= rank 12)
+	)
+)
+
+
+
+
+
+
+
+
+
+
+
+;;; a person can not have two ranks in the same time
+
+
+(disjoint general-of-the-army general)
+(disjoint general-of-the-army lieutenant-general)
+(disjoint general-of-the-army major-general)
+(disjoint general-of-the-army brigadier-general)
+(disjoint general-of-the-army colonel)
+(disjoint general-of-the-army lieutenant-colonel)
+(disjoint general-of-the-army major)
+(disjoint general-of-the-army captain)
+(disjoint general-of-the-army first-lieutenant)
+(disjoint general-of-the-army second-lieutenant)
+(disjoint general-of-the-army cadet)
+
+(disjoint general general-of-the-army)
+(disjoint general lieutenant-general)
+(disjoint general major-general)
+(disjoint general brigadier-general)
+(disjoint general colonel)
+(disjoint general lieutenant-colonel)
+(disjoint general major)
+(disjoint general captain)
+(disjoint general first-lieutenant)
+(disjoint general second-lieutenant)
+(disjoint general cadet)
+
+(disjoint lieutenant-general general-of-the-army)
+(disjoint lieutenant-general general)
+(disjoint lieutenant-general major-general)
+(disjoint lieutenant-general brigadier-general)
+(disjoint lieutenant-general colonel)
+(disjoint lieutenant-general lieutenant-colonel)
+(disjoint lieutenant-general major)
+(disjoint lieutenant-general captain)
+(disjoint lieutenant-general first-lieutenant)
+(disjoint lieutenant-general second-lieutenant)
+(disjoint lieutenant-general cadet)
+
+(disjoint major-general general-of-the-army)
+(disjoint major-general general)
+(disjoint major-general lieutenant-general)
+(disjoint major-general brigadier-general)
+(disjoint major-general colonel)
+(disjoint major-general lieutenant-colonel)
+(disjoint major-general major)
+(disjoint major-general captain)
+(disjoint major-general first-lieutenant)
+(disjoint major-general second-lieutenant)
+(disjoint major-general cadet)
+
+(disjoint brigadier-general general-of-the-army)
+(disjoint brigadier-general general)
+(disjoint brigadier-general lieutenant-general)
+(disjoint brigadier-general major-general)
+(disjoint brigadier-general colonel)
+(disjoint brigadier-general lieutenant-colonel)
+(disjoint brigadier-general major)
+(disjoint brigadier-general captain)
+(disjoint brigadier-general first-lieutenant)
+(disjoint brigadier-general second-lieutenant)
+(disjoint brigadier-general cadet)
+
+(disjoint colonel general-of-the-army)
+(disjoint colonel general)
+(disjoint colonel lieutenant-general)
+(disjoint colonel major-general)
+(disjoint colonel brigadier-general)
+(disjoint colonel lieutenant-colonel)
+(disjoint colonel major)
+(disjoint colonel captain)
+(disjoint colonel first-lieutenant)
+(disjoint colonel second-lieutenant)
+(disjoint colonel cadet)
+
+(disjoint lieutenant-colonel general-of-the-army)
+(disjoint lieutenant-colonel general)
+(disjoint lieutenant-colonel lieutenant-general)
+(disjoint lieutenant-colonel major-general)
+(disjoint lieutenant-colonel brigadier-general)
+(disjoint lieutenant-colonel colonel)
+(disjoint lieutenant-colonel major)
+(disjoint lieutenant-colonel captain)
+(disjoint lieutenant-colonel first-lieutenant)
+(disjoint lieutenant-colonel second-lieutenant)
+(disjoint lieutenant-colonel cadet)
+
+(disjoint major general-of-the-army)
+(disjoint major general)
+(disjoint major lieutenant-general)
+(disjoint major major-general)
+(disjoint major brigadier-general)
+(disjoint major colonel)
+(disjoint major lieutenant-colonel)
+(disjoint major captain)
+(disjoint major first-lieutenant)
+(disjoint major second-lieutenant)
+(disjoint major cadet)
+
+(disjoint captain general-of-the-army)
+(disjoint captain general)
+(disjoint captain lieutenant-general)
+(disjoint captain major-general)
+(disjoint captain brigadier-general)
+(disjoint captain colonel)
+(disjoint captain lieutenant-colonel)
+(disjoint captain major)
+(disjoint captain first-lieutenant)
+(disjoint captain second-lieutenant)
+(disjoint captain cadet)
+
+(disjoint first-lieutenant general-of-the-army)
+(disjoint first-lieutenant general)
+(disjoint first-lieutenant lieutenant-general)
+(disjoint first-lieutenant major-general)
+(disjoint first-lieutenant brigadier-general)
+(disjoint first-lieutenant colonel)
+(disjoint first-lieutenant lieutenant-colonel)
+(disjoint first-lieutenant major)
+(disjoint first-lieutenant captain)
+(disjoint first-lieutenant second-lieutenant)
+(disjoint first-lieutenant cadet)
+
+(disjoint second-lieutenant general-of-the-army)
+(disjoint second-lieutenant general)
+(disjoint second-lieutenant lieutenant-general)
+(disjoint second-lieutenant major-general)
+(disjoint second-lieutenant brigadier-general)
+(disjoint second-lieutenant colonel)
+(disjoint second-lieutenant lieutenant-colonel)
+(disjoint second-lieutenant major)
+(disjoint second-lieutenant captain)
+(disjoint second-lieutenant first-lieutenant)
+(disjoint second-lieutenant cadet)
+
+(disjoint cadet general-of-the-army)
+(disjoint cadet general)
+(disjoint cadet lieutenant-general)
+(disjoint cadet major-general)
+(disjoint cadet brigadier-general)
+(disjoint cadet colonel)
+(disjoint cadet lieutenant-colonel)
+(disjoint cadet major)
+(disjoint cadet captain)
+(disjoint cadet first-lieutenant)
+(disjoint cadet second-lieutenant)

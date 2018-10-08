@@ -1,0 +1,70 @@
+﻿C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\VC\VCTargets\Microsoft.CppBuild.targets(391,5): warning MSB8028: The intermediate directory (Debug\) contains files shared from another project (OpenCVApplication.vcxproj).  This can lead to incorrect clean and rebuild behavior.
+  Source.cpp
+d:\andrei\scoala\ip\image processing app\source.cpp(282): warning C4244: '=': conversion from 'float' to 'uchar', possible loss of data
+d:\andrei\scoala\ip\image processing app\source.cpp(472): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+d:\andrei\scoala\ip\image processing app\source.cpp(473): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+d:\andrei\scoala\ip\image processing app\source.cpp(474): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+d:\andrei\scoala\ip\image processing app\source.cpp(495): warning C4244: '=': conversion from 'float' to 'uchar', possible loss of data
+d:\andrei\scoala\ip\image processing app\source.cpp(496): warning C4244: '=': conversion from 'float' to 'uchar', possible loss of data
+d:\andrei\scoala\ip\image processing app\source.cpp(497): warning C4244: '=': conversion from 'float' to 'uchar', possible loss of data
+d:\andrei\scoala\ip\image processing app\source.cpp(731): warning C4018: '<': signed/unsigned mismatch
+d:\andrei\scoala\ip\image processing app\source.cpp(735): warning C4018: '<': signed/unsigned mismatch
+d:\andrei\scoala\ip\image processing app\source.cpp(758): warning C4018: '<': signed/unsigned mismatch
+d:\andrei\scoala\ip\image processing app\source.cpp(907): warning C4018: '<': signed/unsigned mismatch
+d:\andrei\scoala\ip\image processing app\source.cpp(1266): warning C4101: 'T1': unreferenced local variable
+d:\andrei\scoala\ip\image processing app\source.cpp(1266): warning C4101: 'T': unreferenced local variable
+d:\andrei\scoala\ip\image processing app\source.cpp(1329): warning C4244: 'initializing': conversion from 'float' to 'int', possible loss of data
+d:\andrei\scoala\ip\image processing app\source.cpp(1402): warning C4244: '=': conversion from 'float' to 'uchar', possible loss of data
+d:\andrei\scoala\ip\image processing app\source.cpp(1421): warning C4244: '=': conversion from 'float' to 'int', possible loss of data
+d:\andrei\scoala\ip\image processing app\source.cpp(1610): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+d:\andrei\scoala\ip\image processing app\source.cpp(1614): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+d:\andrei\scoala\ip\image processing app\source.cpp(1632): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+d:\andrei\scoala\ip\image processing app\source.cpp(1635): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+d:\andrei\scoala\ip\image processing app\source.cpp(1698): warning C4244: 'initializing': conversion from 'double' to 'uchar', possible loss of data
+d:\andrei\scoala\ip\image processing app\source.cpp(1816): warning C4244: '=': conversion from 'double' to 'int', possible loss of data
+c:\program files (x86)\microsoft visual studio\2017\community\vc\tools\msvc\14.13.26128\include\xutility(2943): warning C4244: '=': conversion from 'const int' to 'float', possible loss of data
+  c:\program files (x86)\microsoft visual studio\2017\community\vc\tools\msvc\14.13.26128\include\xutility(2967): note: see reference to function template instantiation '_OutIt std::_Fill_n_unchecked1<_OutIt,_Diff,_Ty>(_OutIt,_Diff,const _Ty &,std::false_type)' being compiled
+          with
+          [
+              _OutIt=float *,
+              _Diff=int,
+              _Ty=int
+          ]
+  c:\program files (x86)\microsoft visual studio\2017\community\vc\tools\msvc\14.13.26128\include\xutility(2977): note: see reference to function template instantiation '_OutIt std::_Fill_n_unchecked<_Iter,int,_Ty>(_OutIt,_Diff,const _Ty &)' being compiled
+          with
+          [
+              _OutIt=float *,
+              _Iter=float *,
+              _Ty=int,
+              _Diff=int
+          ]
+  d:\andrei\scoala\ip\image processing app\source.cpp(1516): note: see reference to function template instantiation '_OutIt *std::fill_n<float*,int,int>(_OutIt,_Diff,const _Ty &)' being compiled
+          with
+          [
+              _OutIt=float *,
+              _Diff=int,
+              _Ty=int
+          ]
+d:\andrei\scoala\ip\image processing app\source.cpp(809): warning C4715: 'getPixelAtDir': not all control paths return a value
+d:\andrei\scoala\ip\image processing app\source.cpp(784): warning C4715: 'getStartPoint': not all control paths return a value
+  OpenCVApplication.vcxproj -> D:\Andrei\Scoala\IP\Image Processing App\Debug\ImageProcessing.exe
+  OpenCV\dll\Debug\opencv_calib3d2413d.dll
+  OpenCV\dll\Debug\opencv_contrib2413d.dll
+  OpenCV\dll\Debug\opencv_core2413d.dll
+  OpenCV\dll\Debug\opencv_features2d2413d.dll
+  OpenCV\dll\Debug\opencv_ffmpeg2413.dll
+  OpenCV\dll\Debug\opencv_flann2413d.dll
+  OpenCV\dll\Debug\opencv_gpu2413d.dll
+  OpenCV\dll\Debug\opencv_highgui2413d.dll
+  OpenCV\dll\Debug\opencv_imgproc2413d.dll
+  OpenCV\dll\Debug\opencv_legacy2413d.dll
+  OpenCV\dll\Debug\opencv_ml2413d.dll
+  OpenCV\dll\Debug\opencv_nonfree2413d.dll
+  OpenCV\dll\Debug\opencv_objdetect2413d.dll
+  OpenCV\dll\Debug\opencv_ocl2413d.dll
+  OpenCV\dll\Debug\opencv_photo2413d.dll
+  OpenCV\dll\Debug\opencv_stitching2413d.dll
+  OpenCV\dll\Debug\opencv_superres2413d.dll
+  OpenCV\dll\Debug\opencv_video2413d.dll
+  OpenCV\dll\Debug\opencv_videostab2413d.dll
+         19 file(s) copied.

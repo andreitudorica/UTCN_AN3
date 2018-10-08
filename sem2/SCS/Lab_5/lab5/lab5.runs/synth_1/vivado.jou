@@ -1,0 +1,12 @@
+#-----------------------------------------------------------
+# Vivado v2017.4 (64-bit)
+# SW Build 2086221 on Fri Dec 15 20:55:39 MST 2017
+# IP Build 2085800 on Fri Dec 15 22:25:07 MST 2017
+# Start of session at: Thu Apr 19 10:12:35 2018
+# Process ID: 15140
+# Current directory: D:/Andrei/Scoala/SCS/Lab_5/lab5/lab5.runs/synth_1
+# Command line: vivado.exe -log fifo.vds -product Vivado -mode batch -messageDb vivado.pb -notrace -source fifo.tcl
+# Log file: D:/Andrei/Scoala/SCS/Lab_5/lab5/lab5.runs/synth_1/fifo.vds
+# Journal file: D:/Andrei/Scoala/SCS/Lab_5/lab5/lab5.runs/synth_1\vivado.jou
+#-----------------------------------------------------------
+source fifo.tcl -notrace

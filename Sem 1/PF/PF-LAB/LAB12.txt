@@ -1,0 +1,208 @@
+LUCRAREA 12
+Interpretor Lisp
+
+1. SCOPUL LUCRÃRII
+	Se urmãreºte studiul implementãrii în limbajul Lisp a unui microinterpretor care sã 
+simuleze modul de lucru al unui interpretor Lisp.
+2. CONSIDERAÞII TEORETICE
+	Microinterpretorul prezentat în lucrare este implementat în GCLISP ºi ºtie sã 
+interpreteze un subset relevant de Lisp. El nu are implementate (nu ºtie sã evalueze) toate 
+funcþiile ºi toate modurile de gestiune a contextului evaluãrii.
+	Bucla read-eval-print funcþioneazã pe baza unui context reprezentat printr-o listã de 
+asociaþie care conþine iniþial elementele T ºi NIL.
+	Evaluatorul (funcþia eval-) este o funcþie care necesitã douã argumente: forma care 
+urmeazã a fi evaluatã ºi mediul (contextul) în care urmeazã sã se facã aceastã evaluare.
+	Dacã forma este un simbol, atunci evaluatorul determinã valoarea legatã simbolului 
+apelând la context (lista de asociaþie) prin ASSOC. Dacã forma nu este atomicã, el verificã dacã 
+nu cumva este o formã COND, SETQ, definiþie de funcþie sau închidere lexicalã (CLOSE), 
+rezolvând fiecare dintre aceste cazuri prin apeluri de funcþii (fiºierul lisp.lsp). Altfel evaluatorul 
+presupune cã forma este un apel de funcþie.
+	În cazul formei SETQ, dacã variabila respectiva (simbolul) existã în mediu, atunci se 
+face modificarea valorii asociate, iar dacã nu existã, atunci se adaugã perechea (variabila valoare) 
+la sfârºitul listei de asociaþie - mediu.
+	Funcþia apply- necesitã trei argumente: un nume sau o descriere a funcþiei de aplicat 
+(expresie funcþionalã), o listã de argumente pentru funcþia de aplicat, pe care apply- le considerã 
+deja evaluate ºi o listã de asociaþie variabilã-valoare (contextul). Funcþia asigurã aplicarea corectã 
+a celor câteva funcþii primitive ale subsetului (þintã) de Lisp.
+	În cazul celorlalte funcþii, ºi anume cele definite de utilizator, funcþia apply- evalueazã 
+întâi (cu ajutorul evaluatorului eval-) simbolul nume de funcþie la lambda-expresia 
+corespunzãtoare lui ºi apoi aplicã propriuzis lambda-expresia (apel recursiv apply-). Dacã 
+simbolul nume de funcþie nu este gãsit în context (eval- returneazã NIL), atunci avem de-a face 
+cu o funcþie nedefinitã (necunoscutã). (A se vedea ultima clauzã a COND-ului din apply-.)
+	Funcþia bind-assign actualizeazã un mediu creând perechi noi de asociaþie. Ea pune 
+noile perechi în capul listei mediu curent. Cãutarea cu ASSOC în mediul curent rezultat returnat 
+de bind-assign se va opri întotdeauna pe elementele cele mai recente. În acest fel se 
+implementeazã o stivã cu valorile variabilelor legate (de genul stivei ALIST, a se revedea lucrarea 
+nr. 4). Se observã cã bind-assign nu lucreazã cu efect distructiv în mediu, astfel cã la terminarea 
+evaluãrii unei lambda-expresii (LAMBDA) (deci la ieºirea din corpul lambda-expresiei) mediul nu 
+mai are în vârf parametrii lambda-expresiei.
+	Simularea modului de lucru în care stabilirea domeniului variabilelor se face lexical ºi nu 
+dinamic implicã introducerea mecanismului CLOSE. Funcþia CLOSE lucreazã asemãnãtor cu 
+QUOTE, dar se foloseºte doar la citarea funcþiilor, nu ºi a altor forme (în microinterpretorul 
+nostru se foloseºte, practic, la citarea lambda-expresiilor). Funcþia CLOSE returneazã o închidere 
+lexicalã (lexical closure) formatã din lambda-expresia argument ºi o listã de asociaþie (mediu) 
+reprezentând contextul actual al evaluãrii CLOSE-ului curent. Aºa cum în microinterpretorul 
+nostru o definire de funcþie prin DEFUN produce legarea lambda-expresiei asociate funcþiei la 
+simbolul nume de funcþie (prin SETQ), tot aºa ºi o definire de funcþie ca închidere lexicalã este 
+memoratã într-un simbol nume de închidere. Apelul unei astfel de funcþii-închidere se va face în 
+contextul "prins" (memorat) în momentul definirii închiderii ºi nu în cel al apelului curent, oricare 
+ar fi el. Aºadar, legarea variabilelor libere din corpul funcþiei închidere lexicalã nu se face dinamic, 
+ci lexical, la valorile globale iniþiale (din momentul definirii funcþiei-închidere). (Este suficientã 
+examinarea textului Lisp, legarea fiind independentã de ordinea de apelare a diverselor funcþii.)
+	Mecanismul de închidere lexicalã descris mai sus ºi implementat în microinterpretorul 
+nostru simuleazã închiderile lexicale din limbajul standard Common Lisp. Forma CLOSE 
+simuleazã funcþia COLSURE din Common Lisp. De asemenea, în Common Lisp, forma 
+FUNCTION, folositã pentru citarea localã a expresiilor funcþionale, creeazã implicit o închidere 
+(a se revedea lucrarea nr. 7).
+	Exemplul de mai jos scoate în evidenþã deosebirea dintre QUOTE ºi CLOSE, aplicate 
+pe lambda-expresii:
+
+# (SETQ dubla (QUOTE (LAMBDA (p x) (p (p x)))))
+
+defineºte o funcþie de douã argumente, dintre care unul este o funcþie p care se aplicã asupra 
+rezultatului returnat de aplicarea aceleiaºi funcþii p asupra lui x.
+
+# (SETQ x 3)
+3
+# (dubla (QUOTE (LAMBDA (y) (* x y))) 2)
+va întoarce valoarea 8  (2 * 2) * 2
+deoarece legãrile se fac dinamic:
+		p = (QUOTE (LAMBDA (y) (* x y)))
+		x = 2
+
+# (dubla (CLOSE (LAMBDA (y) (* x y))) 2)
+va întoarce valoarea 18  (3 * 2) * 3
+deoarece legãrile se fac lexical:
+		p = (CLOSE (LAMBDA (y) (* x y)))
+		x = 3
+3. DESFÃªURAREA LUCRÃRII
+	1) Sã se modifice microinterpretorul Lisp astfel încât sã fie acceptate ºi alte forme Lisp 
+primitive cunoscute (APPEND, LIST, MAPCAR, DO etc.).
+	2) Sã se rezolve problema argumentelor eronate ºi în cazul altor forme decât forma 
+CAR.
+4. ÎNTREBÃRI ªI PROBLEME
+	1) Sã se scrie un microinterpretor Lisp în care mediul sã fie organizat sub forma unei 
+liste de liste de asociaþie (dupã modelul real al stivei ALIST) care sã se transmitã în cazul 
+apelurilor recursive. În acest fel se poate rezolva ºi problema manipulãrii definiþiilor de funcþii 
+recognoscibile doar în anumite medii.
+	2) Sã se scrie un microinterpretor Lisp care, pe lângã problema CLOSURE, sã rezolve 
+ºi problema FUNCALL, APPLY. (Indicaþie: vezi implementarea din [1].)
+	3) Sã se rezolve problema definirii ºi apelului de macrouri.
+5. SURSE
+;; Fisierul lisp.lsp
+
+(DEFMACRO CADDDR(l)
+  `(CAR (CDR (CDR (CDR ,l)))))
+
+(DEFUN read-eval-print ()
+ (BLOCK rep
+  (LET	((mediu (LIST '(T T) '(NIL NIL)))
+	 (read- NIL))
+	(LOOP 		
+		(FORMAT T "~%# ")
+		(IF (EQL (SETQ read- (READ)) 'EXIT)
+			(RETURN-FROM rep 'GOOD-BYE)
+			(FORMAT T "~% ~A" (eval- read- mediu)))))))
+
+(DEFUN eval- (forma mediu)
+  (COND ((ATOM forma)
+		(COND	((NUMBERP forma) forma)
+			(T (CADR (ASSOC forma mediu)))))
+	((EQL (FIRST forma) 'QUOTE)
+		(CADR forma))
+	((EQL (FIRST forma) 'COND)
+		(eval-cond (REST forma) mediu))
+
+	((EQL (FIRST forma) 'SETQ)
+		(as-val (CADR forma)			;nume variabila
+			(eval- (CADDR forma) mediu)	;valoare
+			mediu))
+	((EQL (FIRST forma) 'DEFUN)
+		(as-val (CADR forma)		;nume functie
+			(CONS	'LAMBDA
+				(CDDR forma))	;expresie lambda asociata
+			mediu))
+	((EQL (FIRST forma) 'CLOSE)
+		(LIST	'CLOSURE
+			(CADR (CADR forma))	;argumentele
+			(CADDR (CADR forma))	;corpul
+			mediu))
+	(T (apply-	(FIRST forma)
+			(MAPCAR #'(LAMBDA (x) (eval- x mediu))
+				(REST forma))
+			mediu))))
+
+(DEFUN as-val (var val lasoc)
+   (PROGN
+	(LET ((temp NIL))
+		(COND	((SETQ temp (ASSOC var lasoc))
+				(RPLACA (REST temp) val))
+			(T (RPLACD	(LAST lasoc)
+					(LIST (LIST var val))))))
+   val))
+
+(DEFUN eval-cond (clauze mediu)
+  (COND ((NULL clauze) NIL)
+	((eval- (CAAR clauze) mediu)
+		(eval- (CADAR clauze) mediu))
+	(T (eval-cond (REST clauze) mediu))))
+
+(DEFUN apply- (forma arg mediu)
+ (COND	((ATOM forma)
+		(COND	((OR (EQL forma 'CAR) (EQL forma 'FIRST))
+				(COND	((LISTP (CAR arg)) (CAAR arg))
+					(T (FORMAT T "~%Argumentul trebuie
+						      sa fie o lista.")
+					   '-Eroare)))
+			((OR (EQL forma 'CDR) (EQL forma 'REST))
+				(CDAR arg))
+			((EQL forma 'CONS)
+				(CONS (CAR arg) (CADR arg)))
+			((EQL forma 'ATOM)
+				(ATOM (CAR arg)))
+			((EQL forma 'NULL)
+				(NULL (CAR arg)))
+			((EQL forma 'EQUAL)
+				(EQUAL (CAR arg) (CADR arg)))
+			((EQL forma '=)
+				(= (CAR arg) (CADR arg)))
+			((EQL forma '*)
+				(* (CAR arg) (CADR arg)))
+			((EQL forma '-)
+				(- (CAR arg) (CADR arg)))
+			((EQL forma '+)
+				(+ (CAR arg) (CADR arg)))
+			((eval- forma mediu)
+				(apply- (eval- forma mediu)
+					arg
+					mediu))
+			(T 'Nu-recunosc-comanda!!!)))
+	((EQL (CAR forma) 'CLOSURE)
+		(eval-	(CADDR forma)
+			(bind-assign	(CADR forma)	;arg formale
+					arg	 	;lista valorilor
+					(CADDDR forma))))
+							;lista de asociatie
+	((EQL (CAR forma) 'LAMBDA)
+		(eval-	(CADDR forma)
+			(bind-assign	(CADR forma)
+					arg
+					mediu)))))
+
+(DEFUN bind-assign (lsimb lvalori lasoc)
+  (COND ((OR (NULL lsimb) (NULL lvalori))
+		lasoc)
+	(T (CONS (LIST (CAR lsimb) (CAR lvalori))
+		 (bind-assign (REST lsimb)
+			      (REST lvalori)
+			      lasoc)))))
+ 
+
+ 
+ 
+
+
+
+112
+
+

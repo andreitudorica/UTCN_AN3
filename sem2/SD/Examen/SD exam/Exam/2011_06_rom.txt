@@ -1,0 +1,7 @@
+1. O aplicatie de recunoastere vocala care desface cuvintele in fonoame (cuvinte, silabe etc) si sa spui ce stil arhitectural ai folosi.
+Sa gasesti atribute de calitate (cerinte nonfunctionale) si sa faci cu scenarii. Ce tactici folosesti pentru a le obtine?
+2. Sistem de brokeraj, la care sa spui cum l-ai proiecta si ce patternuri arhitecturale ai folosi.
+3. Doua arhitecturi de la ceva compilatoare: una pipe si una paralela. Sa faci diferente/asemanari intre ele.
+4. Un sistem care permite cumpararea de bilete online si de la casa; cand se amana un spectacol se returneaza banii inapoi. Ce patternuri aplicati?
+5. Sa faci sistemul de la punctul 4 cu layers si sa spui ce pui la Data Model si Data Access.
+6. Problema cu client server.

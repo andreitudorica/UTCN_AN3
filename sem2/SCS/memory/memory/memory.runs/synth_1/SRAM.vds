@@ -1,0 +1,27 @@
+#-----------------------------------------------------------
+# Vivado v2017.4 (64-bit)
+# SW Build 2086221 on Fri Dec 15 20:55:39 MST 2017
+# IP Build 2085800 on Fri Dec 15 22:25:07 MST 2017
+# Start of session at: Mon May 21 10:38:30 2018
+# Process ID: 11996
+# Current directory: D:/Andrei/Scoala/SCS/memory/memory/memory.runs/synth_1
+# Command line: vivado.exe -log SRAM.vds -product Vivado -mode batch -messageDb vivado.pb -notrace -source SRAM.tcl
+# Log file: D:/Andrei/Scoala/SCS/memory/memory/memory.runs/synth_1/SRAM.vds
+# Journal file: D:/Andrei/Scoala/SCS/memory/memory/memory.runs/synth_1\vivado.jou
+#-----------------------------------------------------------
+source SRAM.tcl -notrace
+Command: synth_design -top SRAM -part xc7a50ticpg236-1L
+Starting synth_design
+Attempting to get a license for feature 'Synthesis' and/or device 'xc7a50ti'
+INFO: [Common 17-349] Got license for feature 'Synthesis' and/or device 'xc7a50ti'
+INFO: Launching helper process for spawning children vivado processes
+INFO: Helper process launched with PID 15168 
+---------------------------------------------------------------------------------
+Starting Synthesize : Time (s): cpu = 00:00:06 ; elapsed = 00:00:06 . Memory (MB): peak = 344.543 ; gain = 100.301
+---------------------------------------------------------------------------------
+INFO: [Synth 8-638] synthesizing module 'SRAM' [D:/Andrei/Scoala/SCS/memory/memory/memory.srcs/sources_1/new/SRAM.vhd:38]
+INFO: [Synth 8-3491] module 'Mem64kWORD' declared at 'D:/Andrei/Scoala/SCS/memory/memory/memory.srcs/sources_1/new/Mem64kWORD.vhd:34' bound to instance 'MB0' of component 'Mem64kWORD' [D:/Andrei/Scoala/SCS/memory/memory/memory.srcs/sources_1/new/SRAM.vhd:48]
+INFO: [Synth 8-638] synthesizing module 'Mem64kWORD' [D:/Andrei/Scoala/SCS/memory/memory/memory.srcs/sources_1/new/Mem64kWORD.vhd:38]
+INFO: [Synth 8-3491] module 'Mem64k8b' declared at 'D:/Andrei/Scoala/SCS/memory/memory/memory.srcs/sources_1/new/Mem64k8b.vhd:34' bound to instance 'LB' of component 'Mem64k8b' [D:/Andrei/Scoala/SCS/memory/memory/memory.srcs/sources_1/new/Mem64kWORD.vhd:48]
+INFO: [Synth 8-638] synthesizing module 'Mem64k8b' [D:/Andrei/Scoala/SCS/memory/memory/memory.srcs/sources_1/new/Mem64k8b.vhd:38]
+WARNING: [Synth 8-614] signal 'ram' is read in the process but is not in the sensitivity list [D:/Andrei/Scoala/SCS/memory/memory/memory.srcs/sources_1/new/Mem64k8b.vhd:45]

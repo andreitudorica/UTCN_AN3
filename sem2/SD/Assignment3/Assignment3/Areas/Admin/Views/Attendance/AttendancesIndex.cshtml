@@ -1,0 +1,53 @@
+﻿@{
+    ViewBag.Title = "Index";
+}
+
+@model PagedList.IPagedList<Assignment3.Models.AttendanceModel>
+@using PagedList.Mvc;
+
+<link href="~/Content/PagedList.css" rel="stylesheet" type="text/css" />
+
+@{
+    ViewBag.Title = "Attendances";
+}
+
+<h2>Laboratories</h2>
+
+<p>
+    @Html.ActionLink("Create New", "AttendancesCreate")
+</p>
+
+<table class="table">
+    <tr>
+        <th>
+            Laboratory ID
+        </th>
+        <th>
+            Student ID
+        </th>
+        <th></th>
+    </tr>
+
+
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.LaboratoryID)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.StudentID)
+            </td>
+            <td>
+                @Html.ActionLink("Edit", "AttendancesEdit", new { id = item.ID }) |
+                @Html.ActionLink("Delete", "AttendancesDelete", new { id = item.ID })
+            </td>
+        </tr>
+    }
+
+</table>
+<br />
+Page @(Model.PageCount < Model.PageNumber ? 0 : Model.PageNumber) of @Model.PageCount
+
+@Html.PagedListPager(Model, page => Url.Action("Index",
+    new { page, sortOrder = ViewBag.CurrentSort, currentFilter = ViewBag.CurrentFilter }))
